@@ -43,9 +43,6 @@ public:
   virtual inline void associer_proprietes_fluide(const long, const double, const double) { /* do nothing */ };
   virtual const Champ_base& diffusivite() const=0;
   inline virtual void calculer_borne_locale(DoubleVect& ,double,double ) const {};
-  virtual inline long Tenseur_Reynolds_Externe( void ) const ;
-  virtual inline void Oublie_Tenseur_Reynolds( void ) ;
-  virtual inline void Garde_Tenseur_Reynolds( void ) ;
 
   //liste d'Op_Diff de problemes resolus simultanement (thermique monolithique)
   mutable std::vector<const Operateur_Diff_base *> op_ext;
@@ -58,19 +55,6 @@ protected:
   virtual const Champ_base& diffusivite_pour_pas_de_temps() const;
 
   REF(Champ_base) diffusivite_pour_pas_de_temps_;
-  long Tenseur_Reynolds_Externe_;
 };
-inline long Operateur_Diff_base::Tenseur_Reynolds_Externe( void ) const
-{
-  return Tenseur_Reynolds_Externe_;
-}
-inline void Operateur_Diff_base::Oublie_Tenseur_Reynolds( void )
-{
-  Tenseur_Reynolds_Externe_ = 1;
-}
-inline void Operateur_Diff_base::Garde_Tenseur_Reynolds( void )
-{
-  Tenseur_Reynolds_Externe_ = 0;
-}
 
 #endif

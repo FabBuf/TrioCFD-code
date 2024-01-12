@@ -182,6 +182,10 @@ public :
                      (on utilise des valeurs predites, pas de derivees renseignees)
   */
   virtual long  has_interface_blocs() const;
+  virtual double get_time_factor() const
+  {
+    return 1.;
+  }
   virtual void dimensionner_blocs(matrices_t matrices, const tabs_t& semi_impl = {}) const;
   virtual void assembler_blocs(matrices_t matrices, DoubleTab& secmem, const tabs_t& semi_impl = {}) const;
   virtual void assembler_blocs_avec_inertie(matrices_t matrices, DoubleTab& secmem, const tabs_t& semi_impl = {});
@@ -306,6 +310,7 @@ protected :
 
   long sys_invariant_;
   long implicite_;
+  bool has_time_factor_; // Parameter set to 1 if convection has a prefactor (eg rhoCp in energy)
   Parametre_equation parametre_equation_;
   Champ_Fonc volume_maille;
 
@@ -313,7 +318,7 @@ protected :
   Champs_compris champs_compris_;
   Champs_Fonc list_champ_combi;
 
-  //memoization of the matrix for PolyMAC
+  //memoization of the matrix for PolyMAC_P0P1NC
   mutable Matrice_Morse matrice_stockee;
   mutable long matrice_init;
 

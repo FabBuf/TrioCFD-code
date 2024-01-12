@@ -61,6 +61,9 @@
 #include <Domaine.h>
 #include <TRUSTTrav.h>
 #include <stat_counters.h>
+#include <Dirichlet_paroi_fixe.h>
+#include <Dirichlet_paroi_defilante.h>
+#include <Echange_contact_VDF_FT_Disc.h>
 
 #include <Joint.h>
 #include <Maillage_FT_Disc.h>
@@ -2070,9 +2073,19 @@ void Transport_Interfaces_FT_Disc::preparer_pas_de_temps(void)
 
 double Transport_Interfaces_FT_Disc::calculer_pas_de_temps(void) const
 {
-  // We should think of implementing it as in eq. 16 for instance:
+  // TODO:
+// We should think of implementing it as in eq. 16 for instance:
   // https://hal.archives-ouvertes.fr/hal-02304125/document
   // and use the Lagrangian min edge length instead of Delta_x.
+  //
+  // Ou encore :
+  // Par ailleurs du fait de la contrainte sur le pas de temps capillaire (Popinet 2009) cette approche
+  // connait egalement des limites (Pierson 2021). En effet, quand les films deviennent suffisamment minces,
+  // et que les cellules composant le film sont suffisamment petites, le pas de temps necessaire au calcul
+  // decroit drastiquement, comme la taille des cellules a la puissance trois-demi.
+  // Pierson, J. (2021). Numerical study of drop bouncing on a fluid-fluid interface. ICTAM, Milan.
+  // Popinet, S. (2020). A vertically-Lagrangian, non-hydrostatic, multilayer model for multiscale free-surface flows. Journal of Computational Physics, 109609
+  //
   return DMAXFLOAT;
 }
 
@@ -3190,13 +3203,13 @@ void Transport_Interfaces_FT_Disc::calcul_indicatrice_faces(const DoubleTab& ind
             const DoubleTab& interfacial_area = ns.get_interfacial_area();
             const DoubleTab& normale_elements = get_update_normale_interface().valeurs();
 
-            const long vef = (ns.inconnue().valeurs().nb_dim() == 2);
+            const long dim = ns.inconnue().valeurs().line_size();
+            const long vef = (dim == 2);
             if (vef)
               {
                 Cerr << "Code never applied or checked in VEF. You should read the algo first and assess it!" << finl;
                 Process::exit();
               }
-            const long dim = ns.inconnue().valeurs().line_size();
             // On fait la moyenne des 2 valeurs calculees sur les voisins
             // ATTENTION, ici on veut la valeur de chiv (cad chi_0) a la face.
             for (long face = 0; face < nfaces; face++)
@@ -3231,12 +3244,12 @@ void Transport_Interfaces_FT_Disc::calcul_indicatrice_faces(const DoubleTab& ind
                                         const double nx = normale_elements(elem, j);
                                         // produit scalaire :
                                         x +=  nf*nx;
-                                        x *= ai/surface;
-                                        // Que/comment Choisir?
-                                        indic_face += x;
-                                        Cerr << "Never tested. To be verified. It should depend on a scalar product with the vect (xp-xv)" << finl;
-                                        Process::exit();
                                       }
+                                    x *= ai/surface;
+                                    // Que/comment Choisir?
+                                    indic_face += x;
+                                    Cerr << "Never tested. To be verified. It should depend on a scalar product with the vect (xp-xv)" << finl;
+                                    Process::exit();
                                   }
                                 else
                                   {
@@ -5550,9 +5563,9 @@ void Transport_Interfaces_FT_Disc::calcul_nb_traverse( const DoubleTab& xe, cons
   const ArrOfInt& index_elem = intersection.index_elem() ;
   const DoubleTab& normale_facettes = maillage.get_update_normale_facettes() ;
   const IntTab& facettes = maillage.facettes() ;
-  const long nb_som  = facettes.line_size() ;
+  //const long nb_som  = facettes.line_size() ;
   const DoubleTab& sommets = maillage.sommets() ;
-  IntTab Som( nb_som ) ;
+  //IntTab Som( nb_som ) ;
   // Pour un element donne, on parcourt ces facettes
   long index = index_elem[elem] ;
   const double precision = Objet_U::precision_geom ;
@@ -8001,6 +8014,68 @@ void Transport_Interfaces_FT_Disc::mettre_a_jour(double temps)
         }
     }
 
+  const Probleme_base&  pb = get_probleme_base();
+
+  if (sub_type(Probleme_FT_Disc_gen,pb))
+    {
+
+      Probleme_FT_Disc_gen& pb_ft = ref_cast_non_const(Probleme_FT_Disc_gen, pb);
+      // injection des interfaces with temperature of activation
+      if (pb_ft.tcl().reinjection_tcl() && pb_ft.tcl().ready_inject_tcl())
+        {
+          const double thetac = pb_ft.tcl().thetaC_tcl();
+          const double Rc = pb_ft.tcl().Rc_inject();
+
+          // const Nom expr = "x^2+(y-8e-05*cos(50.0*pi/180.0))^2-8e-05^2";
+          const Nom expr = Nom("x^2+(y-") + Nom(Rc)
+                           + Nom("*cos(") + Nom(thetac)
+                           + Nom("*pi/180.0))^2-") + Nom(Rc)
+                           + Nom("^2");
+
+          // On essaye d'injecter l'interface
+          Maillage_FT_Disc maillage_tmp;
+          maillage_tmp.associer_equation_transport (*this);
+
+          // By default, inject vapeur, phase 0
+          Maillage_FT_Disc::AjoutPhase phase =
+            0 ?
+            Maillage_FT_Disc::AJOUTE_PHASE1 : Maillage_FT_Disc::AJOUTE_PHASE0;
+
+          DoubleTab sauvegarde (
+            variables_internes_->indicatrice_cache.valeur ().valeurs ());
+
+          const long ok = marching_cubes ().construire_iso (
+                            expr, 0., maillage_tmp,
+                            variables_internes_->indicatrice_cache.valeur ().valeurs (), phase,
+                            variables_internes_->distance_interface_sommets);
+
+          Cerr << "Injection_interface time " << temps << " " << expr;
+          if (ok)
+            {
+              maillage_interface ().ajouter_maillage (maillage_tmp);
+              get_update_indicatrice ();
+              double unused_vol_phase_0 = 0.;
+              const double volume_phase_1_old = calculer_integrale_indicatrice (
+                                                  sauvegarde, unused_vol_phase_0);
+              unused_vol_phase_0 = 0.;
+              const double volume_phase_1 = calculer_integrale_indicatrice (
+                                              variables_internes_->indicatrice_cache.valeur ().valeurs (),
+                                              unused_vol_phase_0);
+              double volume = volume_phase_1 - volume_phase_1_old;
+              // pow(-1,1-phase) ne compile pas avec xlC sur AIX car n'a que pow(double,long)
+              volume *= pow (-1., 1 - phase);
+              Cerr << " volume " << volume << finl;
+            }
+          else
+            {
+              Cerr << " failure: collision" << finl;
+              variables_internes_->indicatrice_cache.valeur ().valeurs () =
+                sauvegarde;
+            }
+        }
+    }
+
+
   // Traitement des domaines de suppression
   test_suppression_interfaces_sous_domaine();
 
@@ -8215,7 +8290,7 @@ void Transport_Interfaces_FT_Disc::transporter_sans_changement_topologie(DoubleT
   maillage.changer_temps(temps);
   indicatrice_.valeurs()=get_update_indicatrice().valeurs();
   variables_internes_->indicatrice_cache.changer_temps(temps);
-  indicatrice_faces_.valeurs()=get_compute_indicatrice_faces().valeurs();
+  indicatrice_.valeurs()=get_compute_indicatrice_faces().valeurs();
   variables_internes_->indicatrice_face_cache.changer_temps(temps);
   indicatrice_.changer_temps(temps);
   get_update_distance_interface();
@@ -10531,6 +10606,11 @@ const Maillage_FT_Disc& Transport_Interfaces_FT_Disc::maillage_interface_pour_po
 {
   //return variables_internes_->maillage_pour_post;
   return maillage_interface();
+}
+
+const long& Transport_Interfaces_FT_Disc::get_n_iterations_distance() const
+{
+  return variables_internes_->n_iterations_distance;
 }
 
 /*! @brief Calcule et renvoie la distance a l'interface, evaluee sur une epaisseur egale a n_iterations_distance aux elements et discretisee aux elements

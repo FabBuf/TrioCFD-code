@@ -26,6 +26,7 @@
 #include <Analyse_Angle.h>
 #include <Linear_algebra_tools_impl.h>
 #include <Modele_Collision_FT.h> // EB
+#include <Device.h>
 #include <medcoupling++.h>
 #ifdef MEDCOUPLING_
 #include <MEDCouplingMemArray.hxx>
@@ -37,6 +38,8 @@ using namespace MEDCoupling;
 #include <Navier.h>
 #include <Symetrie.h>
 #include <Dirichlet_loi_paroi.h>
+
+#include <set>
 
 Implemente_base(Domaine_VF,"Domaine_VF",Domaine_dis_base);
 
@@ -101,8 +104,136 @@ Entree& Domaine_VF::readOn(Entree& is)
 /*! @brief cette methode ne fait rien elle est surchargee par Domaine_VDF par ex.
  *
  */
-void Domaine_VF::reordonner(Faces& )
+void Domaine_VF::reordonner(Faces&)
 {
+}
+
+void Domaine_VF::renumeroter(Faces& les_faces)
+{
+
+  // Construction du tableau de renumerotation des faces. Ce tableau,
+  // une fois trie dans l'ordre croissant donne l'ordre des faces dans
+  // le domaine_VF. La cle de tri est construite de sorte a pouvoir retrouver
+  // l'indice de la face a partir de la cle par la formule :
+  //  indice_face = cle % nb_faces
+  const long nbfaces = les_faces.nb_faces();
+  ArrOfInt sort_key(nbfaces);
+
+  {
+    nb_faces_std_ = 0;
+    const long nb_faces_front = domaine().nb_faces_frontiere();
+    // Attention : face_voisins_ n'est pas encore initialise, il
+    // faut passer par les_faces.voisins() :
+    const IntTab& facevoisins = les_faces.voisins();
+    // On place en premier les faces de bord:
+    long i_face;
+    for (i_face = 0; i_face < nb_faces_front; i_face++)
+      // Si la face est au bord, elle doit etre placee au debut
+      // (en fait elle ne doit pas etre renumerotee)
+      sort_key[i_face] = i_face;
+
+    for (i_face=nb_faces_front; i_face < nbfaces; i_face++)
+      {
+        const long elem0 = facevoisins(i_face, 0);
+        const long elem1 = facevoisins(i_face, 1);
+        // Ces faces ont toujours deux voisins.
+        assert(elem0 >= 0 && elem1 >= 0);
+        if (rang_elem_non_std_[elem0] >= 0 || rang_elem_non_std_[elem1] >= 0)
+          {
+            // Si la face est voisine d'un element non standard, elle
+            // doit etre classee juste apres les faces de bord:
+            sort_key[i_face] = i_face;
+          }
+        else
+          {
+            // Face standard : a la fin du tableau
+            sort_key[i_face] = i_face + nbfaces;
+            nb_faces_std_++;
+          }
+      }
+
+    sort_key.ordonne_array();
+
+    // On transforme a nouveau la cle en numero de face:
+    for (i_face = 0; i_face < nbfaces; i_face++)
+      {
+        const long key = sort_key[i_face] % nbfaces;
+        sort_key[i_face] = key;
+      }
+  }
+  // On reordonne les faces:
+  {
+    IntTab& faces_sommets = les_faces.les_sommets();
+    IntTab old_tab(faces_sommets);
+    const long nb_som_faces = faces_sommets.dimension(1);
+    for (long i = 0; i < nbfaces; i++)
+      {
+        const long old_i = sort_key[i];
+        for (long j = 0; j < nb_som_faces; j++)
+          faces_sommets(i, j) = old_tab(old_i, j);
+      }
+  }
+
+  {
+    IntTab& faces_voisins = les_faces.voisins();
+    IntTab old_tab(faces_voisins);
+    for (long i = 0; i < nbfaces; i++)
+      {
+        const long old_i = sort_key[i];
+        faces_voisins(i, 0) = old_tab(old_i, 0);
+        faces_voisins(i, 1) = old_tab(old_i, 1);
+      }
+  }
+
+  // Calcul de la table inversee: reverse_index[ancien_numero] = nouveau numero
+  ArrOfInt reverse_index(nbfaces);
+  {
+    for (long i = 0; i < nbfaces; i++)
+      {
+        const long j = sort_key[i];
+        reverse_index[j] = i;
+      }
+  }
+  // Renumerotation de elem_faces:
+  {
+    // Nombre d'indices de faces dans le tableau
+    const long nb_items = elem_faces_.size();
+    ArrOfInt& array = elem_faces_;
+    for (long i = 0; i < nb_items; i++)
+      {
+        const long old = array[i];
+        if (old<0)
+          array[i] = -1;
+        else
+          array[i] = reverse_index[old];
+      }
+  }
+  // Mise a jour des indices des faces de joint:
+  {
+    Joints&      joints    = domaine().faces_joint();
+    const long nbjoints = joints.size();
+    for (long i_joint = 0; i_joint < nbjoints; i_joint++)
+      {
+        Joint&     un_joint         = joints[i_joint];
+        ArrOfInt& indices_faces = un_joint.set_joint_item(Joint::FACE).set_items_communs();
+        const long nbfaces2    = indices_faces.size_array();
+        assert(nbfaces2 == un_joint.nb_faces()); // renum_items_communs rempli ?
+        for (long i = 0; i < nbfaces2; i++)
+          {
+            const long old = indices_faces[i]; // ancien indice local
+            indices_faces[i] = reverse_index[old];
+          }
+        // Les faces de joint ne sont plus consecutives dans le
+        // tableau: num_premiere_face n'a plus ne sens
+        un_joint.fixer_num_premiere_face(-1);
+      }
+  }
+  // Mise a jour des indices des groupes de faces:
+  {
+    Groupes_Faces&      groupes_faces    = domaine().groupes_faces();
+    groupes_faces.renumerote(reverse_index);
+  }
+
 }
 
 
@@ -205,7 +336,7 @@ void Domaine_VF::discretiser()
   }
   {
     long i=0, derniere=ledomaine.nb_bords();
-    les_bords_.dimensionner(domaine().nb_front_Cl()+domaine().nb_groupes_int());
+    les_bords_.dimensionner(domaine().nb_front_Cl()+domaine().nb_groupes_faces());
     for(; i<derniere; i++)
       {
         les_bords_[i].associer_frontiere(ledomaine.bord(i));
@@ -228,11 +359,11 @@ void Domaine_VF::discretiser()
         les_bords_[i].associer_Domaine_dis(*this);
       }
     decal=derniere;
-    derniere+=domaine().nb_groupes_int();
+    derniere+=domaine().nb_groupes_faces();
     for(; i<derniere; i++)
       {
         long j=i-decal;
-        les_bords_[i].associer_frontiere(ledomaine.groupe_interne(j));
+        les_bords_[i].associer_frontiere(ledomaine.groupe_faces(j));
         les_bords_[i].associer_Domaine_dis(*this);
       }
   }
@@ -251,11 +382,12 @@ void Domaine_VF::discretiser()
 
   delete les_faces_ptr;
 
-// Fill in the table face_numero_bord
+  // Fill in the table face_numero_bord
   remplir_face_numero_bord();
 
-  faces_perio_.resize_array(nb_faces_tot());
   faces_doubles_.resize_array(nb_faces());
+  est_face_bord_.resize_array(nb_faces_tot());
+
 
   ///////////////////////
   // On imprime des infos
@@ -419,7 +551,7 @@ long Domaine_VF::numero_face_local(long face, long elem) const
 void Domaine_VF::construire_face_virt_pe_num()
 {
   long i;
-  Cerr << "Domaine_VF::construire_face_virt_pe_num" << finl;
+
   const long nf = nb_faces();
   const long nf_tot = nb_faces_tot();
   const long nb_faces_virt = nf_tot - nf;
@@ -508,7 +640,7 @@ DoubleTab Domaine_VF::normalized_boundaries_outward_vector(long global_face_numb
   long neighbor_elem=neighbor_faces(global_face_number,0);
   if( neighbor_elem == -1 )
     neighbor_elem = neighbor_faces(global_face_number,1);
-  DoubleTab vector_face_elem(dimension);
+  //DoubleTab vector_face_elem(dimension);
   double inner_product=0;
   for(long i=0; i<dimension; i++)
     {
@@ -551,18 +683,17 @@ void Domaine_VF::marquer_faces_double_contrib(const Conds_lim& conds_lim)
 
   // marquage des faces periodiques
   ////////////////////////////////////////////////
+
+  est_face_bord_=0; // init for inner faces.
   for (auto& itr : conds_lim)
     {
       const Cond_lim_base& cl=itr.valeur();
-      if (sub_type(Periodique, cl))
+      long flag = sub_type(Periodique, cl) ? 2 : 1;
+      const Front_VF& le_bord = ref_cast(Front_VF, cl.frontiere_dis());
+      for (long ind_face = 0; ind_face < le_bord.nb_faces_tot(); ind_face++)
         {
-          const Periodique& la_cl_period = ref_cast(Periodique,cl);
-          const Front_VF& le_bord = ref_cast(Front_VF, la_cl_period.frontiere_dis());
-          for (long ind_face = 0; ind_face < le_bord.nb_faces_tot(); ind_face++)
-            {
-              long num_face = le_bord.num_face(ind_face);
-              faces_perio_[num_face]=1;
-            }
+          long num_face = le_bord.num_face(ind_face);
+          est_face_bord_[num_face]=flag;
         }
     }
   for (auto& itr : conds_lim)
@@ -778,6 +909,9 @@ void Domaine_VF::info_elem_som()
       Cerr<< nb_boundary_faces << " of them on boundary "<<bords(i).le_nom()<<finl;
     }
   Cerr<<"=============================================="<<finl;
+  long internal_item = std::min(nbelem, nbfaces);
+  internal_item = std::min(internal_item, nbsom);
+  set_exit_on_copy_condition(internal_item);
 }
 
 void Domaine_VF::creer_tableau_faces(Array_base& t, Array_base::Resize_Options opt) const
@@ -799,21 +933,29 @@ void Domaine_VF::creer_tableau_faces_bord(Array_base& t, Array_base::Resize_Opti
 
 void Domaine_VF::remplir_face_numero_bord()
 {
-  Cerr << " Domaine_VF::remplir_face_numero_bord" << finl;
+  Cerr << "Domaine_VF::remplir_face_numero_bord" << finl;
   face_numero_bord_.resize(nb_faces());
   face_numero_bord_=-1; // init for inner faces.
   Domaine& ledomaine=domaine();
-  long ndeb, nfin, num_face;
+  long ndeb, nfin;
   const long nb_bords = ledomaine.nb_bords();
   for (long n_bord=0; n_bord<nb_bords; n_bord++)
     {
       const Bord& le_bord = ledomaine.bord(n_bord);
       ndeb = le_bord.num_premiere_face();
       nfin = ndeb + le_bord.nb_faces();
-      for (num_face=ndeb; num_face<nfin; num_face++)
-        {
-          face_numero_bord_[num_face] = n_bord;
-        }
+      for (long num_face=ndeb; num_face<nfin; num_face++)
+        face_numero_bord_[num_face] = n_bord;
+    }
+
+  const long nb_raccords = ledomaine.nb_raccords() ;
+  for (long n_racc=0; n_racc<nb_raccords; n_racc++)
+    {
+      const Raccord& le_racc = ledomaine.raccord(n_racc);
+      ndeb = le_racc -> num_premiere_face();
+      nfin = ndeb + le_racc -> nb_faces();
+      for (long num_face=ndeb; num_face<nfin; num_face++)
+        face_numero_bord_[num_face] = n_racc + nb_bords;
     }
 }
 
@@ -1023,10 +1165,11 @@ void Domaine_VF::init_dist_paroi_globale(const Conds_lim& conds_lim) // Methode 
 
         for (long f=num_face_1_cl ; f < nb_faces_cl+num_face_1_cl ; f++)
           {
-            const long ind = face_voisins(f, 0) > -1 ? face_voisins(f, 0) : face_voisins(f, 1);
-            if ( dist_face_elem0(f, ind) < y_elem_(ind) ) // Prise en compte du cas ou l'element a plusieurs faces de bord
+            const long ind = (face_voisins(f,0)>=0) ? face_voisins(f,0) : face_voisins(f,1) ;
+            const double dist_ef_loc = (face_voisins(f,0)>=0) ? dist_face_elem0(f, face_voisins(f,0)) : dist_face_elem1(f, face_voisins(f,1));
+            if ( dist_ef_loc < y_elem_(ind) ) // Prise en compte du cas ou l'element a plusieurs faces de bord
               {
-                y_elem_(ind) = dist_face_elem0(f, ind) ;
+                y_elem_(ind) = dist_ef_loc ;
                 for (long d = 0 ; d < D ; d++)
                   n_y_elem_(ind, d) = -face_normales(f,  d)/face_surfaces(f);
               }

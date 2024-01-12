@@ -16,9 +16,9 @@
 #ifndef CL_Types_Aretes_enum_included
 #define CL_Types_Aretes_enum_included
 
-#include <TRUST_type_traits.h>
+#include <type_traits>
 
-enum class Type_Flux_Arete { FLUIDE, BORD, COIN_FLUIDE, INTERNE, MIXTE, PERIODICITE, PAROI_FLUIDE, PAROI, SYMETRIE_PAROI, SYMETRIE_FLUIDE, SYMETRIE, INTERNE_FT }; // EB : INTERNE_FT : calcul du flux aux aretes internes avec une viscosite calcule par une indicatrice aux aretes
+enum class Type_Flux_Arete { FLUIDE, BORD, COIN_FLUIDE, INTERNE, MIXTE, PERIODICITE, PAROI_FLUIDE, PAROI, NAVIER_PAROI, NAVIER_FLUIDE, NAVIER, INTERNE_FT }; // EB : INTERNE_FT : calcul du flux aux aretes internes avec une viscosite calcule par une indicatrice aux aretes
 
 enum class Type_Flux_Fa7 { ELEM, SORTIE_LIBRE };
 

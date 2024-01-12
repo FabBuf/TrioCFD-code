@@ -48,6 +48,7 @@ public:
   long lire_motcle_non_standard(const Motcle&, Entree&) override;
   virtual void preparer_pas_de_temps(void);
   virtual void corriger_pas_de_temps(double dt);
+  void compute_divergence_free_velocity_extension();
   DoubleTab&   derivee_en_temps_inco(DoubleTab&) override;
   void         mettre_a_jour(double temps) override;
   long preparer_calcul() override;

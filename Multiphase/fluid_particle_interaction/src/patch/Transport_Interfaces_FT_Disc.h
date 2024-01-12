@@ -166,6 +166,7 @@ public:
   virtual long get_champ_post_FT(const Motcle& champ, Postraitement_base::Localisation loc, DoubleTab *dtab = 0) const;
   virtual long get_champ_post_FT(const Motcle& champ, Postraitement_base::Localisation loc, IntTab    *itab = 0) const;
   virtual const Maillage_FT_Disc& maillage_interface_pour_post() const;
+  virtual const long& get_n_iterations_distance() const;
   long get_mesh_tag() const override
   {
     return maillage_interface_pour_post().get_mesh_tag();

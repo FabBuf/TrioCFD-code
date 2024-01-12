@@ -587,7 +587,7 @@ void Modele_Collision_FT::set_longueur(double Lx, double Ly, double Lz)
 {
   Longueurs_modele_collision(0)=Lx;
   Longueurs_modele_collision(1)=Ly;
-  if(dimension==3) Longueurs_modele_collision(2)=Lz;
+  if (dimension==3) Longueurs_modele_collision(2)=Lz;
 }
 
 void Modele_Collision_FT::set_origin(DoubleVect& Origin)
@@ -598,7 +598,7 @@ void Modele_Collision_FT::set_origin(double Ox, double Oy, double Oz)
 {
   Origine_modele_collision(0)=Ox;
   Origine_modele_collision(1)=Oy;
-  if(dimension==3) Origine_modele_collision(2)=Oz;
+  if (dimension==3) Origine_modele_collision(2)=Oz;
 }
 
 DoubleVect& Modele_Collision_FT::get_origin()

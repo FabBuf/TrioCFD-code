@@ -35,18 +35,7 @@ public:
     assert(ref_diffusivite_.non_nul());
     return ref_diffusivite_.valeur();
   }
-  inline void associer_indicatrices(const DoubleTab& indic_elem, const DoubleVect& indic_arete)
-  {
-    indicatrice_elem_.ref(indic_elem);
-    indicatrice_arete_.ref(indic_arete);
-    is_solid_particle_=1;
-  }
-  inline void associer_proprietes_fluide(const long formule_mu, const double mu_particule, const double mu_fluide)
-  {
-    formule_mu_=formule_mu;
-    mu_solide_=mu_particule;
-    mu_fluide_=mu_fluide;
-  }
+
   inline virtual void associer_pb(const Probleme_base& pb) final
   {
     ref_probleme_ = pb;
@@ -58,7 +47,7 @@ public:
     // Pour Pb_multiphase, tab_diffusivite_ = alpha * Mu ou alpha * D
     if (sub_type(Pb_Multiphase, ref_probleme_.valeur()))
       {
-        tab_alpha_.ref(ref_cast(Pb_Multiphase, ref_probleme_.valeur()).eq_masse.inconnue().passe());
+        tab_alpha_.ref(ref_cast(Pb_Multiphase, ref_probleme_.valeur()).equation_masse().inconnue().passe());
         tab_diffusivite_ = tab_alpha_;
         for (long e = 0; e < tab_diffusivite_.dimension(0); e++)
           for (long n = 0; n < tab_diffusivite_.dimension(1); n++)
@@ -135,7 +124,6 @@ public:
     else {return 0.25 * (tab_diffusivite_(is_var_ * i, compo) + tab_diffusivite_(is_var_ * j, compo) + tab_diffusivite_(is_var_ * k, compo) + tab_diffusivite_(is_var_ * l, compo));}
 
   }
-
 
   inline double nu_lam_impl_face(long i, long j, long k, long l, long compo) const { return nu_2_impl_face(i, j, k, l, compo); }
   inline double nu_lam_impl_face2(long i, long j, long compo) const { return nu_1_impl_face(i, j, compo); }

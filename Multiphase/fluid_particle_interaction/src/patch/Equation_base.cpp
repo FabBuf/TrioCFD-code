@@ -53,6 +53,7 @@ Equation_base::Equation_base()
   ecrit_champ_xyz_bin=0;
   sys_invariant_=1;
   implicite_=-1;
+  has_time_factor_= false;
   champs_compris_.ajoute_nom_compris("volume_maille");
   Nom expr_equation_non_resolue="0";
   equation_non_resolue_.setNbVar(1);
@@ -138,7 +139,7 @@ void Equation_base::completer()
 
   inconnue()->associer_domaine_cl_dis(le_dom_Cl_dis);
 
-  if (mon_probleme.valeur().get_coupled())
+  if (mon_probleme.valeur().is_coupled())
     {
       bool err = false;
       long nb_cl = le_dom_Cl_dis->nb_cond_lim();
@@ -149,7 +150,7 @@ void Equation_base::completer()
 
           bool raccord_found = false;
 
-          // VDF and polymac
+          // VDF and PolyMAC_P0P1NC
           if (la_cl.que_suis_je().debute_par("Paroi_Echange_contact") || la_cl.que_suis_je().debute_par("Echange_contact_Rayo"))
             raccord_found = true;
 
@@ -722,6 +723,7 @@ DoubleTab& Equation_base::derivee_en_temps_inco(DoubleTab& derivee)
   derivee = 0.;
   DoubleTrav secmem(derivee);
   // secmem = sum(operators) + sources + equation specific terms
+  const double time_factor = get_time_factor();
 
   bool calcul_explicite = false;
   if (parametre_equation_.non_nul() && sub_type(Parametre_implicite, parametre_equation_.valeur()))
@@ -735,14 +737,32 @@ DoubleTab& Equation_base::derivee_en_temps_inco(DoubleTab& derivee)
       // Add convection operator only if equation has one
       derivee=inconnue().valeurs();
       if (nombre_d_operateurs()>1)
-        derivee_en_temps_conv(secmem, derivee);
+        {
+          derivee_en_temps_conv(secmem, derivee);
+          if (has_time_factor_)
+            {
+              secmem *= time_factor;
+            }
+        }
     }
   else
     {
       // Add all explicit operators
       for(long i=0; i<nombre_d_operateurs(); i++)
         if(operateur(i).l_op_base().get_decal_temps()!=1)
-          operateur(i).ajouter(secmem);
+          {
+            if (has_time_factor_)
+              {
+                DoubleTrav secmem_tmp(secmem);
+                operateur(i).ajouter(secmem_tmp);
+                if (i == 1) secmem_tmp *= time_factor;
+                secmem += secmem_tmp;
+              }
+            else
+              {
+                operateur(i).ajouter(secmem);
+              }
+          }
     }
   les_sources.ajouter(secmem);
   if (calculate_time_derivative())
@@ -785,7 +805,7 @@ DoubleTab& Equation_base::derivee_en_temps_inco(DoubleTab& derivee)
         {
           //boucle sur les operateurs
           Operateur_base& op=operateur(i).l_op_base();
-          if(!op.get_matrice().non_nul())
+          if(op.get_matrice().est_nul())
             op.set_matrice().typer("Matrice_Morse");
           if(op.get_decal_temps()==1)
             {
@@ -1263,7 +1283,7 @@ const Champ_base& Equation_base::get_champ(const Motcle& nom) const
     {
       return champs_compris_.get_champ(nom);
     }
-  catch (Champs_compris_erreur& err_)
+  catch (Champs_compris_erreur&)
     {
 
     }
@@ -1272,7 +1292,7 @@ const Champ_base& Equation_base::get_champ(const Motcle& nom) const
     {
       return milieu().get_champ(nom);
     }
-  catch (Champs_compris_erreur& err_)
+  catch (Champs_compris_erreur&)
     {
     }
   long nb_op = nombre_d_operateurs();
@@ -1283,7 +1303,7 @@ const Champ_base& Equation_base::get_champ(const Motcle& nom) const
           {
             return operateur(i).l_op_base().get_champ(nom);
           }
-        catch (Champs_compris_erreur& err_)
+        catch (Champs_compris_erreur&)
           {
 
           }
@@ -1296,7 +1316,7 @@ const Champ_base& Equation_base::get_champ(const Motcle& nom) const
           {
             return itr->get_champ(nom);
           }
-        catch (Champs_compris_erreur& err_)
+        catch (Champs_compris_erreur&)
           {
 
           }
@@ -1885,10 +1905,13 @@ void Equation_base::Gradient_conjugue_diff_impl(DoubleTrav& secmem, DoubleTab& s
           Cerr << "No convergence of the implicited diffusion algorithm for the equation " << que_suis_je() << " in "
                << nmax << " iterations." << finl;
           Cerr << "Residue : " << residual << " Threshold : " << seuil << finl;
-          Cerr << "The problem " << probleme().le_nom() << " has been saved." << finl;
-          probleme().sauver();
+          Cerr << "======================================================================================" << finl;
           Cerr << "The problem is post processed to help you to see where the non convergence is located." << finl;
+          schema_temps().set_stationnaire_atteint()=0;
           probleme().postraiter(1);
+          probleme().mettre_a_jour(schema_temps().temps_courant());
+          probleme().finir();
+          Cerr << "The problem " << probleme().le_nom() << " has been saved too." << finl;
           exit();
         }
       else
@@ -1950,7 +1973,7 @@ void Equation_base::reculer(long i)
 
 // methodes pour l'implicite
 
-/* peut utiliser une memoization (discretisations PolyMAC)*/
+/* peut utiliser une memoization (discretisations PolyMAC_P0P1NC)*/
 void Equation_base::dimensionner_matrice(Matrice_Morse& matrice)
 {
   if (matrice_init)
@@ -1967,7 +1990,7 @@ void Equation_base::dimensionner_matrice(Matrice_Morse& matrice)
 
   matrice.get_set_coeff() = 0.0;  // just to be sure ...
 
-  if (probleme().discretisation().que_suis_je().debute_par("PolyMAC") || probleme().discretisation().que_suis_je() == "DDFV")
+  if (probleme().discretisation().is_polymac_family())
     {
       matrice.sort_stencil();
       matrice_stockee.get_set_tab1().ref_array(matrice.get_set_tab1());
@@ -2167,7 +2190,7 @@ void Equation_base::assembler_blocs(matrices_t matrices, DoubleTab& secmem, cons
   statistiques().end_count(source_counter_);
 
   statistiques().begin_count(assemblage_sys_counter_);
-  if (!(discretisation().que_suis_je().debute_par("PolyMAC") || probleme().que_suis_je() == "Pb_Multiphase"))
+  if (!(discretisation().is_polymac_family() || probleme().que_suis_je() == "Pb_Multiphase"))
     {
       const std::string& nom_inco = inconnue().le_nom().getString();
       Matrice_Morse *mat = matrices.count(nom_inco) ? matrices.at(nom_inco) : NULL;
@@ -2182,7 +2205,7 @@ void Equation_base::assembler_blocs_avec_inertie(matrices_t matrices, DoubleTab&
   solv_masse().valeur().set_penalisation_flag(0);
   schema_temps().ajouter_blocs(matrices, secmem, *this);
 
-  if (!(discretisation().que_suis_je().debute_par("PolyMAC")))
+  if (!discretisation().is_polymac_family())
     {
       const std::string& nom_inco = inconnue().le_nom().getString();
       Matrice_Morse *mat = matrices.count(nom_inco) ? matrices.at(nom_inco) : NULL;
@@ -2260,7 +2283,7 @@ Nom Equation_base::expression_residu()
 {
   long size = residu_.size_array();
   Nom tmp(""),ajout("");
-  if (probleme().get_coupled())
+  if (probleme().is_coupled())
     {
       ajout="_";
       ajout+=probleme().le_nom();

@@ -34,7 +34,7 @@
 #include <medcoupling++.h>
 
 #include <Bords_Internes.h>
-#include <Groupes_internes.h>
+#include <Groupes_Faces.h>
 #ifdef MEDCOUPLING_
 #include <MEDCouplingFieldTemplate.hxx>
 #include <MEDCouplingUMesh.hxx>
@@ -129,9 +129,9 @@ public:
   long nb_faces_bords_int() const ;
   long nb_faces_bords_int(long ) const ;
   long nb_faces_bords_int(Type_Face type) const ;
-  long nb_groupes_internes() const ;
-  long nb_groupes_internes(long ) const ;
-  long nb_groupes_internes(Type_Face type) const ;
+  long nb_faces_groupes_faces() const ;
+  long nb_faces_groupes_faces(long ) const ;
+  long nb_faces_groupes_faces(Type_Face type) const ;
   inline long nb_faces_frontiere() const ;
   inline long nb_faces_frontiere(Type_Face type) const ;
   inline long nb_faces_specifiques() const ;
@@ -148,8 +148,8 @@ public:
   inline const Bords& faces_bord() const;
   inline Bords& faces_bord();
 
-  inline const Groupes_internes& groupes_internes() const;
-  inline Groupes_internes& groupes_internes();
+  inline const Groupes_Faces& groupes_faces() const;
+  inline Groupes_Faces& groupes_faces();
 
   inline const Joints& faces_joint() const;
   inline Joints& faces_joint();
@@ -167,12 +167,12 @@ public:
   inline Bord& bord(const Nom&);
 
   ///
-  /// Groupes_internes
+  /// Groupes_Faces
   ///
-  inline const Groupe_interne& groupe_interne(long) const;
-  inline Groupe_interne& groupe_interne(long);
-  inline const Groupe_interne& groupe_interne(const Nom&) const;
-  inline long nb_groupes_int() const ;
+  inline const Groupe_Faces& groupe_faces(long) const;
+  inline Groupe_Faces& groupe_faces(long);
+  inline const Groupe_Faces& groupe_faces(const Nom&) const;
+  inline long nb_groupes_faces() const ;
 
   ///
   /// Frontieres
@@ -226,6 +226,7 @@ public:
   inline long get_renum_som_perio(long i) const { return renum_som_perio_[i]; }
   void construire_renum_som_perio(const Conds_lim&, const Domaine_dis&) ;
   inline void set_renum_som_perio(IntTab& renum)  {    renum_som_perio_=renum;   };
+  const ArrOfInt& get_renum_som_perio() const { return renum_som_perio_; }
 
   ///
   /// Time-dependency
@@ -334,6 +335,12 @@ public:
   virtual const MD_Vector& md_vector_elements() const;
   static long identifie_item_unique(IntList& item_possible, DoubleTab& coord_possible, const DoubleVect& coord_ref);
 
+  //Extraire surface on a mobile boundary (deformable domaine, like ALE)
+  inline void setLes_elems_extrait_surf_ref(const IntTab&) ;
+  inline IntTab getLes_elems_extrait_surf_ref() const;
+  inline void setExtrait_surf_dom_deformable(bool) ;
+  inline bool getExtrait_surf_dom_deformable() const;
+
 protected:
   // Domaine name
   Nom nom_;
@@ -355,8 +362,8 @@ protected:
   Bords mes_faces_bord_;
   Raccords mes_faces_raccord_;
   Bords_Internes mes_bords_int_;
-  // Groupes_internes representent les groupes de faces lues dans les fichiers d'entrees
-  Groupes_internes mes_groupes_internes_;
+  // Groupes_Faces representent les groupes de faces lues dans les fichiers d'entrees
+  Groupes_Faces mes_groupes_faces_;
   // Les faces de joint sont les faces communes avec les autres processeurs (bords
   //  du domaine locale a ce processeur qui se raccordent a un processeur voisin)
   Joints mes_faces_joint_;
@@ -396,6 +403,10 @@ protected:
 #endif
 
   void duplique_bords_internes();
+
+  //attributes necessary to perform surface extraction on a moving boundary (deformable domaine, like ALE)
+  IntTab les_elems_extrait_surf_reference_; // list of elements belonging to the extracted surface on a moving boundary defines at the initialization.
+  bool extrait_surf_dom_deformable_; // indicates whether the domain was defined by extraction on a moving boundary
 
 private:
   void prepare_rmp_with(Domaine& );
@@ -513,9 +524,9 @@ inline long Domaine::nb_frontieres_internes() const {  return mes_bords_int_.nb_
 
 /*! @brief Renvoie le nombre de groupes de faces enregistrees dans le domaine.
  *
- * @return (long) le nombre de groupe de faces internes du domaine
+ * @return (long) le nombre de groupe de faces specifies dans le domaine
  */
-inline long Domaine::nb_groupes_int() const {  return mes_groupes_internes_.nb_groupes_internes(); }
+inline long Domaine::nb_groupes_faces() const {  return mes_groupes_faces_.nb_groupes_faces(); }
 
 /*! @brief Renvoie le nombre de faces frontiere du domaine.
  *
@@ -527,10 +538,10 @@ inline long Domaine::nb_faces_frontiere() const { return nb_faces_bord() + nb_fa
 
 /*! @brief Renvoie le nombre de faces speciales du domaine.
  *
- * C'est la somme des nombres de  bords, de raccords, de bords internes et de groupes de faces internes
+ * C'est la somme des nombres de  bords, de raccords, de bords internes et de groupes de faces specifies
  *
  */
-inline long Domaine::nb_faces_specifiques() const { return nb_faces_bord() + nb_faces_raccord() + nb_faces_bords_int() + nb_groupes_internes(); }
+inline long Domaine::nb_faces_specifiques() const { return nb_faces_bord() + nb_faces_raccord() + nb_faces_bords_int() + nb_faces_groupes_faces(); }
 
 /*! @brief Renvoie le nombre de bords + le nombre de raccords
  *
@@ -614,26 +625,26 @@ inline const Bord_Interne& Domaine::bords_interne(const Nom& nom) const {   retu
  */
 inline Bord_Interne& Domaine::bords_interne(const Nom& nom) {   return mes_bords_int_(nom); }
 
-/*! @brief Renvoie les groupe_interne dont le nom est specifie
+/*! @brief Renvoie les Groupe_Faces dont le nom est specifie
  *
- * @param (Nom& nom) le nom des groupes internes a renvoyer
- * @return (Groupe_interne&) les Groupe_interne dont le nom est specifie
+ * @param (Nom& nom) le nom des groupes de faces a renvoyer
+ * @return (Groupe_Faces&) les Groupe_Faces dont le nom est specifie
  */
-inline const Groupe_interne& Domaine::groupe_interne(const Nom& nom) const {   return mes_groupes_internes_(nom); }
+inline const Groupe_Faces& Domaine::groupe_faces(const Nom& nom) const {   return mes_groupes_faces_(nom); }
 
-/*! @brief Renvoie la i-ieme Groupe_interne du domaine
+/*! @brief Renvoie la i-ieme Groupe_Faces du domaine
  *
- * @param (long i) l'indice de la Groupe_interne a renvoyer
- * @return (Groupe_interne&) la i-ieme Groupe_interne du domaine
+ * @param (long i) l'indice de la Groupe_Faces a renvoyer
+ * @return (Groupe_Faces&) la i-ieme Groupe_Faces du domaine
  */
-inline Groupe_interne& Domaine::groupe_interne(long i) {   return mes_groupes_internes_(i); }
+inline Groupe_Faces& Domaine::groupe_faces(long i) {   return mes_groupes_faces_(i); }
 
-/*! @brief Renvoie la i-ieme Groupe_interne du domaine (version const)
+/*! @brief Renvoie la i-ieme Groupe_Faces du domaine (version const)
  *
- * @param (long i) l'indice de la Groupe_interne a renvoyer
- * @return (Groupe_interne&) la i-ieme Groupe_interne du domaine
+ * @param (long i) l'indice de la Groupe_Faces a renvoyer
+ * @return (Groupe_Faces&) la i-ieme Groupe_Faces du domaine
  */
-inline const Groupe_interne& Domaine::groupe_interne(long i) const {   return mes_groupes_internes_(i); }
+inline const Groupe_Faces& Domaine::groupe_faces(long i) const {   return mes_groupes_faces_(i); }
 
 /*! @brief Renvoie le i-ieme bord du domaine (version const)
  *
@@ -656,9 +667,9 @@ inline const Frontiere& Domaine::frontiere(long i) const
   if(i<fin)
     return mes_bords_int_(i);
   i-=fin;
-  fin=nb_groupes_int();
+  fin=nb_groupes_faces();
   if(i<fin)
-    return mes_groupes_internes_(i);
+    return mes_groupes_faces_(i);
   assert(0);
   exit();
   return frontiere(i);
@@ -678,9 +689,9 @@ inline Frontiere& Domaine::frontiere(long i)
   if(i<fin)
     return mes_bords_int_(i);
   i-=fin;
-  fin=nb_groupes_int();
+  fin=nb_groupes_faces();
   if(i<fin)
-    return mes_groupes_internes_(i);
+    return mes_groupes_faces_(i);
   assert(0);
   exit();
   return frontiere(i);
@@ -774,18 +785,18 @@ inline const Bords& Domaine::faces_bord() const { return mes_faces_bord_; }
  */
 inline Bords& Domaine::faces_bord() {  return mes_faces_bord_; }
 
-/*! @brief Renvoie la liste des groupes_internes du domaine.
+/*! @brief Renvoie la liste des Groupes_Faces du domaine.
  * (version const)
  *
- * @return (Groupes_internes&) la liste des Groupes_internes du domaine
+ * @return (Groupes_Faces&) la liste des Groupes_Faces du domaine
  */
-inline const Groupes_internes& Domaine::groupes_internes() const { return mes_groupes_internes_; }
+inline const Groupes_Faces& Domaine::groupes_faces() const { return mes_groupes_faces_; }
 
-/*! @brief Renvoie la liste des groupes_internes du domaine.
+/*! @brief Renvoie la liste des Groupes_Faces du domaine.
  *
- * @return (Groupes_internes&) la liste des Groupes_internes du domaine
+ * @return (Groupes_Faces&) la liste des Groupes_Faces du domaine
  */
-inline Groupes_internes& Domaine::groupes_internes() {  return mes_groupes_internes_; }
+inline Groupes_Faces& Domaine::groupes_faces() {  return mes_groupes_faces_; }
 
 /*! @brief Renvoie la liste des joints du domaine.
  * (version const)
@@ -849,7 +860,7 @@ inline long Domaine::nb_faces_frontiere(Type_Face type) const
 /*! @brief Renvoie le nombre de faces specifique du domaine du type specifie.
  *
  *     C'est la somme des nombres de  bords, de raccords
- *     de bords internes et de groupes internes du type specifie.
+ *     de bords internes et de groupes de faces du type specifie.
  *
  * @param (Type_Face type) un type de face (certains elements geometriques ont plusieurs types de faces)
  * @return (long) le nombre de faces frontiere du domaine du type specifie
@@ -860,7 +871,7 @@ inline long Domaine::nb_faces_specifiques(Type_Face type) const
     nb_faces_bord(type) +
     nb_faces_bords_int(type) +
     nb_faces_raccord(type) +
-    nb_groupes_internes(type);
+    nb_faces_groupes_faces(type);
 }
 
 // Decription:
@@ -893,5 +904,30 @@ inline IntTab& Domaine::set_aretes_som() {  return aretes_som_; }
  */
 inline const IntTab& Domaine::elem_aretes() const {   return elem_aretes_; }
 inline IntTab& Domaine::set_elem_aretes() {   return elem_aretes_; }
+
+
+inline void Domaine::setLes_elems_extrait_surf_ref(const IntTab& ref)
+{
+  les_elems_extrait_surf_reference_=ref;
+
+}
+inline IntTab Domaine::getLes_elems_extrait_surf_ref() const
+{
+  return les_elems_extrait_surf_reference_;
+}
+
+
+inline void Domaine::setExtrait_surf_dom_deformable(bool def)
+{
+
+  extrait_surf_dom_deformable_ = def;
+
+}
+inline bool Domaine::getExtrait_surf_dom_deformable() const
+{
+
+  return extrait_surf_dom_deformable_;
+
+}
 
 #endif

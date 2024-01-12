@@ -79,23 +79,23 @@ void Iterateur_VDF_Face<_TYPE_>::ajouter_blocs_aretes_bords(const long ncomp, ma
         case TypeAreteBordVDF::PAROI_PAROI:
           ajouter_blocs_aretes_bords_<_TYPE_::CALC_ARR_PAR, Type_Flux_Arete::PAROI, Type_Double>(n_arete, ncomp, mats, secmem, semi_impl);
           break;
-        case TypeAreteBordVDF::SYM_SYM:
-          ajouter_blocs_aretes_bords_<_TYPE_::CALC_ARR_SYMM, Type_Flux_Arete::SYMETRIE, Type_Double>(n_arete, ncomp, mats, secmem, semi_impl);
-          break;
-        case TypeAreteBordVDF::PAROI_SYM:
-          ajouter_blocs_aretes_bords_<_TYPE_::CALC_ARR_SYMM_PAR, Type_Flux_Arete::SYMETRIE_PAROI, Type_Double>(n_arete, ncomp, mats, secmem, semi_impl);
+        case TypeAreteBordVDF::PAROI_FLUIDE:
+          ajouter_blocs_aretes_bords_<_TYPE_::CALC_ARR_PAR_FL, Type_Flux_Arete::PAROI_FLUIDE, Type_Double>(n_arete, ncomp, mats, secmem, semi_impl);
           break;
         case TypeAreteBordVDF::FLUIDE_FLUIDE:
           ajouter_blocs_aretes_bords_<_TYPE_::CALC_ARR_FL, Type_Flux_Arete::FLUIDE, Type_Double>(n_arete, ncomp, mats, secmem, semi_impl);
           break;
-        case TypeAreteBordVDF::PAROI_FLUIDE:
-          ajouter_blocs_aretes_bords_<_TYPE_::CALC_ARR_PAR_FL, Type_Flux_Arete::PAROI_FLUIDE, Type_Double>(n_arete, ncomp, mats, secmem, semi_impl);
+        case TypeAreteBordVDF::PAROI_NAVIER:
+          ajouter_blocs_aretes_bords_<_TYPE_::CALC_ARR_NAVIER_PAR, Type_Flux_Arete::NAVIER_PAROI, Type_Double>(n_arete, ncomp, mats, secmem, semi_impl);
+          break;
+        case TypeAreteBordVDF::FLUIDE_NAVIER:
+          ajouter_blocs_aretes_bords_<_TYPE_::CALC_ARR_NAVIER_FL, Type_Flux_Arete::NAVIER_FLUIDE, Type_Double>(n_arete, ncomp, mats, secmem, semi_impl);
+          break;
+        case TypeAreteBordVDF::NAVIER_NAVIER:
+          ajouter_blocs_aretes_bords_<_TYPE_::CALC_ARR_NAVIER, Type_Flux_Arete::NAVIER, Type_Double>(n_arete, ncomp, mats, secmem, semi_impl);
           break;
         case TypeAreteBordVDF::PERIO_PERIO:
           ajouter_blocs_aretes_bords_<_TYPE_::CALC_ARR_PERIO, Type_Flux_Arete::PERIODICITE, Type_Double>(n_arete, ncomp, mats, secmem, semi_impl);
-          break;
-        case TypeAreteBordVDF::FLUIDE_SYM:
-          ajouter_blocs_aretes_bords_<_TYPE_::CALC_ARR_SYMM_FL, Type_Flux_Arete::SYMETRIE_FLUIDE, Type_Double>(n_arete, ncomp, mats, secmem, semi_impl);
           break;
         default:
           Cerr << "On a rencontre un type d'arete non prevu : [ num arete : " << n_arete << " ], [ type : " << n_type << " ]" << finl;
@@ -105,7 +105,7 @@ void Iterateur_VDF_Face<_TYPE_>::ajouter_blocs_aretes_bords(const long ncomp, ma
 }
 
 template <class _TYPE_> template <bool should_calc_flux, Type_Flux_Arete Arete_Type, typename Type_Double>
-enable_if_t_< Arete_Type == Type_Flux_Arete::PAROI || Arete_Type == Type_Flux_Arete::SYMETRIE || Arete_Type == Type_Flux_Arete::SYMETRIE_PAROI, void>
+std::enable_if_t< Arete_Type == Type_Flux_Arete::PAROI || Arete_Type == Type_Flux_Arete::NAVIER || Arete_Type == Type_Flux_Arete::NAVIER_PAROI, void>
 Iterateur_VDF_Face<_TYPE_>::ajouter_blocs_aretes_bords_(const long n_arete, const long ncomp, matrices_t mats, DoubleTab& secmem, const tabs_t& semi_impl) const
 {
   if (should_calc_flux)
@@ -117,7 +117,7 @@ Iterateur_VDF_Face<_TYPE_>::ajouter_blocs_aretes_bords_(const long n_arete, cons
       const DoubleTab& inco = semi_impl.count(nom_ch_inco_) ? semi_impl.at(nom_ch_inco_) : le_champ_convecte_ou_inc->valeurs();
 
       const DoubleTab* a_r = (!is_pb_multi || !is_conv_op_) ? nullptr : semi_impl.count("alpha_rho") ? &semi_impl.at("alpha_rho") :
-                             &ref_cast(Pb_Multiphase,op_base->equation().probleme()).eq_masse.champ_conserve().valeurs();
+                             &ref_cast(Pb_Multiphase,op_base->equation().probleme()).equation_masse().champ_conserve().valeurs();
 
       // second membre
       flux_evaluateur.template flux_arete < Arete_Type > (inco, a_r, n_arete, fac1, fac2, fac3, signe, flux);
@@ -143,7 +143,7 @@ Iterateur_VDF_Face<_TYPE_>::ajouter_blocs_aretes_bords_(const long n_arete, cons
 }
 
 template <class _TYPE_>  template <bool should_calc_flux, Type_Flux_Arete Arete_Type, typename Type_Double>
-enable_if_t_<Arete_Type == Type_Flux_Arete::FLUIDE || Arete_Type == Type_Flux_Arete::PAROI_FLUIDE || Arete_Type == Type_Flux_Arete::SYMETRIE_FLUIDE, void>
+std::enable_if_t<Arete_Type == Type_Flux_Arete::FLUIDE || Arete_Type == Type_Flux_Arete::PAROI_FLUIDE || Arete_Type == Type_Flux_Arete::NAVIER_FLUIDE, void>
 Iterateur_VDF_Face<_TYPE_>::ajouter_blocs_aretes_bords_(const long n_arete, const long ncomp, matrices_t mats, DoubleTab& secmem, const tabs_t& semi_impl) const
 {
   if (should_calc_flux)
@@ -155,7 +155,7 @@ Iterateur_VDF_Face<_TYPE_>::ajouter_blocs_aretes_bords_(const long n_arete, cons
       const DoubleTab& inco = semi_impl.count(nom_ch_inco_) ? semi_impl.at(nom_ch_inco_) : le_champ_convecte_ou_inc->valeurs();
 
       const DoubleTab* a_r = (!is_pb_multi || !is_conv_op_) ? nullptr : semi_impl.count("alpha_rho") ? &semi_impl.at("alpha_rho") :
-                             &ref_cast(Pb_Multiphase,op_base->equation().probleme()).eq_masse.champ_conserve().valeurs();
+                             &ref_cast(Pb_Multiphase,op_base->equation().probleme()).equation_masse().champ_conserve().valeurs();
 
       // second membre
       flux_evaluateur.template flux_arete < Arete_Type > (inco, a_r, n_arete, fac1, fac2, fac3, signe, flux3, flux1_2);
@@ -188,7 +188,7 @@ Iterateur_VDF_Face<_TYPE_>::ajouter_blocs_aretes_bords_(const long n_arete, cons
 }
 
 template <class _TYPE_>  template <bool should_calc_flux, Type_Flux_Arete Arete_Type, typename Type_Double>
-enable_if_t_<Arete_Type == Type_Flux_Arete::PERIODICITE, void>
+std::enable_if_t<Arete_Type == Type_Flux_Arete::PERIODICITE, void>
 Iterateur_VDF_Face<_TYPE_>::ajouter_blocs_aretes_bords_(const long n_arete, const long ncomp, matrices_t mats, DoubleTab& secmem, const tabs_t& semi_impl) const
 {
   if (should_calc_flux)
@@ -261,7 +261,7 @@ void Iterateur_VDF_Face<_TYPE_>::ajouter_blocs_aretes_coins(const long ncomp, ma
 }
 
 template <class _TYPE_> template <bool should_calc_flux, Type_Flux_Arete Arete_Type, TypeAreteCoinVDF::type_arete Arete_Type_Coin, typename Type_Double>
-enable_if_t_< Arete_Type == Type_Flux_Arete::PAROI, void>
+std::enable_if_t< Arete_Type == Type_Flux_Arete::PAROI, void>
 Iterateur_VDF_Face<_TYPE_>::ajouter_blocs_aretes_coins_(const long n_arete, const long ncomp, matrices_t mats, DoubleTab& secmem, const tabs_t& semi_impl) const
 {
   if (should_calc_flux)
@@ -273,7 +273,7 @@ Iterateur_VDF_Face<_TYPE_>::ajouter_blocs_aretes_coins_(const long n_arete, cons
       const DoubleTab& inco = semi_impl.count(nom_ch_inco_) ? semi_impl.at(nom_ch_inco_) : le_champ_convecte_ou_inc->valeurs();
 
       const DoubleTab* a_r = (!is_pb_multi || !is_conv_op_) ? nullptr : semi_impl.count("alpha_rho") ? &semi_impl.at("alpha_rho") :
-                             &ref_cast(Pb_Multiphase,op_base->equation().probleme()).eq_masse.champ_conserve().valeurs();
+                             &ref_cast(Pb_Multiphase,op_base->equation().probleme()).equation_masse().champ_conserve().valeurs();
 
       // second membre
       flux_evaluateur.template flux_arete < Arete_Type > (inco, a_r, n_arete, fac1, fac2, fac3, signe, flux);
@@ -301,7 +301,7 @@ Iterateur_VDF_Face<_TYPE_>::ajouter_blocs_aretes_coins_(const long n_arete, cons
 }
 
 template <class _TYPE_> template <bool should_calc_flux, Type_Flux_Arete Arete_Type, typename Type_Double>
-enable_if_t_<Arete_Type == Type_Flux_Arete::COIN_FLUIDE, void>
+std::enable_if_t<Arete_Type == Type_Flux_Arete::COIN_FLUIDE, void>
 Iterateur_VDF_Face<_TYPE_>::ajouter_blocs_aretes_coins_(const long n_arete, const long ncomp, matrices_t mats, DoubleTab& secmem, const tabs_t& semi_impl) const
 {
   if (should_calc_flux)
@@ -312,7 +312,7 @@ Iterateur_VDF_Face<_TYPE_>::ajouter_blocs_aretes_coins_(const long n_arete, cons
       const DoubleTab& inco = semi_impl.count(nom_ch_inco_) ? semi_impl.at(nom_ch_inco_) : le_champ_convecte_ou_inc->valeurs();
 
       const DoubleTab* a_r = (!is_pb_multi || !is_conv_op_) ? nullptr : semi_impl.count("alpha_rho") ? &semi_impl.at("alpha_rho") :
-                             &ref_cast(Pb_Multiphase,op_base->equation().probleme()).eq_masse.champ_conserve().valeurs();
+                             &ref_cast(Pb_Multiphase,op_base->equation().probleme()).equation_masse().champ_conserve().valeurs();
 
       // second membre
       flux_evaluateur.template flux_arete < Arete_Type > (inco, a_r, n_arete, fac1, fac2, fac3, signe, flux3, flux1_2);
@@ -339,7 +339,7 @@ Iterateur_VDF_Face<_TYPE_>::ajouter_blocs_aretes_coins_(const long n_arete, cons
 }
 
 template <class _TYPE_> template <bool should_calc_flux, Type_Flux_Arete Arete_Type, typename Type_Double>
-enable_if_t_<Arete_Type == Type_Flux_Arete::PERIODICITE, void>
+std::enable_if_t<Arete_Type == Type_Flux_Arete::PERIODICITE, void>
 Iterateur_VDF_Face<_TYPE_>::ajouter_blocs_aretes_coins_(const long n_arete, const long ncomp, matrices_t mats, DoubleTab& secmem, const tabs_t& semi_impl) const
 {
   if (should_calc_flux)
@@ -395,7 +395,7 @@ void Iterateur_VDF_Face<_TYPE_>::ajouter_blocs_aretes_mixtes(const long ncomp, m
 }
 
 template <class _TYPE_> template <bool should_calc_flux, Type_Flux_Arete Arete_Type, typename Type_Double>
-enable_if_t_<Arete_Type == Type_Flux_Arete::INTERNE || Arete_Type == Type_Flux_Arete::INTERNE_FT || Arete_Type == Type_Flux_Arete::MIXTE, void> //|| Arete_Type == Type_Flux_Arete::INTERNE_FT
+std::enable_if_t<Arete_Type == Type_Flux_Arete::INTERNE || Arete_Type == Type_Flux_Arete::INTERNE_FT || Arete_Type == Type_Flux_Arete::MIXTE, void> //|| Arete_Type == Type_Flux_Arete::INTERNE_FT
 Iterateur_VDF_Face<_TYPE_>::ajouter_blocs_aretes_generique_(const long debut, const long fin, const long ncomp, matrices_t mats, DoubleTab& secmem, const tabs_t& semi_impl) const
 {
   // XXX : tab_flux_bords rempli seulement si MIXTE ... ie pas INTERNE !
@@ -407,7 +407,7 @@ Iterateur_VDF_Face<_TYPE_>::ajouter_blocs_aretes_generique_(const long debut, co
       const DoubleTab& inco = semi_impl.count(nom_ch_inco_) ? semi_impl.at(nom_ch_inco_) : le_champ_convecte_ou_inc->valeurs();
 
       const DoubleTab* a_r = (!is_pb_multi || !is_conv_op_) ? nullptr : semi_impl.count("alpha_rho") ? &semi_impl.at("alpha_rho") :
-                             &ref_cast(Pb_Multiphase,op_base->equation().probleme()).eq_masse.champ_conserve().valeurs();
+                             &ref_cast(Pb_Multiphase,op_base->equation().probleme()).equation_masse().champ_conserve().valeurs();
 
       // second membre
       for (long n_arete = debut; n_arete < fin; n_arete++)
@@ -494,7 +494,7 @@ void Iterateur_VDF_Face<_TYPE_>::ajouter_blocs_fa7_sortie_libre(const long ncomp
         case sortie_libre:
           ajouter_blocs_fa7_sortie_libre_<_TYPE_::CALC_FA7_SORTIE_LIB, Type_Flux_Fa7::SORTIE_LIBRE, Type_Double>(num_cl, ncomp, mats, secmem, semi_impl);
           break;
-        case symetrie: /* fall through */
+        case navier: /* fall through */
         case entree_fluide:
         case paroi_fixe:
         case paroi_defilante:
@@ -524,7 +524,7 @@ void Iterateur_VDF_Face<_TYPE_>::ajouter_blocs_fa7_sortie_libre_(const long num_
       const long ndeb = frontiere_dis.num_premiere_face(), nfin = ndeb + frontiere_dis.nb_faces();
 
       const DoubleTab* a_r = (!is_pb_multi || !is_conv_op_) ? nullptr : semi_impl.count("alpha_rho") ? &semi_impl.at("alpha_rho") :
-                             &ref_cast(Pb_Multiphase,op_base->equation().probleme()).eq_masse.champ_conserve().valeurs();
+                             &ref_cast(Pb_Multiphase,op_base->equation().probleme()).equation_masse().champ_conserve().valeurs();
 
       // second membre
       for (long face = ndeb; face < nfin; face++)
@@ -560,11 +560,11 @@ void Iterateur_VDF_Face<_TYPE_>::ajouter_blocs_fa7_elem(const long ncomp, matric
 {
   DoubleTab& tab_flux_bords = op_base->flux_bords();
   const DoubleTab& inco = semi_impl.count(nom_ch_inco_) ? semi_impl.at(nom_ch_inco_) : le_champ_convecte_ou_inc->valeurs();
-  Type_Double flux(ncomp), aii(ncomp), ajj(ncomp), flux_c(ncomp) /* partie compressible */;
+  Type_Double flux(ncomp), aii(ncomp), ajj(ncomp);
   const long n_fc_bd = le_dom->nb_faces_bord();
 
   const DoubleTab* a_r = (!is_pb_multi || !is_conv_op_) ? nullptr : semi_impl.count("alpha_rho") ? &semi_impl.at("alpha_rho") :
-                         &ref_cast(Pb_Multiphase,op_base->equation().probleme()).eq_masse.champ_conserve().valeurs();
+                         &ref_cast(Pb_Multiphase,op_base->equation().probleme()).equation_masse().champ_conserve().valeurs();
 //  const IntTab& f_e = le_dom->face_voisins();
   // second membre
   for (long num_elem = 0; num_elem < nb_elem; num_elem++)

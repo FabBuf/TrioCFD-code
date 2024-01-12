@@ -54,7 +54,8 @@ public :
 
   virtual void remplir_face_voisins_fictifs(const Domaine_Cl_dis_base& ) ;
   virtual Faces* creer_faces();
-  virtual void reordonner(Faces& );
+  virtual void reordonner(Faces&);
+  void renumeroter(Faces&);
   inline long nb_joints() const { return domaine().nb_joints(); }
   inline long premiere_face_int() const;
   inline long nb_faces() const;
@@ -73,6 +74,9 @@ public :
   inline IntTab& face_numero_bord() { return face_numero_bord_; }
   inline const IntTab& face_numero_bord() const { return face_numero_bord_; }
   void remplir_face_numero_bord();
+
+  inline ArrOfInt& est_face_bord() { return est_face_bord_; }
+  inline const ArrOfInt& est_face_bord() const { return est_face_bord_; }
 
   inline virtual const IntVect& orientation() const;
   inline virtual long orientation(long ) const;
@@ -129,7 +133,6 @@ public :
   inline const IntTab& aretes_multiples_virt_pe_num() const; // EB
   inline IntTab& aretes_multiples_virt_pe_num(); // EB
   inline const ArrOfInt& faces_doubles() const;
-  inline const ArrOfInt& faces_perio() const;
   inline IntTab& face_sommets() override;
   inline const IntTab& face_sommets() const override;
   void modifier_pour_Cl(const Conds_lim&) override;
@@ -213,9 +216,10 @@ protected:
 
   VECT(Front_VF) les_bords_;
 
-  IntTab num_fac_loc_;
-  ArrOfInt faces_perio_;   // faces periodiques (utile si on boucle de 0 a nb_faces_tot)
+  IntTab num_fac_loc_;     // renvoie pour une face son numero local dans l'element
+  //ArrOfInt faces_perio_;   // faces periodiques (utile si on boucle de 0 a nb_faces_tot)
   ArrOfInt faces_doubles_; // faces a double contribution (faces periodiques et items communs). Utile si on boucle de 0 a nb_faces pour une reduction ensuite
+  ArrOfInt est_face_bord_; // renvoie pour une face reelle ou virtuelle: 0 si interne, 1 si face de bord non periodique, 2 si face de bord periodique
   IntVect aretes_multiples_; 			    // EB
   IntTab faces_doubles_pe_num_; // EB indice du PE voisin possedant la face et indice locale de cette face sur le pe
   IntTab faces_doubles_virt_pe_num_; // EB
@@ -242,6 +246,11 @@ protected:
   DoubleTab n_y_elem_ ; // vecteur normal entre le bord le plus proche et l'element
   DoubleTab n_y_faces_; // vecteur normal entre le bord le plus proche et la face
 
+  long nb_elem_std_=-10;                     // nombre d'elements standard
+  long nb_faces_std_=-10;                    // nombre de faces standard
+  IntVect rang_elem_non_std_;    // rang_elem_non_std_= -1 si l'element est standard
+  // rang_elem_non_std_= rang de l'element dans les tableaux
+  // relatifs aux elements non standards
 };
 
 // Renvoie le numero local de face a partir d'un numero de face global et de elem local (0 ou 1)
@@ -511,13 +520,6 @@ inline const ArrOfInt& Domaine_VF::faces_doubles() const
   return faces_doubles_;
 }
 
-/*! @brief renvoie 1 pour les faces appartenant a un bord perio
- *
- */
-inline const ArrOfInt& Domaine_VF::faces_perio() const
-{
-  return faces_perio_;
-}
 /*! @brief renvoie le numero du ieme sommet de la face num_face.
  *
  */

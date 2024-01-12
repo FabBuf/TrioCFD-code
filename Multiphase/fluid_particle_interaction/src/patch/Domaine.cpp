@@ -51,6 +51,7 @@ Domaine::Domaine() :
   axi1d_(0),
   epsilon_(Objet_U::precision_geom),
   deformable_(0),
+  extrait_surf_dom_deformable_(false),
   volume_total_(-1)
 { }
 
@@ -100,6 +101,11 @@ Sortie& Domaine::printOn(Sortie& s) const
   s << mes_faces_joint_;
   s << mes_faces_raccord_;
   s << mes_bords_int_;
+  if (nb_groupes_faces() !=0)
+    {
+      s << finl << "groupes_faces" << finl;
+      s << mes_groupes_faces_;
+    }
   s << "}" << finl;
   //
 
@@ -190,8 +196,6 @@ Entree& Domaine::readOn(Entree& s)
   s >> acc;
   assert (acc == "{");
   read_former_domaine(s);
-  s >> acc;
-  assert (acc == "}");
   check_domaine();
 
   if ( (Process::nproc()==1) && (NettoieNoeuds::NettoiePasNoeuds==0) )
@@ -214,7 +218,7 @@ Entree& Domaine::readOn(Entree& s)
  */
 void Domaine::read_former_domaine(Entree& s)
 {
-  Nom dnu;
+  Nom dnu, acc;
   Cerr << " Reading part of domain " << le_nom() << finl;
   s >> dnu; // Name of the Domaine, now unused ...
   s >> elem_;
@@ -228,7 +232,15 @@ void Domaine::read_former_domaine(Entree& s)
   s >> mes_faces_raccord_;
   mes_bords_int_.vide();
   s >> mes_bords_int_;
-  mes_groupes_internes_.vide();
+  mes_groupes_faces_.vide();
+  s >> acc;
+  if (acc == "groupes_faces")
+    {
+      s >> mes_groupes_faces_;
+      s >> acc;
+    }
+  if (acc != "}")
+    Process::exit( "misformatted domain file : One expected a closing bracket } to end. ");
 }
 
 /*! @brief associate the read objects to the domaine and check that the reading objects are coherent
@@ -239,7 +251,7 @@ void Domaine::check_domaine()
   // remplacer Faces::vide_0D par le bon type pour les procs qui n'ont pas de faces de bord:
   {
     long i;
-    long n = nb_front_Cl() + nb_groupes_int();
+    long n = nb_front_Cl();
     for (i = 0; i < n; i++)
       corriger_type(frontiere(i).faces(), type_elem().valeur());
   }
@@ -251,7 +263,7 @@ void Domaine::check_domaine()
   mes_faces_joint_.associer_domaine(*this);
   mes_faces_raccord_.associer_domaine(*this);
   mes_bords_int_.associer_domaine(*this);
-  mes_groupes_internes_.associer_domaine(*this);
+  mes_groupes_faces_.associer_domaine(*this);
   elem_.associer_domaine(*this);
   fixer_premieres_faces_frontiere();
 
@@ -263,7 +275,7 @@ void Domaine::check_domaine()
   check_frontiere(mes_faces_bord_, "(Bord)");
   check_frontiere(mes_faces_raccord_, "(Raccord)");
   check_frontiere(mes_bords_int_, "(Bord_Interne)");
-  check_frontiere(mes_groupes_internes_, "(Groupe_interne)");
+  check_frontiere(mes_groupes_faces_, "(Groupe_Faces)");
 }
 
 Entree& Domaine::lire_bords_a_imprimer(Entree& is)
@@ -279,7 +291,7 @@ Entree& Domaine::lire_bords_a_imprimer(Entree& is)
       exit();
     }
   is >> nom_lu;
-  while (nom_lu != "}")
+  while (nom_lu != accolade_fermee)
     {
       Cerr << nom_lu << " ";
       bords_a_imprimer_.add(Nom(nom_lu));
@@ -302,7 +314,7 @@ Entree& Domaine::lire_bords_a_imprimer_sum(Entree& is)
       exit();
     }
   is >> nom_lu;
-  while (nom_lu != "}")
+  while (nom_lu != accolade_fermee)
     {
       Cerr << nom_lu << " ";
       bords_a_imprimer_sum_.add(Nom(nom_lu));
@@ -587,13 +599,13 @@ long Domaine::nb_faces_bords_int() const
   return mes_bords_int_.nb_faces();
 }
 
-/*! @brief Renvoie le nombre de face internes du domaine.
+/*! @brief Renvoie le nombre de faces dans les Groupe_Faces du domaine.
  *
- * @return (long) le nombre de face internes du domaine
+ * @return (long) le nombre de faces dans les Groupe_Faces du domaine
  */
-long Domaine::nb_groupes_internes() const
+long Domaine::nb_faces_groupes_faces() const
 {
-  return mes_groupes_internes_.nb_faces();
+  return mes_groupes_faces_.nb_faces();
 }
 
 /*! @brief Renvoie le nombre de sommets du domaine.
@@ -656,14 +668,14 @@ long Domaine::nb_faces_bords_int(long i) const
   return mes_bords_int_(i).nb_faces();
 }
 
-/*! @brief Renvoie le nombre de faces de la i-ieme liste de groupes internes
+/*! @brief Renvoie le nombre de faces de la i-ieme liste de groupes de faces
  *
- * @param (long i) le numero de la liste de groupes internes dont on veut connaitre le nombre de faces
- * @return (long i) le nombre de faces de la i-ieme liste de groupes internes
+ * @param (long i) le numero de la liste de groupes de faces dont on veut connaitre le nombre de faces
+ * @return (long i) le nombre de faces de la i-ieme liste de groupes de faces
  */
-long Domaine::nb_groupes_internes(long i) const
+long Domaine::nb_faces_groupes_faces(long i) const
 {
-  return mes_groupes_internes_(i).nb_faces();
+  return mes_groupes_faces_(i).nb_faces();
 }
 
 /*! @brief Renumerotation des noeuds: Le noeud de numero k devient le noeud de numero Les_Nums[k]
@@ -687,8 +699,8 @@ void Domaine::renum(const IntVect& Les_Nums)
     mes_faces_raccord_(i)->renum(Les_Nums);
   for (long i = 0; i < nb_frontieres_internes(); i++)
     mes_bords_int_(i).renum(Les_Nums);
-  for (long i = 0; i < nb_groupes_internes(); i++)
-    mes_groupes_internes_(i).renum(Les_Nums);
+  for (long i = 0; i < nb_groupes_faces(); i++)
+    mes_groupes_faces_(i).renum(Les_Nums);
 }
 
 /*! @brief Renumerotation des noeuds et des elements presents dans les items communs des joints Le noeud de numero k devient le noeud de numero Les_Nums[k]
@@ -824,8 +836,8 @@ void Domaine::correct_type_of_borders_after_merge()
   }
 
   {
-    // Les Groupes Internes :
-    auto& list = mes_groupes_internes_.get_stl_list();
+    // Les Groupes de faces:
+    auto& list = mes_groupes_faces_.get_stl_list();
     for (auto it = list.begin(); it != list.end(); ++it)
       {
         Frontiere& front = *it;
@@ -894,7 +906,7 @@ long Domaine::comprimer_joints()
   return 1;
 }
 
-/*! @brief Concatene les bords de meme nom et ceci pour: les bords, les bords periodiques, les bords internes et les groupes internes.
+/*! @brief Concatene les bords de meme nom et ceci pour: les bords, les bords periodiques, les bords internes et les groupes de faces.
  *
  */
 long Domaine::comprimer()
@@ -949,8 +961,8 @@ long Domaine::comprimer()
   }
 
   {
-    // Les Groupes Internes :
-    auto& list = mes_groupes_internes_.get_stl_list();
+    // Les Groupes de faces :
+    auto& list = mes_groupes_faces_.get_stl_list();
     for (auto it = list.begin(); it != list.end(); ++it)
       {
         Frontiere& front = *it;
@@ -1028,8 +1040,8 @@ void Domaine::merge_wo_vertices_with(Domaine& dom2)
   dom2.bords_int().associer_domaine(*this);
   bords_int().add(dom2.bords_int());
 
-  dom2.groupes_internes().associer_domaine(*this);
-  groupes_internes().add(dom2.groupes_internes());
+  dom2.groupes_faces().associer_domaine(*this);
+  groupes_faces().add(dom2.groupes_faces());
 
   correct_type_of_borders_after_merge();
   comprimer();
@@ -1052,9 +1064,10 @@ void Domaine::fill_from_list(std::list<Domaine*>& lst)
   for(auto& elem: lst)
     elem->comprimer();
 
+#ifndef NDEBUG
   Domaine& fst_dom = *lst.front();
   Nom typ_elem = fst_dom.type_elem()->que_suis_je();
-
+#endif
   for(auto& it: lst)
     {
       Domaine& dom2 = *it;
@@ -1077,7 +1090,7 @@ void Domaine::fill_from_list(std::list<Domaine*>& lst)
 
 /*! @brief Ecriture des noms des bords sur un flot de sortie
  *
- * Ecrit les noms des: bords, bords periodiques, raccords et groupes internes.
+ * Ecrit les noms des: bords, bords periodiques, raccords et groupes de faces.
  *
  * @param (Sortie& os) un flot de sortie
  */
@@ -1095,8 +1108,8 @@ void Domaine::ecrire_noms_bords(Sortie& os) const
   for (const auto &itr : mes_bords_int_)
     os << itr.le_nom() << finl;
 
-  // Les Groupes Internes :
-  for (const auto &itr : mes_groupes_internes_)
+  // Les Groupes de faces :
+  for (const auto &itr : mes_groupes_faces_)
     os << itr.le_nom() << finl;
 }
 
@@ -1145,14 +1158,14 @@ long Domaine::nb_faces_bords_int(Type_Face type) const
   return mes_bords_int_.nb_faces(type);
 }
 
-/*! @brief Renvoie le nombre de goupes de faces internes du type specifie
+/*! @brief Renvoie le nombre de goupes de faces du type specifie
  *
  * @param (Type_Face type) un type de face
- * @return (long) le nombre de groupes internes du type specifie
+ * @return (long) le nombre de groupes de faces du type specifie
  */
-long Domaine::nb_groupes_internes(Type_Face type) const
+long Domaine::nb_faces_groupes_faces(Type_Face type) const
 {
-  return mes_groupes_internes_.nb_faces(type);
+  return mes_groupes_faces_.nb_faces(type);
 }
 
 /*! @brief Renvoie le rang de l'element contenant le point dont les coordonnees sont specifiees.
@@ -1230,7 +1243,7 @@ long Domaine::rang_frontiere(const Nom& un_nom) const
       ++i;
     }
 
-  for (const auto &itr : mes_groupes_internes_)
+  for (const auto &itr : mes_groupes_faces_)
     {
       if (itr.le_nom() == un_nom)
         return i;
@@ -1269,18 +1282,14 @@ void Domaine::fixer_premieres_faces_frontiere()
       compteur += itr->nb_faces();
       Journal() << "Le raccord " << itr->le_nom() << " commence a la face : " << itr->num_premiere_face() << finl;
     }
-  for (auto &itr : mes_groupes_internes_)
-    {
-      itr.fixer_num_premiere_face(compteur);
-      compteur += itr.nb_faces();
-      Journal() << "Le groupe de faces internes " << itr.le_nom() << " commence a la face : " << itr.num_premiere_face() << finl;
-    }
   for (auto &itr : mes_faces_joint_)
     {
       itr.fixer_num_premiere_face(compteur);
       compteur += itr.nb_faces();
       Journal() << "Le joint " << itr.le_nom() << " commence a la face : " << itr.num_premiere_face() << finl;
     }
+  for (auto &itr : mes_groupes_faces_)
+    itr.fixer_num_premiere_face(-1);
 }
 
 // Construction du tableau elem_virt_pe_num_ a partir du tableau mes_elems
@@ -1980,6 +1989,7 @@ void Domaine::creer_mes_domaines_frontieres(const Domaine_VF& domaine_vf)
   const Nom expr_faces("1");
   long nb_frontieres = nb_front_Cl();
   domaines_frontieres_.vide();
+
   for (long i=0; i<nb_frontieres; i++)
     {
       // Nom de la frontiere
@@ -2393,10 +2403,11 @@ void Domaine::build_mc_face_mesh(const Domaine_dis_base& domaine_dis_base) const
   // Then we can simply identify cells by their nodal connectivity:
   DataArrayIdType * mP;
   mc_face_mesh_->areCellsIncludedIn(faces_tmp,2, mP);
-  DAId renum(mP);
+  // DAId renum(mP); //useful to automatically free memory allocated in mP
+  DAId renum2(mP->invertArrayN2O2O2N(nb_fac));
 #ifndef NDEBUG
   // All cells should be found:
-  DAId outliers = renum->findIdsNotInRange(0, nb_fac);
+  DAId outliers = renum2->findIdsNotInRange(0, nb_fac);
   if (outliers->getNumberOfTuples() != 0)
     Process::exit("Invalid renumbering arrays! Should not happen. Some faces could not be matched between the TRUST face domain and the buildDescendingConnectivity() version.");
 #endif
@@ -2407,10 +2418,11 @@ void Domaine::build_mc_face_mesh(const Domaine_dis_base& domaine_dis_base) const
   bool check = true;
 #endif
   // Apply the renumbering so that final mc_face_mesh_ has the same face number as in TRUST
-  mc_face_mesh_->renumberCells(renum->begin(), check);
+  mc_face_mesh_->renumberCells(renum2->begin(), check);
 #ifndef NDEBUG
   mc_face_mesh_->checkConsistency();
 #endif
+  mP->decrRef();
 #endif
 }
 
@@ -2431,7 +2443,7 @@ void Domaine::prepare_rmp_with(Domaine& other_domain)
   if (get_mc_mesh() == nullptr) build_mc_mesh();
   if (other_domain.get_mc_mesh() == nullptr) other_domain.build_mc_mesh();
 
-  Cerr << "Domaine_dis_base : building remapper between local mesh ( " << le_nom() << " ) with " << mc_mesh_->getNumberOfCells() << " cells, distant mesh ( " << other_domain.le_nom() << " ) with " << other_domain.get_mc_mesh()->getNumberOfCells() << " cells" << finl;
+  Cerr << "Building remapper between " << le_nom() << " (" << (long)mc_mesh_->getSpaceDimension() << "D) mesh with " << (long)mc_mesh_->getNumberOfCells() << " cells and " << other_domain.le_nom() << " (" << (long)other_domain.get_mc_mesh()->getSpaceDimension() << "D) mesh with " << (long)other_domain.get_mc_mesh()->getNumberOfCells() << " cells" << finl;
   rmps[&other_domain].prepare(other_domain.get_mc_mesh(), get_mc_mesh(), "P0P0");
   Cerr << "remapper prepared with " << rmps.at(&other_domain).getNumberOfColsOfMatrix() << " columns in matrix, with max value = " << rmps.at(&other_domain).getMaxValueInCrudeMatrix() << finl;
 #else

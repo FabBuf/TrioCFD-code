@@ -14,11 +14,11 @@
 *****************************************************************************/
 
 #include <Discretisation_base.h>
-#include <Mod_turb_hyd_base.h>
+#include <Modele_turbulence_hyd_base.h>
 #include <Turbulence_paroi.h>
 #include <Equation_base.h>
 
-Implemente_instanciable(Turbulence_paroi,"Turbulence_paroi",DERIV(Turbulence_paroi_base));
+Implemente_instanciable(Turbulence_paroi, "Turbulence_paroi", DERIV(Turbulence_paroi_base));
 
 Sortie& Turbulence_paroi::printOn(Sortie& s) const
 {
@@ -55,28 +55,27 @@ Entree& Turbulence_paroi::readOn(Entree& s)
       Cerr << finl;
       exit();
     }
-  typ+="_";
+  typ += "_";
 
-  Nom discr=eqn.discretisation().que_suis_je();
+  Nom discr = eqn.discretisation().que_suis_je();
 
   //  les operateurs de diffusion sont communs aux discretisations VEF et VEFP1B
-  if(discr=="VEFPreP1B") discr="VEF";
+  if (discr == "VEFPreP1B") discr = "VEF";
   if (discr=="VDF+") discr="VDF"; // EB
-  typ+=discr;
+  typ += discr;
 
-  Cerr<<"et typage :"<<typ<<finl;
+  Cerr << "et typage :" << typ << finl;
   DERIV(Turbulence_paroi_base)::typer(typ);
   valeur().associer_modele(mon_modele_turb_hyd.valeur());
-  valeur().associer(eqn.domaine_dis(),eqn.domaine_Cl_dis());
+  valeur().associer(eqn.domaine_dis(), eqn.domaine_Cl_dis());
   return s;
 }
 
-
 /*! @brief Associe un modele de turbulence a l'objet.
  *
- * @param (Mod_turb_hyd_base& le_modele) le modele de turbulence hydraulique a associer a l'objet
+ * @param (Modele_turbulence_hyd_base& le_modele) le modele de turbulence hydraulique a associer a l'objet
  */
-void Turbulence_paroi::associer_modele(const Mod_turb_hyd_base& mod)
+void Turbulence_paroi::associer_modele(const Modele_turbulence_hyd_base& mod)
 {
   mon_modele_turb_hyd = mod;
 }

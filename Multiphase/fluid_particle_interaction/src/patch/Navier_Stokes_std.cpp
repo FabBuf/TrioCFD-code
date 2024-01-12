@@ -1101,6 +1101,9 @@ void Navier_Stokes_std::mettre_a_jour(double temps)
     le_traitement_particulier.post_traitement_particulier();
   Debog::verifier("Navier_Stokes_std::mettre_a_jour : pression", la_pression.valeurs());
   Debog::verifier("Navier_Stokes_std::mettre_a_jour : vitesse", la_vitesse.valeurs());
+
+  if (la_vorticite.non_nul()) la_vorticite.mettre_a_jour(temps);
+
 }
 
 double Navier_Stokes_std::LocalFlowRateRelativeError() const
@@ -1437,7 +1440,7 @@ const Champ_base& Navier_Stokes_std::get_champ(const Motcle& nom) const
     {
       if (la_vorticite.est_nul())  throw Champs_compris_erreur();
       Champ_Fonc_base& ch=ref_cast_non_const(Champ_Fonc_base,la_vorticite.valeur());
-      if (((ch.temps()!=la_vitesse->temps()) || (ch.temps()==temps_init)) && (la_vitesse->mon_equation_non_nul()))
+      if ((ch.temps()==temps_init) && (la_vitesse->mon_equation_non_nul()))
         ch.mettre_a_jour(la_vitesse->temps());
       return champs_compris_.get_champ(nom);
     }
@@ -1513,7 +1516,7 @@ const Champ_base& Navier_Stokes_std::get_champ(const Motcle& nom) const
     {
       return Equation_base::get_champ(nom);
     }
-  catch (Champs_compris_erreur& err_)
+  catch (Champs_compris_erreur&)
     {
     }
 
@@ -1522,7 +1525,7 @@ const Champ_base& Navier_Stokes_std::get_champ(const Motcle& nom) const
       {
         return le_traitement_particulier->get_champ(nom);
       }
-    catch (Champs_compris_erreur& err_)
+    catch (Champs_compris_erreur&)
       {
       }
   throw Champs_compris_erreur();
@@ -1639,7 +1642,7 @@ static void construire_matrice_implicite(Operateur_base& op,
     }
 }
 
-/* dans PolyMAC, le gradient contribue a la matrice de l'equation de N-S */
+/* dans PolyMAC_P0P1NC, le gradient contribue a la matrice de l'equation de N-S */
 void Navier_Stokes_std::dimensionner_matrice_sans_mem(Matrice_Morse& matrice)
 {
   Equation_base::dimensionner_matrice_sans_mem(matrice);
