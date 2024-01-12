@@ -291,8 +291,8 @@ Eval_Conv_VDF_Face<DERIVED_T>::flux_arete(const DoubleTab& inco, const DoubleTab
       if (DERIVED_T::IS_AXI) return;
       else
         {
-          flux_arete < Type_Flux_Arete::INTERNE > (inco, a_r, fac1, fac2, fac3, fac4, flux3_4);
-          flux_arete < Type_Flux_Arete::INTERNE > (inco, a_r, fac3, fac4, fac1, fac2, flux1_2);
+          flux_arete < Type_Flux_Arete::INTERNE > (inco, a_r, num_arete, fac1, fac2, fac3, fac4, flux3_4);
+          flux_arete < Type_Flux_Arete::INTERNE > (inco, a_r, num_arete, fac3, fac4, fac1, fac2, flux1_2);
           return;
         }
     }
@@ -468,7 +468,7 @@ Eval_Conv_VDF_Face<DERIVED_T>::coeffs_fa7(const DoubleTab* a_r, long num_elem, l
 }
 
 template <typename DERIVED_T> template<Type_Flux_Arete Arete_Type, typename Type_Double> inline
-enable_if_t_<Arete_Type == Type_Flux_Arete::INTERNE || Arete_Type == Type_Flux_Arete::MIXTE || Arete_Type == Type_Flux_Arete::PERIODICITE, void>
+enable_if_t_<Arete_Type == Type_Flux_Arete::INTERNE || Arete_Type == Type_Flux_Arete::INTERNE_FT || Arete_Type == Type_Flux_Arete::MIXTE || Arete_Type == Type_Flux_Arete::PERIODICITE, void>
 Eval_Conv_VDF_Face<DERIVED_T>::coeffs_arete(const DoubleTab* a_r, long num_arete, long fac1, long fac2 , long fac3, long fac4, Type_Double& aii, Type_Double& ajj) const
 {
   assert(aii.size_array() == ajj.size_array());

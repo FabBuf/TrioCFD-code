@@ -35,7 +35,18 @@ public:
     assert(ref_diffusivite_.non_nul());
     return ref_diffusivite_.valeur();
   }
-
+  inline void associer_indicatrices(const DoubleTab& indic_elem, const DoubleVect& indic_arete)
+  {
+    indicatrice_elem_.ref(indic_elem);
+    indicatrice_arete_.ref(indic_arete);
+    is_solid_particle_=1;
+  }
+  inline void associer_proprietes_fluide(const long formule_mu, const double mu_particule, const double mu_fluide)
+  {
+    formule_mu_=formule_mu;
+    mu_solide_=mu_particule;
+    mu_fluide_=mu_fluide;
+  }
   inline virtual void associer_pb(const Probleme_base& pb) final
   {
     ref_probleme_ = pb;
@@ -87,8 +98,44 @@ public:
 
   inline double nu_2_impl_face(long i, long j, long k, long l, long compo) const
   {
-    return 0.25 * (tab_diffusivite_(is_var_ * i, compo) + tab_diffusivite_(is_var_ * j, compo) + tab_diffusivite_(is_var_ * k, compo) + tab_diffusivite_(is_var_ * l, compo));
+    if (is_solid_particle_==1)
+      {
+        double indicArete = 0.25 * (indicatrice_elem_[i] + indicatrice_elem_[j]
+                                    + indicatrice_elem_[k] + indicatrice_elem_[l]);
+        double myViscLam=0.;
+        switch (formule_mu_)
+          {
+          case 0: // standard default : fluid viscosity
+          case 3: // staircase average
+            {
+              myViscLam = (indicArete ==0) ?  mu_solide_ : mu_fluide_;
+            }
+            break;
+          case 1: // Arithmetic average
+            {
+              myViscLam = mu_solide_ + indicArete * (mu_fluide_ - mu_solide_);
+            }
+            break;
+          case 2: // Harmonic average
+            {
+              myViscLam = (mu_solide_ * mu_fluide_) / (mu_fluide_ - indicArete * (mu_fluide_ - mu_solide_));
+            }
+            break;
+          default:
+            {
+              Cerr << "The method specified for formule_mu in not recognized. \n" << finl;
+              Cerr << "you can choose : standard, arithmetic or harmonic. \n" << finl;
+              //Cerr << "We should not be here Navier_Stokes_FT_Disc::FT_disc_calculer_champs_rho_mu_nu_dipha" << finl;
+              Process::exit();
+            }
+
+          }
+        return myViscLam; // fin EB
+      }
+    else {return 0.25 * (tab_diffusivite_(is_var_ * i, compo) + tab_diffusivite_(is_var_ * j, compo) + tab_diffusivite_(is_var_ * k, compo) + tab_diffusivite_(is_var_ * l, compo));}
+
   }
+
 
   inline double nu_lam_impl_face(long i, long j, long k, long l, long compo) const { return nu_2_impl_face(i, j, k, l, compo); }
   inline double nu_lam_impl_face2(long i, long j, long compo) const { return nu_1_impl_face(i, j, compo); }
@@ -149,7 +196,7 @@ protected:
   double mu_solide_;
   double mu_fluide_;
   long 	 formule_mu_;
-  long   is_solid_particle_;
+  long   is_solid_particle_=0;
 };
 
 #endif /* Eval_Diff_VDF_included */

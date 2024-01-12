@@ -1,0 +1,18 @@
+  const IntTab& sommet_face() const;       // pour postraitement uniquement // EB
+  const ArrOfInt& sommet_face_bord() const;  // pour postraitement uniquement
+  inline long sommet_face_bord(long i) const;
+  void update_sommet_face(); // EB
+  //idem, mais rend le sommet interne (sommet_face_bord_=-1)
+  //		 - sommet_face_ // EB
+  //             - sommet_face_bord_
+  // EB : on a besoin d'un sommet_face_ pour le calcul de l'indicatrice aux faces
+  // Par definition, le sommet m'appartient ssi sommet_face_ >= 0
+  // (si sommet_face_ < 0, le sommet est virtuel)
+  IntTabFT sommet_face_;
+  ArrOfIntFT sommet_face_bord_;
+//  sommet_face_[i]. On garantit qu'un sommet est reel sur exactement un
+inline long Maillage_FT_Disc::sommet_virtuel_face(long i) const { return (sommet_face_[i] < 0) ? 1 : 0 ; }
+  return (sommet_face_bord_[i] >= 0) ? 1 : 0;
+inline long Maillage_FT_Disc::sommet_face_bord(long i) const
+  return sommet_face_bord_[i];
+  return (sommet_face_[sommet] < 0) ? 1 : 0;

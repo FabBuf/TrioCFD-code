@@ -951,4 +951,3 @@ void Domaine::creer_structure_parallelle_aretes(const long nb_aretes_reelles, In
   Les_Aretes_som.set_md_vector(md);
 // Scatter::calculer_renum_items_communs(mes_aretes_joint, Joint::ARETE);
 }
-

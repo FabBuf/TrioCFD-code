@@ -210,6 +210,7 @@ long Marching_Cubes::construire_iso(const DoubleVect& valeurs_sommets,
         maillage.sommet_PE_owner_. resize_array(nb_sommets);
         maillage.sommet_num_owner_.resize_array(nb_sommets);
         maillage.sommet_elem_.     resize_array(nb_sommets);
+        maillage.sommet_face_.     resize(nb_sommets,dimension); // EB
         maillage.sommet_face_bord_.resize_array(nb_sommets);
         maillage.drapeaux_sommets_.resize_array(nb_sommets);
 

@@ -996,7 +996,7 @@ void Maillage_FT_Disc::calcul_indicatrice(DoubleVect& indicatrice,
   // Calcul de l'indicatrice au voisinage de l'interface a l'aide
   // de la fonction distance.
   // Il reste dans elements_calcules[i] == 0 les voisins de l'interface
-  /*
+
   {
     const DoubleTab& distance = equation_transport().get_update_distance_interface().valeurs();
     long i;
@@ -1028,7 +1028,7 @@ void Maillage_FT_Disc::calcul_indicatrice(DoubleVect& indicatrice,
         Cerr << "[" << me() << "] calcul_indicatrice : error_count = " << error_count << finl;
       }
   }
-  */
+
   indicatrice.echange_espace_virtuel();
 
   // Certains elements ont une indicatrice erronee (error_count).
@@ -7252,7 +7252,8 @@ void Maillage_FT_Disc::nettoyer_maillage()
             if (dimension3)
               sommets_(n, 2) = sommets_(i, 2);
             sommet_elem_[n] = sommet_elem_[i];
-            for (long dim=0; dim<dimension; dim++) sommet_face_(n,dim) = sommet_face_(i,dim); // EB
+            if(i<sommet_face_.dimension(0) && n <sommet_face_.dimension(0))
+              for (long dim=0; dim<dimension; dim++) sommet_face_(n,dim) = sommet_face_(i,dim); // EB
             sommet_face_bord_[n] = sommet_face_bord_[i];
             sommet_PE_owner_[n] = sommet_PE_owner_[i];
             drapeaux_sommets_[n] = drapeaux_sommets_[i];
@@ -7497,7 +7498,8 @@ void Maillage_FT_Disc::nettoyer_noeuds_virtuels_et_frontieres()
             if (dimension3)
               sommets_(n, 2) = sommets_(i, 2);
             sommet_elem_[n] = sommet_elem_[i];
-            for (long dim=0; dim<dimension; dim++) sommet_face_(n,dim) = sommet_face_(i,dim); // EB
+            if(sommet_face_.dimension(0)>0 && sommet_face_.dimension(1)>0 )
+              for (long dim=0; dim<dimension; dim++) sommet_face_(n,dim) = sommet_face_(i,dim); // EB
             sommet_face_bord_[n] = sommet_face_bord_[i];
             sommet_PE_owner_[n] = sommet_PE_owner_[i];
             drapeaux_sommets_[n] = drapeaux_sommets_[i];

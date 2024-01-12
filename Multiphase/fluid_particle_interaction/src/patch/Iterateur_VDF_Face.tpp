@@ -120,7 +120,7 @@ Iterateur_VDF_Face<_TYPE_>::ajouter_blocs_aretes_bords_(const long n_arete, cons
                              &ref_cast(Pb_Multiphase,op_base->equation().probleme()).eq_masse.champ_conserve().valeurs();
 
       // second membre
-      flux_evaluateur.template flux_arete < Arete_Type > (inco, a_r, fac1, fac2, fac3, signe, flux);
+      flux_evaluateur.template flux_arete < Arete_Type > (inco, a_r, n_arete, fac1, fac2, fac3, signe, flux);
       for (long k = 0; k < ncomp; k++)
         {
           secmem(fac3, k) += signe * flux[k];
@@ -135,7 +135,7 @@ Iterateur_VDF_Face<_TYPE_>::ajouter_blocs_aretes_bords_(const long n_arete, cons
       Matrice_Morse *matrice = (is_pb_multi && is_conv_op_) ? (mats.count(nom_ch_inco_) && !semi_impl.count(nom_ch_inco_) ? mats.at(nom_ch_inco_) : nullptr) : (mats.count(nom_ch_inco_) ? mats.at(nom_ch_inco_) : nullptr);
       if (matrice)
         {
-          flux_evaluateur.template coeffs_arete < Arete_Type > (a_r, fac1, fac2, fac3, signe, aii1_2, aii3_4, ajj1_2);
+          flux_evaluateur.template coeffs_arete < Arete_Type > (a_r, n_arete, fac1, fac2, fac3, signe, aii1_2, aii3_4, ajj1_2);
           for (long i = 0; i < ncomp; i++)
             fill_coeff_matrice_morse < Type_Double > (fac3, i, ncomp, signe, aii3_4, *matrice);
         }
@@ -158,7 +158,7 @@ Iterateur_VDF_Face<_TYPE_>::ajouter_blocs_aretes_bords_(const long n_arete, cons
                              &ref_cast(Pb_Multiphase,op_base->equation().probleme()).eq_masse.champ_conserve().valeurs();
 
       // second membre
-      flux_evaluateur.template flux_arete < Arete_Type > (inco, a_r, fac1, fac2, fac3, signe, flux3, flux1_2);
+      flux_evaluateur.template flux_arete < Arete_Type > (inco, a_r, n_arete, fac1, fac2, fac3, signe, flux3, flux1_2);
       for (long k = 0; k < ncomp; k++)
         secmem(fac3, k) += signe * flux3[k];
 
@@ -177,7 +177,7 @@ Iterateur_VDF_Face<_TYPE_>::ajouter_blocs_aretes_bords_(const long n_arete, cons
       Matrice_Morse *matrice = (is_pb_multi && is_conv_op_) ? (mats.count(nom_ch_inco_) && !semi_impl.count(nom_ch_inco_) ? mats.at(nom_ch_inco_) : nullptr) : (mats.count(nom_ch_inco_) ? mats.at(nom_ch_inco_) : nullptr);
       if (matrice)
         {
-          flux_evaluateur.template coeffs_arete < Arete_Type > (a_r, fac1, fac2, fac3, signe, aii1_2, aii3_4, ajj1_2);
+          flux_evaluateur.template coeffs_arete < Arete_Type > (a_r, n_arete, fac1, fac2, fac3, signe, aii1_2, aii3_4, ajj1_2);
           for (long i = 0; i < ncomp; i++)
             {
               fill_coeff_matrice_morse < Type_Double > (fac3, i, ncomp, signe, aii3_4, *matrice);
@@ -200,7 +200,7 @@ Iterateur_VDF_Face<_TYPE_>::ajouter_blocs_aretes_bords_(const long n_arete, cons
 
 
       // second membre
-      flux_evaluateur.template flux_arete < Arete_Type > (inco, nullptr, fac1, fac2, fac3, fac4, flux3_4, flux1_2);
+      flux_evaluateur.template flux_arete < Arete_Type > (inco, nullptr, n_arete, fac1, fac2, fac3, fac4, flux3_4, flux1_2);
       for (long k = 0; k < ncomp; k++)
         {
           secmem(fac3, k) += 0.5 * flux3_4[k];
@@ -213,11 +213,11 @@ Iterateur_VDF_Face<_TYPE_>::ajouter_blocs_aretes_bords_(const long n_arete, cons
       Matrice_Morse *matrice = (is_pb_multi && is_conv_op_) ? (mats.count(nom_ch_inco_) && !semi_impl.count(nom_ch_inco_) ? mats.at(nom_ch_inco_) : nullptr) : (mats.count(nom_ch_inco_) ? mats.at(nom_ch_inco_) : nullptr);
       if (matrice)
         {
-          flux_evaluateur.template coeffs_arete < Arete_Type > (nullptr, fac3, fac4, fac1, fac2, aii, ajj);
+          flux_evaluateur.template coeffs_arete < Arete_Type > (nullptr, n_arete, fac3, fac4, fac1, fac2, aii, ajj);
           for (long i = 0; i < ncomp; i++)
             fill_coeff_matrice_morse(fac1, fac2, i, ncomp, aii, ajj, *matrice);
 
-          flux_evaluateur.template coeffs_arete < Arete_Type > (nullptr, fac1, fac2, fac3, fac4, aii, ajj);
+          flux_evaluateur.template coeffs_arete < Arete_Type > (nullptr, n_arete, fac1, fac2, fac3, fac4, aii, ajj);
           for (long i = 0; i < ncomp; i++)
             {
               aii[i] *= 0.5;
@@ -276,7 +276,7 @@ Iterateur_VDF_Face<_TYPE_>::ajouter_blocs_aretes_coins_(const long n_arete, cons
                              &ref_cast(Pb_Multiphase,op_base->equation().probleme()).eq_masse.champ_conserve().valeurs();
 
       // second membre
-      flux_evaluateur.template flux_arete < Arete_Type > (inco, a_r, fac1, fac2, fac3, signe, flux);
+      flux_evaluateur.template flux_arete < Arete_Type > (inco, a_r, n_arete, fac1, fac2, fac3, signe, flux);
       for (long k = 0; k < ncomp; k++)
         {
           secmem(fac3, k) += signe * flux[k];
@@ -293,7 +293,7 @@ Iterateur_VDF_Face<_TYPE_>::ajouter_blocs_aretes_coins_(const long n_arete, cons
       Matrice_Morse *matrice = (is_pb_multi && is_conv_op_) ? (mats.count(nom_ch_inco_) && !semi_impl.count(nom_ch_inco_) ? mats.at(nom_ch_inco_) : nullptr) : (mats.count(nom_ch_inco_) ? mats.at(nom_ch_inco_) : nullptr);
       if (matrice)
         {
-          flux_evaluateur.template coeffs_arete < Arete_Type > (a_r, fac1, fac2, fac3, signe, aii1_2, aii3_4, ajj1_2);
+          flux_evaluateur.template coeffs_arete < Arete_Type > (a_r, n_arete, fac1, fac2, fac3, signe, aii1_2, aii3_4, ajj1_2);
           for (long i = 0; i < ncomp; i++)
             fill_coeff_matrice_morse(fac3, i, ncomp, signe, aii3_4, *matrice);
         }
@@ -315,7 +315,7 @@ Iterateur_VDF_Face<_TYPE_>::ajouter_blocs_aretes_coins_(const long n_arete, cons
                              &ref_cast(Pb_Multiphase,op_base->equation().probleme()).eq_masse.champ_conserve().valeurs();
 
       // second membre
-      flux_evaluateur.template flux_arete < Arete_Type > (inco, a_r, fac1, fac2, fac3, signe, flux3, flux1_2);
+      flux_evaluateur.template flux_arete < Arete_Type > (inco, a_r, n_arete, fac1, fac2, fac3, signe, flux3, flux1_2);
       for (long k = 0; k < ncomp; k++)
         {
           secmem(fac3, k) += signe * flux3[k];
@@ -327,7 +327,7 @@ Iterateur_VDF_Face<_TYPE_>::ajouter_blocs_aretes_coins_(const long n_arete, cons
       Matrice_Morse *matrice = (is_pb_multi && is_conv_op_) ? (mats.count(nom_ch_inco_) && !semi_impl.count(nom_ch_inco_) ? mats.at(nom_ch_inco_) : nullptr) : (mats.count(nom_ch_inco_) ? mats.at(nom_ch_inco_) : nullptr);
       if (matrice)
         {
-          flux_evaluateur.template coeffs_arete < Arete_Type > (a_r, fac1, fac2, fac3, signe, aii1_2, aii3_4, ajj1_2);
+          flux_evaluateur.template coeffs_arete < Arete_Type > (a_r, n_arete, fac1, fac2, fac3, signe, aii1_2, aii3_4, ajj1_2);
 
           for (long i = 0; i < ncomp; i++)
             {
@@ -349,7 +349,7 @@ Iterateur_VDF_Face<_TYPE_>::ajouter_blocs_aretes_coins_(const long n_arete, cons
       const DoubleTab& inco = semi_impl.count(nom_ch_inco_) ? semi_impl.at(nom_ch_inco_) : le_champ_convecte_ou_inc->valeurs();
 
       // second membre
-      flux_evaluateur.template flux_arete < Arete_Type > (inco, nullptr, fac1, fac2, fac3, fac4, flux3_4, flux1_2);
+      flux_evaluateur.template flux_arete < Arete_Type > (inco, nullptr, n_arete, fac1, fac2, fac3, fac4, flux3_4, flux1_2);
       for (long k = 0; k < ncomp; k++)
         {
           secmem(fac3, k) += 0.5 * flux3_4[k];
@@ -362,11 +362,11 @@ Iterateur_VDF_Face<_TYPE_>::ajouter_blocs_aretes_coins_(const long n_arete, cons
       Matrice_Morse *matrice = (is_pb_multi && is_conv_op_) ? (mats.count(nom_ch_inco_) && !semi_impl.count(nom_ch_inco_) ? mats.at(nom_ch_inco_) : nullptr) : (mats.count(nom_ch_inco_) ? mats.at(nom_ch_inco_) : nullptr);
       if (matrice)
         {
-          flux_evaluateur.template coeffs_arete < Arete_Type > (nullptr, fac3, fac4, fac1, fac2, aii, ajj);
+          flux_evaluateur.template coeffs_arete < Arete_Type > (nullptr, n_arete, fac3, fac4, fac1, fac2, aii, ajj);
           for (long i = 0; i < ncomp; i++)
             fill_coeff_matrice_morse < Type_Double > (fac1, fac2, i, ncomp, aii, ajj, *matrice);
 
-          flux_evaluateur.template coeffs_arete < Arete_Type > (nullptr, fac1, fac2, fac3, fac4, aii, ajj);
+          flux_evaluateur.template coeffs_arete < Arete_Type > (nullptr, n_arete, fac1, fac2, fac3, fac4, aii, ajj);
           for (long i = 0; i < ncomp; i++)
             fill_coeff_matrice_morse < Type_Double > (fac3, fac4, i, ncomp, aii, ajj, *matrice);
         }
@@ -379,9 +379,11 @@ Iterateur_VDF_Face<_TYPE_>::ajouter_blocs_aretes_coins_(const long n_arete, cons
 template<class _TYPE_> template <typename Type_Double>
 void Iterateur_VDF_Face<_TYPE_>::ajouter_blocs_aretes_internes(const long ncomp, matrices_t mats, DoubleTab& secmem, const tabs_t& semi_impl) const
 {
-  if(!_TYPE_::CALC_ARR_INT) return; /* do nothing */
-
-  ajouter_blocs_aretes_generique_<true, Type_Flux_Arete::INTERNE, Type_Double>(premiere_arete_interne, derniere_arete_interne, ncomp, mats, secmem, semi_impl);
+  if(!_TYPE_::CALC_ARR_INT ) return; /* do nothing */
+  if (!_TYPE_::CALC_ARR_INT_FT)
+    ajouter_blocs_aretes_generique_<true, Type_Flux_Arete::INTERNE, Type_Double>(premiere_arete_interne, derniere_arete_interne, ncomp, mats, secmem, semi_impl);
+  else
+    ajouter_blocs_aretes_generique_<true, Type_Flux_Arete::INTERNE_FT, Type_Double>(premiere_arete_interne, derniere_arete_interne, ncomp, mats, secmem, semi_impl);
 }
 
 template<class _TYPE_> template <typename Type_Double>
@@ -393,7 +395,7 @@ void Iterateur_VDF_Face<_TYPE_>::ajouter_blocs_aretes_mixtes(const long ncomp, m
 }
 
 template <class _TYPE_> template <bool should_calc_flux, Type_Flux_Arete Arete_Type, typename Type_Double>
-enable_if_t_<Arete_Type == Type_Flux_Arete::INTERNE || Arete_Type == Type_Flux_Arete::INTERNE_FT || Arete_Type == Type_Flux_Arete::MIXTE, void>
+enable_if_t_<Arete_Type == Type_Flux_Arete::INTERNE || Arete_Type == Type_Flux_Arete::INTERNE_FT || Arete_Type == Type_Flux_Arete::MIXTE, void> //|| Arete_Type == Type_Flux_Arete::INTERNE_FT
 Iterateur_VDF_Face<_TYPE_>::ajouter_blocs_aretes_generique_(const long debut, const long fin, const long ncomp, matrices_t mats, DoubleTab& secmem, const tabs_t& semi_impl) const
 {
   // XXX : tab_flux_bords rempli seulement si MIXTE ... ie pas INTERNE !
@@ -413,7 +415,7 @@ Iterateur_VDF_Face<_TYPE_>::ajouter_blocs_aretes_generique_(const long debut, co
           flux = 0.;
           const long fac1 = Qdm(n_arete, 0), fac2 = Qdm(n_arete, 1), fac3 = Qdm(n_arete, 2), fac4 = Qdm(n_arete, 3);
           const long n = le_dom->nb_faces_bord(), n2 = le_dom->nb_faces_tot(); /* GF pour assurer bilan seq = para */
-          flux_evaluateur.template flux_arete < Arete_Type > (inco, a_r, fac1, fac2, fac3, fac4, flux);
+          flux_evaluateur.template flux_arete < Arete_Type > (inco, a_r, n_arete, fac1, fac2, fac3, fac4, flux);
           fill_resu_tab < Type_Double > (fac3, fac4, ncomp, flux, secmem);
 
           if (is_MIXTE)
@@ -436,7 +438,7 @@ Iterateur_VDF_Face<_TYPE_>::ajouter_blocs_aretes_generique_(const long debut, co
                 }
             }
 
-          flux_evaluateur.template flux_arete < Arete_Type > (inco, a_r, fac3, fac4, fac1, fac2, flux);
+          flux_evaluateur.template flux_arete < Arete_Type > (inco, a_r, n_arete, fac3, fac4, fac1, fac2, flux);
           fill_resu_tab < Type_Double > (fac1, fac2, ncomp, flux, secmem);
           if (is_MIXTE)
             {
@@ -467,11 +469,11 @@ Iterateur_VDF_Face<_TYPE_>::ajouter_blocs_aretes_generique_(const long debut, co
             aii = 0., ajj = 0.;
             const long fac1 = Qdm(n_arete, 0), fac2 = Qdm(n_arete, 1), fac3 = Qdm(n_arete, 2), fac4 = Qdm(n_arete, 3);
 
-            flux_evaluateur.template coeffs_arete < Arete_Type > (a_r, fac3, fac4, fac1, fac2, aii, ajj);
+            flux_evaluateur.template coeffs_arete < Arete_Type > (a_r, n_arete, fac3, fac4, fac1, fac2, aii, ajj);
             for (long i = 0; i < ncomp; i++)
               fill_coeff_matrice_morse < Type_Double > (fac1, fac2, i, ncomp, aii, ajj, *matrice);
 
-            flux_evaluateur.template coeffs_arete < Arete_Type > (a_r, fac1, fac2, fac3, fac4, aii, ajj);
+            flux_evaluateur.template coeffs_arete < Arete_Type > (a_r, n_arete, fac1, fac2, fac3, fac4, aii, ajj);
             for (long i = 0; i < ncomp; i++)
               fill_coeff_matrice_morse < Type_Double > (fac3, fac4, i, ncomp, aii, ajj, *matrice);
           }

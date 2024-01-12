@@ -15,13 +15,15 @@
 #include <Pave.h>
 #include <Particule_Solide.h>
 #include <Fluide_Diphasique.h>
-#include <Transport_Interfaces_FT_Disc.h>
+//#include <Transport_Interfaces_FT_Disc.h>
 #include <Domaine_VF.h>
+#include <Domaine_VDF.h>
 #include <MD_Vector.h>
 #include <Domaine.h>
 #include <TRUSTTabFT.h>
 class Param;
 class Maillage_FT_Disc;
+class Transport_Interfaces_FT_Disc;
 // ====================================================================
 // .DESCRIPTION        : class Modele_Collision_FT
 //  Cette classe implemente le calcul de la force de contact

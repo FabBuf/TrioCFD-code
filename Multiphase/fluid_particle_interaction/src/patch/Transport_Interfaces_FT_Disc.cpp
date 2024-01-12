@@ -1417,7 +1417,7 @@ Entree& Transport_Interfaces_FT_Disc::lire_cond_init(Entree& is)
 {
   if (Process::je_suis_maitre())
     Cerr << "Reading initial condition" << finl;
-  Motcles motcles(4);
+  Motcles motcles(5);
   motcles[0] = "fonction";
   motcles[1] = "fichier_geom";
   motcles[2] = "fonction_ignorer_collision";
@@ -8215,7 +8215,7 @@ void Transport_Interfaces_FT_Disc::transporter_sans_changement_topologie(DoubleT
   maillage.changer_temps(temps);
   indicatrice_.valeurs()=get_update_indicatrice().valeurs();
   variables_internes_->indicatrice_cache.changer_temps(temps);
-  indicatrice_.valeurs()=get_compute_indicatrice_faces().valeurs();
+  indicatrice_faces_.valeurs()=get_compute_indicatrice_faces().valeurs();
   variables_internes_->indicatrice_face_cache.changer_temps(temps);
   indicatrice_.changer_temps(temps);
   get_update_distance_interface();

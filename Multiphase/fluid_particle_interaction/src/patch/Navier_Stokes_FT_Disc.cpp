@@ -32,6 +32,7 @@
 #include <Schema_Temps_base.h>
 #include <Domaine_VDF.h>
 #include <Debog.h>
+#include <Op_Dift_VDF_Face_leaves.h>
 // Ces includes seront a retirer quand on aura clairement separe les operations
 // specifiques au VDF et VEF
 #include <Domaine_VF.h>
@@ -73,6 +74,7 @@
 #include <iomanip>
 #include <SFichier.h>
 #include <EFichier.h>
+#include <sys/stat.h>
 // fin EB
 // #include <chrono>
 // using namespace std::chrono;
@@ -874,15 +876,28 @@ void ouvrir_fichier(SFichier& os,const Nom& type, const long& flag, const Navier
   // flag nul on n'ouvre pas le fichier
   if (flag==0)
     return ;
+  long rang = -1;
   Nom fichier=Objet_U::nom_du_cas();
   if (type=="forces_particule")
-    fichier+="_Forces_Particule_";
+    {
+      fichier+="_Forces_Particule_";
+      rang = 0;
+    }
   else if( type=="forces_particule_th" )
-    fichier+= "_Forces_Particule_theoriques_";
+    {
+      fichier+= "_Forces_Particule_theoriques_";
+      rang = 1;
+    }
   else if (type=="forces_particule_lit")
-    fichier+= "_Forces_Particules_Lit_";
+    {
+      fichier+= "_Forces_Particules_Lit_";
+      rang = 2;
+    }
   else if (type=="liste_collision")
-    fichier+= "_Liste_Collision_Lit_";
+    {
+      fichier+= "_Liste_Collision_Lit_";
+      rang = 3;
+    }
 
 
   else
@@ -898,7 +913,7 @@ void ouvrir_fichier(SFichier& os,const Nom& type, const long& flag, const Navier
   // On cree le fichier a la premiere impression avec l'en tete ou si le fichier n'existe pas
 
   struct stat f;
-  const long rang=fichiers.search(type);
+  //const long rang=fichier.search(type);
   if (stat(fichier,&f) && (sch.nb_impr_fpi()==1 && !equation.probleme().reprise_effectuee()))
     {
       os.ouvrir(fichier,ios::app);
@@ -976,11 +991,6 @@ long Navier_Stokes_FT_Disc::impr_fpi(Sortie& os) const
             {
               if (Process::je_suis_maitre())
                 {
-
-                  const DoubleTab& force_pression_tot_interf=get_force_tot_pression_interf(); // EB
-                  const DoubleTab& force_frottements_tot_interf=get_force_tot_frottements_interf(); // EB
-                  const DoubleVect& surface_tot_interf=get_surface_tot_interf();
-
                   const DoubleTab& force_pression_tot_interf=get_force_tot_pression_interf(); // EB
                   const DoubleTab& force_frottements_tot_interf=get_force_tot_frottements_interf(); // EB
                   const DoubleVect& surface_tot_interf=get_surface_tot_interf();
@@ -993,7 +1003,8 @@ long Navier_Stokes_FT_Disc::impr_fpi(Sortie& os) const
                   if (nb_compo<dim_max_impr)
                     {
                       SFichier Force_Particule;
-                      ouvrir_fichier(Force_Particule,"forces_particule",1,*this);
+                      const Navier_Stokes_FT_Disc& mon_eq = *this;
+                      ouvrir_fichier(Force_Particule,"forces_particule",1,mon_eq);
                       schema_temps().imprimer_temps_courant(Force_Particule);
 
                       for (long compo=0; compo<nb_compo; compo++)
@@ -1010,7 +1021,8 @@ long Navier_Stokes_FT_Disc::impr_fpi(Sortie& os) const
                   else
                     {
                       SFichier Forces_Particule_Lit;
-                      ouvrir_fichier(Forces_Particule_Lit,"forces_particule_lit",1,*this);
+                      const Navier_Stokes_FT_Disc& mon_eq = *this;
+                      ouvrir_fichier(Forces_Particule_Lit,"forces_particule_lit",1,mon_eq);
                       Forces_Particule_Lit << "TIME ";
                       schema_temps().imprimer_temps_courant(Forces_Particule_Lit);
                       Forces_Particule_Lit << finl;
@@ -1045,7 +1057,8 @@ long Navier_Stokes_FT_Disc::impr_fpi(Sortie& os) const
                       if (nb_compo<dim_max_impr)
                         {
                           SFichier Force_Particule_th;
-                          ouvrir_fichier(Force_Particule_th,"forces_particule_th",1,*this);
+                          const Navier_Stokes_FT_Disc& mon_eq = *this;
+                          ouvrir_fichier(Force_Particule_th,"forces_particule_th",1,mon_eq);
                           schema_temps().imprimer_temps_courant(Force_Particule_th);
                           for (long compo=0; compo<nb_compo; compo++)
                             {
@@ -1396,11 +1409,13 @@ long Navier_Stokes_FT_Disc::preparer_calcul()
         //
         if (eq_transport.is_solid_particle())
           {
+            // TODO FIXME WILL NOT WORK FOR VEF .... should test subtype ... // EB : test not required because the baltik fluid_particle_interaction (is_solid_particle=1) should only be used in VDF
+            //ref_cast(Op_Dift_VDF_Face_FT, terme_diffusif.valeur()).associer_indicatrices(eq_transport.inconnue().valeurs(),eq_transport.get_indicatrice_aretes());
             terme_diffusif->associer_indicatrices(eq_transport.inconnue().valeurs(),eq_transport.get_indicatrice_aretes());
-
             const long formule_mu=fluide_diphasique().formule_mu();
             const double mu_fluide  =  fluide_diphasique().fluide_phase(1).viscosite_dynamique().valeur().valeurs()(0, 0);
             const double mu_particule  = fluide_diphasique().fluide_phase(0).viscosite_dynamique().valeur().valeurs()(0, 0);
+            //ref_cast(Op_Dift_VDF_Face_FT, terme_diffusif.valeur()).associer_proprietes_fluide(formule_mu,mu_particule,mu_fluide);
             terme_diffusif->associer_proprietes_fluide(formule_mu,mu_particule,mu_fluide);
             /*
             const Particule_Solide& particule_solide=ref_cast(Particule_Solide,fluide_diphasique().fluide_phase(0));  // a modifier pour des particules bidisperses ou de tailles differentes
@@ -2021,6 +2036,7 @@ void Navier_Stokes_FT_Disc::calculer_champ_forces_collisions(const DoubleTab& in
   IntVect compo_connexes_facettes(nb_facettes); // Init a zero
 
   long nb_compo_tot=positions.dimension(0);
+
   static const DoubleTab& positions_bords=modele_collision_particule.position_bords();
   long nb_bords = positions_bords.dimension(1);
 
@@ -2075,7 +2091,7 @@ void Navier_Stokes_FT_Disc::calculer_champ_forces_collisions(const DoubleTab& in
   static long nb_compo_reelles;
   static const long is_LC_on=modele_collision_particule.is_LC_activated();
   nb_compo_reelles= is_LC_on ? 0: nb_compo_tot;
-  if (modele_collision_particule.is_detection_Verlet())
+  if (modele_collision_particule.is_detection_Verlet()==1)
     {
       double s_Verlet = modele_collision_particule.get_s_Verlet(); // initialise dans Transport_Interfaces_FT_Disc::preparer_calcul() par 0.3*2*rayon_compo
       long& nb_dt_Verlet = modele_collision_particule.get_nb_dt_Verlet();
@@ -2216,7 +2232,7 @@ void Navier_Stokes_FT_Disc::calculer_champ_forces_collisions(const DoubleTab& in
   DoubleTab dX(dimension), dU(dimension);
 
   IntTab Collision(nb_compo_tot,nb_compo_tot+nb_bords);
-  if (modele_collision_particule.is_detection_Verlet())
+  if (modele_collision_particule.is_detection_Verlet()==1)
     {
       for (long ind_compo_i=0; ind_compo_i< nb_compo_reelles; ind_compo_i++)
         {
@@ -2534,7 +2550,8 @@ void Navier_Stokes_FT_Disc::calculer_champ_forces_collisions(const DoubleTab& in
   if (Process::je_suis_maitre()&& schema_temps().limpr_fpi() && nb_compo_tot>1)
     {
       SFichier Liste_Collision;
-      ouvrir_fichier(Liste_Collision,"liste_collision",1,*this);
+      const Navier_Stokes_FT_Disc& mon_eq = *this;
+      ouvrir_fichier(Liste_Collision,"liste_collision",1,mon_eq);
       schema_temps().imprimer_temps_courant(Liste_Collision);
       for (long compo_i=0; compo_i<nb_compo_tot; compo_i++)
         {
@@ -3985,7 +4002,7 @@ long Navier_Stokes_FT_Disc::trilinear_interpolation_gradU_face(const DoubleTab& 
   // On identifie l'element dans lequel appartient le point de coordonnees coord
   const Domaine_VDF& domaine_vdf = ref_cast(Domaine_VDF, domaine_dis().valeur());
   const Domaine& domaine = domaine_vdf.domaine();
-  const Domaine_VF& domaine_vf = ref_cast(Domaine_VF, domaine_dis().valeur());
+  //const Domaine_VF& domaine_vf = ref_cast(Domaine_VF, domaine_dis().valeur());
   REF(Transport_Interfaces_FT_Disc) & refeq_transport = variables_internes().ref_eq_interf_proprietes_fluide;
   const Transport_Interfaces_FT_Disc& eq_transport = refeq_transport.valeur();
   const Maillage_FT_Disc& maillage = eq_transport.maillage_interface();
@@ -4334,7 +4351,7 @@ long Navier_Stokes_FT_Disc::trilinear_interpolation_gradU_elem_P1(const DoubleTa
 {
   // On identifie l'element dans lequel appartient le point de coordonnees coord
   const Domaine_VDF& domaine_vdf = ref_cast(Domaine_VDF, domaine_dis().valeur());
-  const Domaine_VF& domaine_vf = ref_cast(Domaine_VF, domaine_dis().valeur());
+  //const Domaine_VF& domaine_vf = ref_cast(Domaine_VF, domaine_dis().valeur());
   REF(Transport_Interfaces_FT_Disc) & refeq_transport = variables_internes().ref_eq_interf_proprietes_fluide;
   const Transport_Interfaces_FT_Disc& eq_transport = refeq_transport.valeur();
   const Maillage_FT_Disc& maillage = eq_transport.maillage_interface();
@@ -5064,7 +5081,7 @@ void Navier_Stokes_FT_Disc::calcul_forces_interface()
                   if (variables_internes().Indic_elem_P2_(fa7)==1) Prop_P2_fluide_compo(compo)+=1;
                   if (pression_P2(fa7)<-1e10)
                     {
-                      pression_interf(fa7)=1e15;
+                      if (les_post_interf.flag_pression_facettes_) pression_interf(fa7)=1e15;
                       pression_extrapolee(fa7)=1e15;
                       continue;
                     }

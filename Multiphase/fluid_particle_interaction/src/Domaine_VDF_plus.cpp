@@ -682,7 +682,7 @@ void Domaine_VDF_plus::genere_et_cree_aretes()
 
         if (ok)
           {
-            Aretes_som.append_line(std::max(s1,s2),std::max(s1,s2)); // On ajoute l'arete
+            Aretes_som.append_line(std::min(s1,s2),std::max(s1,s2)); // On ajoute l'arete
             Elem_Aretes(el1,dir)=nb_aretes_;
             //Cerr << "elements_haut_droit " << el1 << " " << el2 << " " << el3 << " " << el4 << finl;
             //Journal() << "Provisoire faces arete: " << face12 << " " << face13 << " " << face24 << " " << face34 << finl;

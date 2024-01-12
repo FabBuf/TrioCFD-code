@@ -210,12 +210,15 @@ void Parcours_interface::parcourir(Maillage_FT_Disc& maillage) const
   domaine_sommets_ptr = & domaine_vf.domaine().les_sommets();
 
   const Domaine_dis& domaine_dis = maillage.refdomaine_dis_.valeur();
-  const Domaine_VDF& domaine_vdf = ref_cast(Domaine_VDF,domaine_dis.valeur());
-  const IntVect& type_arete=domaine_vdf.type_arete();
   static long iteration_parcourir_faces=0;
   static long iteration_parcourir_aretes=0;
-  const long calcul_precis_indic_face=maillage.equation_transport().calcul_precis_indic_faces();
-  const long calcul_precis_indic_arete=maillage.equation_transport().calcul_precis_indic_aretes();
+  REF(Transport_Interfaces_FT_Disc)& refeq_transport = maillage.refequation_transport_;
+  long calcul_precis_indic_face=0, calcul_precis_indic_arete=0;
+  if (refeq_transport.non_nul())
+    {
+      calcul_precis_indic_face=maillage.equation_transport().calcul_precis_indic_faces();
+      calcul_precis_indic_arete=maillage.equation_transport().calcul_precis_indic_aretes();
+    }
 
   const double temps=maillage.temps();
   DoubleTab copie_sommets_maillage;
@@ -244,22 +247,24 @@ void Parcours_interface::parcourir(Maillage_FT_Disc& maillage) const
 
   // debut EB
   // RAZ des intersections face-facettes
-  {
-    const long nb_faces = domaine_vf.nb_faces();
-    const long nb_facettes = maillage.facettes_.dimension(0);
-    maillage.intersections_face_facettes_x_.reset(nb_faces, nb_facettes);
-    maillage.intersections_face_facettes_y_.reset(nb_faces, nb_facettes);
-    maillage.intersections_face_facettes_z_.reset(nb_faces, nb_facettes);
-  }
+  if (calcul_precis_indic_face)
+    {
+      const long nb_faces = domaine_vf.nb_faces();
+      const long nb_facettes = maillage.facettes_.dimension(0);
+      maillage.intersections_face_facettes_x_.reset(nb_faces, nb_facettes);
+      maillage.intersections_face_facettes_y_.reset(nb_faces, nb_facettes);
+      maillage.intersections_face_facettes_z_.reset(nb_faces, nb_facettes);
+    }
 
   // RAZ des intersections arete-facettes
-  {
-    const long nb_aretes = domaine_vf.domaine().nb_aretes();
-    const long nb_facettes = maillage.facettes_.dimension(0);
-    maillage.intersections_arete_facettes_x_.reset(nb_aretes, nb_facettes);
-    maillage.intersections_arete_facettes_y_.reset(nb_aretes, nb_facettes);
-    maillage.intersections_arete_facettes_z_.reset(nb_aretes, nb_facettes);
-  }
+  if (calcul_precis_indic_arete)
+    {
+      const long nb_aretes = domaine_vf.domaine().nb_aretes();
+      const long nb_facettes = maillage.facettes_.dimension(0);
+      maillage.intersections_arete_facettes_x_.reset(nb_aretes, nb_facettes);
+      maillage.intersections_arete_facettes_y_.reset(nb_aretes, nb_facettes);
+      maillage.intersections_arete_facettes_z_.reset(nb_aretes, nb_facettes);
+    }
   // fin EB
 
   // Facettes et elements d'arrivee a envoyer aux processeurs voisins pour l'iteration
@@ -273,7 +278,7 @@ void Parcours_interface::parcourir(Maillage_FT_Disc& maillage) const
   static ArrOfIntFT facettes_a_traiter_numelement;
 
   compteur_erreur_grossiere = 0;
-  long iteration = 0;
+  //long iteration = 0;
   // debut EB
   // FACES
   // Face d'arrivees a envoyer aux processeurs voisins pour l'iteration
@@ -580,6 +585,9 @@ void Parcours_interface::parcourir(Maillage_FT_Disc& maillage) const
 
   if (calcul_precis_indic_arete)
     {
+      const Domaine_VDF& domaine_vdf = ref_cast(Domaine_VDF,domaine_dis.valeur());
+      const IntVect& type_arete=domaine_vdf.type_arete();
+
       maillage.update_sommet_arete();
       //maillage.update_sommet_arete();
       if (iteration_parcourir_aretes>1|| temps>0) // lors des premieres iterations, bug parce qu'on a pas encore rempli sommet_face_ (fait uniquement apres

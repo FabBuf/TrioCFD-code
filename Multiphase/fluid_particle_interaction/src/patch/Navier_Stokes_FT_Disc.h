@@ -48,6 +48,7 @@ public:
   // Methodes surchargees
   //
   void set_param(Param& titi) override;
+  //void ouvrir_fichier(SFichier& ,const Nom& , const long& , const Navier_Stokes_FT_Disc&);
   long lire_motcle_non_standard(const Motcle&, Entree&) override;
   long sauvegarder(Sortie&) const override; //EB
   long reprendre(Entree&) override; // EB

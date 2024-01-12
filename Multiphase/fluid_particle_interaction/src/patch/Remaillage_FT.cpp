@@ -67,7 +67,8 @@ Remaillage_FT::Remaillage_FT() :
   lissage_courbure_iterations_systematique_(0),
   lissage_courbure_iterations_si_remaillage_(0),
   lissage_courbure_iterations_old_(-1),
-  lissage_critere_(0) // Default value to 0, when lissage is applied, it is for the whole mesh
+  lissage_critere_(0), // Default value to 0, when lissage is applied, it is for the whole mesh
+  is_solid_particle_(0)
 {
 }
 
@@ -1684,12 +1685,13 @@ long Remaillage_FT::supprimer_facettes_bord(Maillage_FT_Disc& maillage) const
               maillage.printFa7(fa7,0,Process::Journal());
             }
 #endif
-          /*
-                for (isom=1 ; isom<nb_som_par_facette ; isom++)
-                  {
-                    facettes(fa7,isom) = facettes(fa7,0); // HMS pas besoin de supprimer les facettes
-                  }
-          */
+          if (!is_solid_particle_)
+            {
+              for (isom=1 ; isom<nb_som_par_facette ; isom++)
+                {
+                  facettes(fa7,isom) = facettes(fa7,0);
+                }
+            }
         }
 #else
         {

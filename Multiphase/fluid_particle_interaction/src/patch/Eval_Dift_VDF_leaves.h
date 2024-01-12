@@ -124,7 +124,7 @@ public:
   inline bool uses_wall() const { return false; }
 };
 
-class Eval_Dift_VDF_var_Face_FT : public Eval_Dift_VDF_Face
+class Eval_Dift_VDF_Face_FT : public Eval_Dift_VDF_Face
 {
 public:
   static constexpr bool CALC_ARR_INT_FT=true;

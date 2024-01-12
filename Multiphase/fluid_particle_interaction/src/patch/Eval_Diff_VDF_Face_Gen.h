@@ -52,13 +52,13 @@ public:
   flux_arete(const DoubleTab&, const DoubleTab*, long, long, long, long, long, Type_Double& ) const ;
 
   template<Type_Flux_Arete Arete_Type, typename Type_Double> inline enable_if_t_< Arete_Type == Type_Flux_Arete::INTERNE_FT, void>
-  flux_arete(const DoubleTab&, const DoubleTab*, long, long, long, long, long, Type_Double& ) const ;// EB
+  flux_arete(const DoubleTab&, const DoubleTab*, long, long, long, long, long, Type_Double& ) const ;
 
   template<Type_Flux_Arete Arete_Type, typename Type_Double> inline enable_if_t_< Arete_Type == Type_Flux_Arete::MIXTE, void>
   flux_arete(const DoubleTab&, const DoubleTab*, long, long, long, long, long, Type_Double& ) const ;
 
   template<Type_Flux_Arete Arete_Type, typename Type_Double> inline enable_if_t_<Arete_Type == Type_Flux_Arete::PAROI || Arete_Type == Type_Flux_Arete::SYMETRIE_PAROI, void>
-  flux_arete(const DoubleTab&, const DoubleTab*, long, long, long, long, long, Type_Double& ) const ;
+  flux_arete(const DoubleTab&, const DoubleTab*, long, long, long, long, long, Type_Double& ) const;
 
   template<Type_Flux_Arete Arete_Type, typename Type_Double> inline enable_if_t_<(Arete_Type == Type_Flux_Arete::SYMETRIE), void>
   flux_arete(const DoubleTab&, const DoubleTab*, long, long, long, long, long, Type_Double& ) const { /* Do nothing */ }
@@ -87,7 +87,7 @@ public:
   template<Type_Flux_Fa7 Fa7_Type, typename Type_Double> inline enable_if_t_< Fa7_Type == Type_Flux_Fa7::ELEM, void>
   coeffs_fa7(const DoubleTab*, long, long, long, Type_Double& , Type_Double& ) const;
 
-  template<Type_Flux_Arete Arete_Type, typename Type_Double> inline enable_if_t_< Arete_Type == Type_Flux_Arete::INTERNE, void>
+  template<Type_Flux_Arete Arete_Type, typename Type_Double> inline enable_if_t_< Arete_Type == Type_Flux_Arete::INTERNE || Arete_Type == Type_Flux_Arete::INTERNE_FT, void>
   coeffs_arete(const DoubleTab*, long, long, long, long, long, Type_Double& , Type_Double& ) const;
 
   template<Type_Flux_Arete Arete_Type, typename Type_Double> inline enable_if_t_< Arete_Type == Type_Flux_Arete::MIXTE, void>
@@ -129,7 +129,7 @@ private:
   template<typename Type_Double> void check_error(const char * , const long, const long , const Type_Double& , const Type_Double& , const Type_Double& ) const;
 
   template<Type_Flux_Arete Arete_Type, typename Type_Double>
-  inline enable_if_t_< Arete_Type == Type_Flux_Arete::INTERNE || Arete_Type == Type_Flux_Arete::MIXTE, void>
+  inline enable_if_t_< Arete_Type == Type_Flux_Arete::INTERNE || Arete_Type == Type_Flux_Arete::INTERNE_FT || Arete_Type == Type_Flux_Arete::MIXTE, void>
   test_coeffs_common(const long , const long , const long , const long , const long , Type_Double& , Type_Double& ) const;
 
   template<Type_Flux_Arete Arete_Type, typename Type_Double>
@@ -148,7 +148,7 @@ private:
   test_coeffs_fa7(const long, const long, const long, const Type_Double& ) const;
 
   template<Type_Flux_Arete Arete_Type, typename Type_Double>
-  inline enable_if_t_< Arete_Type == Type_Flux_Arete::INTERNE, void>
+  inline enable_if_t_< Arete_Type == Type_Flux_Arete::INTERNE || Arete_Type == Type_Flux_Arete::INTERNE_FT, void>
   test_coeffs_arete(const long, const long, const long, const long, const long, const Type_Double& ) const;
 
   template<Type_Flux_Arete Arete_Type, typename Type_Double>
