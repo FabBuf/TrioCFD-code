@@ -53,7 +53,7 @@ void Schema_Temps_base::initialize()
                   dt_ev_.setf(ios::scientific);
                   dt_ev_ << "# temps\t\t dt\t\t facsec\t\t residu=max|Ri|\t dt_stab\t ";
                 }
-              for (long i=0; i<pb_base().nombre_d_equations(); i++)
+              for (int i=0; i<pb_base().nombre_d_equations(); i++)
                 dt_ev_ << pb_base().equation(i).expression_residu();
             }
           else
@@ -145,7 +145,7 @@ bool Schema_Temps_base::initTimeStep(double dt)
 bool Schema_Temps_base::iterateTimeStep(bool& converged)
 {
   // Loop on the equations of the problem:
-  for(long i=0; i<pb_base().nombre_d_equations(); i++)
+  for(int i=0; i<pb_base().nombre_d_equations(); i++)
     {
       Equation_base& equation=pb_base().equation(i);
       // Calculate (if equation is solved) the unknown equation U(n+1)
@@ -171,9 +171,9 @@ bool Schema_Temps_base::iterateTimeStep(bool& converged)
 
 /*! @brief Renvoie 1 s'il y a lieu d'effectuer une impression (cf dt_impr) Renvoie 0 sinon
  *
- * @return (long) 1 si il y lieu d'effectuer une impression 0 sinon
+ * @return (int) 1 si il y lieu d'effectuer une impression 0 sinon
  */
-long Schema_Temps_base::limpr() const
+int Schema_Temps_base::limpr() const
 {
   if (dt_impr_<=0)
     return 0; // Negative value for dt_impr : we never print
@@ -188,7 +188,7 @@ long Schema_Temps_base::limpr() const
 
   // 26/01/2010 : On utilise desormais la fonction "modf(operation , & partie entiere)" de math.h
   // Cette fonction decompose le resultat de "operation" en une partie entiere et une partie decimale.
-  // Ainsi, on ne transforme plus un double en long avec tout les risques que cela comporte.
+  // Ainsi, on ne transforme plus un double en int avec tout les risques que cela comporte.
   // ex : modf(9/7,&i) donne 1.000000 pour la partie entiere et 0.285714 pour le partie decimale
   //
   // epsilon permet d'assurer que le resultat de l'operation est independant de la precision machine :
@@ -211,13 +211,13 @@ long Schema_Temps_base::limpr() const
 //    Valeurs par defaut:
 //    Contraintes:
 //    Acces:
-// Retour: long
+// Retour: int
 //    Signification: 1 si il y lieu d'effectuer une impression 0 sinon
 //    Contraintes:
 // Exception:
 // Effets de bord:
 // Postcondition: la methode ne modifie pas l'objet
-long Schema_Temps_base::limpr_fpi() const
+int Schema_Temps_base::limpr_fpi() const
 {
   if (dt_impr_fpi_<=0)
     return 0; // Negative value for dt_impr : we never print
@@ -233,7 +233,7 @@ long Schema_Temps_base::limpr_fpi() const
 
   // 26/01/2010 : On utilise desormais la fonction "modf(operation , & partie entiere)" de math.h
   // Cette fonction decompose le resultat de "operation" en une partie entiere et une partie decimale.
-  // Ainsi, on ne transforme plus un double en long avec tout les risques que cela comporte.
+  // Ainsi, on ne transforme plus un double en int avec tout les risques que cela comporte.
   // ex : modf(9/7,&i) donne 1.000000 pour la partie entiere et 0.285714 pour le partie decimale
   //
   // epsilon permet d'assurer que le resultat de l'operation est independant de la precision machine :
@@ -262,7 +262,7 @@ void Schema_Temps_base::validateTimeStep()
         {
           if (schema_impr())
             dt_ev_ << finl << temps_courant_ << "\t " << dt_ << "\t " << facsec_ <<"\t " << residu_ << "\t " << dt_stab_ << "\t ";
-          for (long i=0; i<pb_base().nombre_d_equations(); i++)
+          for (int i=0; i<pb_base().nombre_d_equations(); i++)
             pb_base().equation(i).imprime_residu(dt_ev_);
         }
 
@@ -292,17 +292,17 @@ void Schema_Temps_base::validateTimeStep()
               double dpercent2=temps_courant()/(temps_courant()+distance);
               dpercent=std::max(dpercent,dpercent2);
             }
-          long percent=long(dpercent*100);
+          int percent=int(dpercent*100);
 
           if (limpr() )
             {
               double seconds_to_finish  =  statistiques().last_time(temps_total_execution_counter_)*(1.-dpercent)/dpercent;
-              long integer_limit=(long)(pow(2.0,(double)((sizeof(True_int)*8)-1))-1);
+              int integer_limit=(int)(pow(2.0,(double)((sizeof(True_int)*8)-1))-1);
               if (seconds_to_finish<integer_limit)
                 {
-                  long h  = long(seconds_to_finish/3600);
-                  long mn = long((seconds_to_finish-3600*h)/60);
-                  long s  = long(seconds_to_finish-3600*h-60*mn);
+                  int h  = int(seconds_to_finish/3600);
+                  int mn = int((seconds_to_finish-3600*h)/60);
+                  int s  = int(seconds_to_finish-3600*h-60*mn);
                   Cout << finl << "Estimated CPU time to finish the run (according to " << (nb_pas_selon_tmax<nb_pas_selon_nb_pas_dt_max?"tmax":"nb_pas_dt_max") << " value) : ";
                   if (seconds_to_finish<1)
                     Cout << seconds_to_finish << " s";
@@ -324,7 +324,7 @@ void Schema_Temps_base::validateTimeStep()
 void Schema_Temps_base::terminate()
 {
   if (je_suis_maitre() && !disable_progress())
-    progress_<< (long)100<< finl;
+    progress_<< (int)100<< finl;
 }
 
 /*! @brief Retourne 1 si lors du dernier pas de temps, le probleme n'a pas evolue.
@@ -349,7 +349,7 @@ bool Schema_Temps_base::isStationary() const
 void Schema_Temps_base::abortTimeStep()
 {
   Probleme_base& prob=pb_base();
-  for(long i=0; i<prob.nombre_d_equations(); i++)
+  for(int i=0; i<prob.nombre_d_equations(); i++)
     prob.equation(i).abortTimeStep();
 
   dt_ = prob.calculer_pas_de_temps();
@@ -376,23 +376,23 @@ void Schema_Temps_base::set_param(Param& param)
   param.ajouter( "facsec",&facsec_); // XD_ADD_P double Value assigned to the safety factor for the time step (1. by default). The time step calculated is multiplied by the safety factor. The first thing to try when a calculation does not converge with an explicit time scheme is to reduce the facsec to 0.5. NL2 Warning: Some schemes needs a facsec lower than 1 (0.5 is a good start), for example Schema_Adams_Bashforth_order_3.
   param.ajouter( "seuil_statio",&seuil_statio_); // XD_ADD_P double Value of the convergence threshold (1e-12 by default). Problems using this type of time scheme converge when the derivatives dGi/dt NL1 of all the unknown transported values Gi have a combined absolute value less than this value. This is the keyword used to set the permanent rating threshold.
   param.ajouter_non_std("residuals", (this));    // XD_ADD_P residuals To specify how the residuals will be computed (default max norm, possible to choose L2-norm instead).
-  param.ajouter( "diffusion_implicite",&ind_diff_impl_); // XD_ADD_P long Keyword to make the diffusive term in the Navier-Stokes equations implicit (in this case, it should be set to 1). The stability time step is then only based on the convection time step (dt=facsec*dt_convection). Thus, in some circumstances, an important gain is achieved with respect to the time step (large diffusion with respect to convection on tightened meshes). Caution: It is however recommended that the user avoids exceeding the convection time step by selecting a too large facsec value. Start with a facsec value of 1 and then increase it gradually if you wish to accelerate calculation. In addition, for a natural convection calculation with a zero initial velocity, in the first time step, the convection time is infinite and therefore dt=facsec*dt_max.
+  param.ajouter( "diffusion_implicite",&ind_diff_impl_); // XD_ADD_P int Keyword to make the diffusive term in the Navier-Stokes equations implicit (in this case, it should be set to 1). The stability time step is then only based on the convection time step (dt=facsec*dt_convection). Thus, in some circumstances, an important gain is achieved with respect to the time step (large diffusion with respect to convection on tightened meshes). Caution: It is however recommended that the user avoids exceeding the convection time step by selecting a too large facsec value. Start with a facsec value of 1 and then increase it gradually if you wish to accelerate calculation. In addition, for a natural convection calculation with a zero initial velocity, in the first time step, the convection time is infinite and therefore dt=facsec*dt_max.
   param.ajouter( "seuil_diffusion_implicite",&seuil_diff_impl_); // XD_ADD_P double This keyword changes the default value (1e-6) of convergency criteria for the resolution by conjugate gradient used for implicit diffusion.
-  param.ajouter( "impr_diffusion_implicite",&impr_diff_impl_); // XD_ADD_P long Unactivate (default) or not the printing of the convergence during the resolution of the conjugate gradient.
-  param.ajouter( "impr_extremums",&impr_extremums_); // XD_ADD_P long Print unknowns extremas
-  param.ajouter( "no_error_if_not_converged_diffusion_implicite",&no_error_if_not_converged_diff_impl_); // XD_ADD_P long not_set
-  param.ajouter( "no_conv_subiteration_diffusion_implicite",&no_conv_subiteration_diff_impl_); // XD_ADD_P long not_set
+  param.ajouter( "impr_diffusion_implicite",&impr_diff_impl_); // XD_ADD_P int Unactivate (default) or not the printing of the convergence during the resolution of the conjugate gradient.
+  param.ajouter( "impr_extremums",&impr_extremums_); // XD_ADD_P int Print unknowns extremas
+  param.ajouter( "no_error_if_not_converged_diffusion_implicite",&no_error_if_not_converged_diff_impl_); // XD_ADD_P int not_set
+  param.ajouter( "no_conv_subiteration_diffusion_implicite",&no_conv_subiteration_diff_impl_); // XD_ADD_P int not_set
   param.ajouter_non_std( "dt_start",(this)); // XD attr dt_start dt_start dt_start 1 dt_start dt_min : the first iteration is based on dt_min. NL2 dt_start dt_calc : the time step at first iteration is calculated in agreement with CFL condition. NL2 dt_start dt_fixe value : the first time step is fixed by the user (recommended when resuming calculation with Crank Nicholson temporal scheme to ensure continuity). NL2 By default, the first iteration is based on dt_calc.
   // param.ajouter( "nb_pas_dt_max",&nb_pas_dt_max_);
   // nb_pas_dt_max non standard pour valgrind
-  param.ajouter_non_std( "nb_pas_dt_max",(this)); // XD_ADD_P long Maximum number of calculation time steps (1e9 by default).
-  param.ajouter( "niter_max_diffusion_implicite",&niter_max_diff_impl_); // XD_ADD_P long This keyword changes the default value (number of unknowns) of the maximal iterations number in the conjugate gradient method used for implicit diffusion.
-  param.ajouter( "precision_impr",&precision_impr_); // XD_ADD_P long Optional keyword to define the digit number for flux values printed into .out files (by default 3).
+  param.ajouter_non_std( "nb_pas_dt_max",(this)); // XD_ADD_P int Maximum number of calculation time steps (1e9 by default).
+  param.ajouter( "niter_max_diffusion_implicite",&niter_max_diff_impl_); // XD_ADD_P int This keyword changes the default value (number of unknowns) of the maximal iterations number in the conjugate gradient method used for implicit diffusion.
+  param.ajouter( "precision_impr",&precision_impr_); // XD_ADD_P int Optional keyword to define the digit number for flux values printed into .out files (by default 3).
   param.ajouter_non_std( "periode_sauvegarde_securite_en_heures",(this)); // XD_ADD_P double To change the default period (23 hours) between the save of the fields in .sauv file.
   param.ajouter_non_std( "no_check_disk_space",(this)); // XD_ADD_P flag To disable the check of the available amount of disk space during the calculation.
   param.ajouter_flag( "disable_progress",&disable_progress_); // XD_ADD_P flag To disable the writing of the .progress file.
   param.ajouter_flag( "disable_dt_ev",&disable_dt_ev_); // XD_ADD_P flag To disable the writing of the .dt_ev file.
-  param.ajouter( "gnuplot_header",&gnuplot_header_); // XD_ADD_P long Optional keyword to modify the header of the .out files. Allows to use the column title instead of columns number.
+  param.ajouter( "gnuplot_header",&gnuplot_header_); // XD_ADD_P int Optional keyword to modify the header of the .out files. Allows to use the column title instead of columns number.
 
   // XD  residuals interprete nul 1 To specify how the residuals will be computed.
   // XD attr norm chaine(into=["L2","max"]) norm 1 allows to choose the norm we want to use (max norm by default). Possible to specify L2-norm.
@@ -487,10 +487,10 @@ Entree& Schema_Temps_base::readOn(Entree& is)
   return is ;
 }
 
-long Schema_Temps_base::lire_motcle_non_standard(const Motcle& mot, Entree& is)
+int Schema_Temps_base::lire_motcle_non_standard(const Motcle& mot, Entree& is)
 {
   Motcle motlu;
-  long retval = 1;
+  int retval = 1;
   if (mot=="dt_start")
     {
       is>>motlu;
@@ -499,7 +499,7 @@ long Schema_Temps_base::lire_motcle_non_standard(const Motcle& mot, Entree& is)
       les_mots2[1]="dt_min";
       les_mots2[2]="dt_calc";
       les_mots2[3]="dt_fixe";
-      long rang2=les_mots2.search(motlu);
+      int rang2=les_mots2.search(motlu);
       switch(rang2)
         {
         case 0:
@@ -592,7 +592,7 @@ Schema_Temps_base::Schema_Temps_base()
   nb_pas_dt_ = 0;
   nb_impr_ = 0;
   nb_impr_fpi_ = 0;
-  nb_pas_dt_max_ = (long)(pow(2.0,(double)((sizeof(True_int)*8)-1))-1);
+  nb_pas_dt_max_ = (int)(pow(2.0,(double)((sizeof(True_int)*8)-1))-1);
   seuil_statio_ = 1.e-12;
   seuil_statio_relatif_deconseille_ = 0;
   norm_residu_ = "max";
@@ -628,7 +628,7 @@ Entree& Schema_Temps_base::lire_residuals(Entree& is)
       Motcles residuals_mots(2);
       residuals_mots[0]="relative";
       residuals_mots[1]="norm";
-      long res_rang=residuals_mots.search(m);
+      int res_rang=residuals_mots.search(m);
       switch(res_rang)
         {
         case 0:
@@ -654,9 +654,9 @@ Entree& Schema_Temps_base::lire_residuals(Entree& is)
  * et du temps courant.
  *
  * @param (Sortie& os) le flot de sortie
- * @return (long) renvoie toujours 0
+ * @return (int) renvoie toujours 0
  */
-long Schema_Temps_base::impr(Sortie& os) const
+int Schema_Temps_base::impr(Sortie& os) const
 {
   os << finl;
   os << "-------------------------------------------------------------------" << finl;
@@ -671,9 +671,9 @@ long Schema_Temps_base::impr(Sortie& os) const
  * et du temps courant.
  *
  * @param (Sortie& os) le flot de sortie
- * @return (long) renvoie toujours 0
+ * @return (int) renvoie toujours 0
  */
-long Schema_Temps_base::impr(Sortie& os,Probleme_base& pb) const
+int Schema_Temps_base::impr(Sortie& os,Probleme_base& pb) const
 {
   os << finl;
   os << " Problem : " << pb.le_nom() << finl;
@@ -683,7 +683,7 @@ long Schema_Temps_base::impr(Sortie& os,Probleme_base& pb) const
   os << "   time scheme : " << pb.schema_temps() << finl;
   return 0;
 }
-long Schema_Temps_base::impr(Sortie& os,const Probleme_base& pb) const
+int Schema_Temps_base::impr(Sortie& os,const Probleme_base& pb) const
 {
   os << finl;
   os << " Problem : " << pb.le_nom() << finl;
@@ -695,13 +695,13 @@ long Schema_Temps_base::impr(Sortie& os,const Probleme_base& pb) const
 }
 
 extern "C" {
-  long ccc_tremain(double*);
+  int ccc_tremain(double*);
 }
 /*! @brief Mise a jour du temps courant (t+=dt) et du nombre de pas de temps effectue (nb_pas_dt_++).
  *
- * @return (long) retourne toujours 1
+ * @return (int) retourne toujours 1
  */
-long Schema_Temps_base::mettre_a_jour()
+int Schema_Temps_base::mettre_a_jour()
 {
 
   temps_precedent_ = temps_courant_;
@@ -747,12 +747,12 @@ long Schema_Temps_base::mettre_a_jour()
     {
       Cout << "[CCRT] ";
       double second_remain;
-      long error = ccc_tremain(&second_remain);
+      int error = ccc_tremain(&second_remain);
       if(!error)
         {
-          long hour_remain = (long)(second_remain/3600);
+          int hour_remain = (int)(second_remain/3600);
           second_remain-=hour_remain*3600;
-          long minute_remain = (long)(second_remain/60);
+          int minute_remain = (int)(second_remain/60);
           second_remain-=minute_remain*60;
           Cout << hour_remain <<"h"<<minute_remain<<"mn"<<second_remain<<"s before job is killed on CCRT." << finl;
         }
@@ -763,7 +763,7 @@ long Schema_Temps_base::mettre_a_jour()
   return 1;
 }
 // Fait une sauvegarde de protection sur des runs de 24h sur machines du CCRT
-long Schema_Temps_base::lsauv() const
+int Schema_Temps_base::lsauv() const
 {
   if (dt_sauv_ <= 0.)
     return 0;
@@ -833,7 +833,7 @@ void Schema_Temps_base::imprimer(Sortie& os, const Probleme_base& pb) const
  *
  * @param (Sortie& os) le flot de sortie pour la sauvegarde
  */
-long Schema_Temps_base::sauvegarder(Sortie& os) const
+int Schema_Temps_base::sauvegarder(Sortie& os) const
 {
   return 1;
 }
@@ -841,9 +841,9 @@ long Schema_Temps_base::sauvegarder(Sortie& os) const
 /*! @brief Reprise (lecture) du temps courant et du nombre de pas de temps effectues a partir d'un flot d'entree.
  *
  * @param (Entree& is) le flot d'entree
- * @return (long) renvoie toujours 1
+ * @return (int) renvoie toujours 1
  */
-long Schema_Temps_base::reprendre(Entree& is)
+int Schema_Temps_base::reprendre(Entree& is)
 {
   return 1;
 }
@@ -852,11 +852,11 @@ long Schema_Temps_base::reprendre(Entree& is)
  *
  * stop contient un 1 Renvoie 0 sinon
  *
- * @return (long) 1 si le fichier (d'extension) .stop contient 1, 0 sinon
+ * @return (int) 1 si le fichier (d'extension) .stop contient 1, 0 sinon
  */
-long Schema_Temps_base::stop_lu() const
+int Schema_Temps_base::stop_lu() const
 {
-  long stop_lu_l = 0;
+  int stop_lu_l = 0;
   if (!get_disable_stop())
     {
       Nom nomfic(nom_du_cas());
@@ -921,12 +921,12 @@ bool Schema_Temps_base::corriger_dt_calcule(double& dt_calc) const
  *
  *         - le nombre de pas de temps maximum est depasse
  *         - l'etat stationnaire est atteint
- *         - indicateur d'arret fichier (voir long Schema_Temps_base::stop_lu())
+ *         - indicateur d'arret fichier (voir int Schema_Temps_base::stop_lu())
  *     Renvoie 0 sinon
  *
- * @return (long) 1 si il y a lieu de stopper le calcul 0 sinon.
+ * @return (int) 1 si il y a lieu de stopper le calcul 0 sinon.
  */
-long Schema_Temps_base::stop() const
+int Schema_Temps_base::stop() const
 {
   if (temps_final_atteint())
     {
@@ -990,7 +990,7 @@ void Schema_Temps_base::ajouter_inertie(Matrice_Base& mat_morse,DoubleTab& secme
   double dt=pas_de_temps();
   // On ne penalise pas les matrices et les secmems meme dans les cas
   // dirichlet , symetrie
-  long pen=0;
+  int pen=0;
   eqn.solv_masse().ajouter_masse(dt,mat_morse,pen); //ordre important pour PolyMAC_P0
   eqn.solv_masse().ajouter_masse(dt,secmem,eqn.inconnue().passe(),pen);
 }
@@ -1009,12 +1009,12 @@ void Schema_Temps_base::update_critere_statio(const DoubleTab& tab_critere, Equa
   DoubleVect& residu_equation = equation.get_residu();
   // En fonction de la taille du tableau residu_equation
   // on prend le max de tab_critere sur tout le tableau ou par colonne
-  long size = residu_equation.size_array();
+  int size = residu_equation.size_array();
   if (size==0)
     {
       Cerr << "Error in Schema_Temps_base::update_critere_statio" << finl;
       Cerr << "Array residu_equation has a null size" << finl;
-      for (long i=0; i<pb_base().nombre_d_equations(); i++)
+      for (int i=0; i<pb_base().nombre_d_equations(); i++)
         if (pb_base().equation(i).get_residu().size_array()==0)
           {
             Cerr << "The equation of kind " << pb_base().equation(i).que_suis_je() << " didn't size the array." << finl;
@@ -1055,13 +1055,13 @@ void Schema_Temps_base::update_critere_statio(const DoubleTab& tab_critere, Equa
       DoubleVect& residu_initial_equation = equation.residu_initial();
       if (nb_pas_dt()<6)
         {
-          for (long i=0; i<size; i++)
+          for (int i=0; i<size; i++)
             residu_initial_equation(i) = residu_equation(i);
           // On ne prend plus le max car celui ci est parfois grand au premier pas de temps:
           // residu_initial_equation(i) = std::max(residu_initial_equation(i), residu_equation(i));
         }
       // On normalise residu_equation par residu_initial_equation
-      for (long i=0; i<size; i++)
+      for (int i=0; i<size; i++)
         if (residu_initial_equation(i)>0)
           residu_equation(i) /= residu_initial_equation(i);
     }
@@ -1084,12 +1084,12 @@ void Schema_Temps_base::update_critere_statio(const DoubleTab& tab_critere, Equa
 // pour la precision de l'impression (utilise dans les operateurs)
 void Schema_Temps_base::imprimer_temps_courant(SFichier& os) const
 {
-  long precision_actuelle=os.get_precision();
-  long precision_temps;
+  int precision_actuelle=os.get_precision();
+  int precision_temps;
   if (!est_egal(temps_courant(),0.))
-    precision_temps=std::max( precision_actuelle, (long)(2+log10(1/std::fabs(pas_de_temps()))+(long)(log10(std::fabs(temps_courant())))) );
+    precision_temps=std::max( precision_actuelle, (int)(2+log10(1/std::fabs(pas_de_temps()))+(int)(log10(std::fabs(temps_courant())))) );
   else
-    precision_temps=std::max( precision_actuelle, (long)(2+log10(1/std::fabs(pas_de_temps()))) );
+    precision_temps=std::max( precision_actuelle, (int)(2+log10(1/std::fabs(pas_de_temps()))) );
   os.precision(precision_temps);
   os << temps_courant();
   os.precision(precision_actuelle);

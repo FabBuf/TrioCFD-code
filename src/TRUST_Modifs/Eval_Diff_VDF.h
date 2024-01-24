@@ -26,7 +26,7 @@ class Eval_Diff_VDF
 public:
   virtual ~Eval_Diff_VDF() { }
 
-  inline const long& is_var() const { return is_var_; }
+  inline const int& is_var() const { return is_var_; }
 
   inline virtual const Champ_base& diffusivite() const final { return get_diffusivite(); }
 
@@ -49,8 +49,8 @@ public:
       {
         tab_alpha_.ref(ref_cast(Pb_Multiphase, ref_probleme_.valeur()).equation_masse().inconnue().passe());
         tab_diffusivite_ = tab_alpha_;
-        for (long e = 0; e < tab_diffusivite_.dimension(0); e++)
-          for (long n = 0; n < tab_diffusivite_.dimension(1); n++)
+        for (int e = 0; e < tab_diffusivite_.dimension(0); e++)
+          for (int n = 0; n < tab_diffusivite_.dimension(1); n++)
             tab_diffusivite_(e, n) = std::max(tab_alpha_(e, n), 1e-8) * ref_diffusivite_->valeurs()(is_var_ * e, n);
 
         tab_diffusivite_.echange_espace_virtuel();
@@ -72,20 +72,20 @@ public:
   }
 
   // Methods used by the flux computation in template class:
-  inline double compute_heq_impl(double d0, long i, double d1, long j, long compo) const
+  inline double compute_heq_impl(double d0, int i, double d1, int j, int compo) const
   {
     return 1. / (d0 / tab_diffusivite_(is_var_ * i, compo) + d1 / tab_diffusivite_(is_var_ * j, compo));
   }
 
-  inline double nu_1_impl(long i, long compo) const { return tab_diffusivite_(is_var_ * i, compo); }
-  inline double nu_2_impl(long i, long compo) const { return tab_diffusivite_(is_var_ * i, compo); }
+  inline double nu_1_impl(int i, int compo) const { return tab_diffusivite_(is_var_ * i, compo); }
+  inline double nu_2_impl(int i, int compo) const { return tab_diffusivite_(is_var_ * i, compo); }
 
-  inline double nu_1_impl_face(long i, long j, long compo) const
+  inline double nu_1_impl_face(int i, int j, int compo) const
   {
     return 0.5 * (tab_diffusivite_(is_var_ * i, compo) + tab_diffusivite_(is_var_ * j, compo));
   }
 
-  inline double nu_2_impl_face(long i, long j, long k, long l, long compo) const
+  inline double nu_2_impl_face(int i, int j, int k, int l, int compo) const
   {
     if (is_solid_particle_==1)
       {
@@ -125,11 +125,11 @@ public:
 
   }
 
-  inline double nu_lam_impl_face(long i, long j, long k, long l, long compo) const { return nu_2_impl_face(i, j, k, l, compo); }
-  inline double nu_lam_impl_face2(long i, long j, long compo) const { return nu_1_impl_face(i, j, compo); }
-  virtual inline double nu_lam_arete (long num_arete) const { return nu_1_lam_arete(num_arete); } // EB
+  inline double nu_lam_impl_face(int i, int j, int k, int l, int compo) const { return nu_2_impl_face(i, j, k, l, compo); }
+  inline double nu_lam_impl_face2(int i, int j, int compo) const { return nu_1_impl_face(i, j, compo); }
+  virtual inline double nu_lam_arete (int num_arete) const { return nu_1_lam_arete(num_arete); } // EB
   // debut EB
-  inline double nu_1_lam_arete(long num_arete) const
+  inline double nu_1_lam_arete(int num_arete) const
   {
     double indic_arete = indicatrice_arete_(num_arete);
     double myViscLam=0.;
@@ -164,17 +164,17 @@ public:
     // fin EB
   }
   // These methods will be overloaded in DIFT operators (See Eval_Dift_VDF_const_Elem for example ...)
-  inline long get_ind_Fluctu_Term() const { return 0; }
-  inline double get_dv_mvol(const long i) const { throw; } /* seulement pour K-Eps */
-  inline virtual double get_equivalent_distance(long boundary_index,long local_face) const { return 0; }
-  inline double nu_t_impl(long i, long compo) const { return 0.; }
-  inline double tau_tan_impl(long i, long j) const { return 0.; }
+  inline int get_ind_Fluctu_Term() const { return 0; }
+  inline double get_dv_mvol(const int i) const { throw; } /* seulement pour K-Eps */
+  inline virtual double get_equivalent_distance(int boundary_index,int local_face) const { return 0; }
+  inline double nu_t_impl(int i, int compo) const { return 0.; }
+  inline double tau_tan_impl(int i, int j) const { return 0.; }
   inline bool uses_wall() const { return false; }
   inline bool uses_mod() const { return false; }
   inline const DoubleTab& get_k_elem() const { throw; } // pour F5 seulement ...
 
 protected:
-  long is_var_ = 0;
+  int is_var_ = 0;
   REF(Probleme_base) ref_probleme_;
   REF(Champ_base) ref_diffusivite_;
   DoubleTab tab_diffusivite_, tab_alpha_;
@@ -183,8 +183,8 @@ protected:
 
   double mu_solide_;
   double mu_fluide_;
-  long 	 formule_mu_;
-  long   is_solid_particle_=0;
+  int 	 formule_mu_;
+  int   is_solid_particle_=0;
 };
 
 #endif /* Eval_Diff_VDF_included */

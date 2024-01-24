@@ -35,76 +35,76 @@ public:
    * ************************************** */
 
   template<Type_Flux_Fa7 Fa7_Type, typename Type_Double> inline std::enable_if_t< Fa7_Type == Type_Flux_Fa7::SORTIE_LIBRE, void>
-  flux_fa7(const DoubleTab&, const DoubleTab*, long , const Neumann_sortie_libre&, long, Type_Double& ) const;
+  flux_fa7(const DoubleTab&, const DoubleTab*, int , const Neumann_sortie_libre&, int, Type_Double& ) const;
 
   template<Type_Flux_Fa7 Fa7_Type, typename Type_Double> inline std::enable_if_t< Fa7_Type == Type_Flux_Fa7::ELEM, void>
-  flux_fa7(const DoubleTab&, const DoubleTab*,long, long, long, Type_Double& ) const;
+  flux_fa7(const DoubleTab&, const DoubleTab*,int, int, int, Type_Double& ) const;
 
   template<Type_Flux_Arete Arete_Type, typename Type_Double> inline std::enable_if_t< Arete_Type == Type_Flux_Arete::INTERNE, void>
-  flux_arete(const DoubleTab&, const DoubleTab*, long, long, long, long, long, Type_Double& ) const ;
+  flux_arete(const DoubleTab&, const DoubleTab*, int, int, int, int, int, Type_Double& ) const ;
 
   template<Type_Flux_Arete Arete_Type, typename Type_Double> inline std::enable_if_t< Arete_Type == Type_Flux_Arete::INTERNE_FT, void>
-  flux_arete(const DoubleTab&, const DoubleTab*, long, long, long, long, long, Type_Double& ) const  {/* do nothing */}
+  flux_arete(const DoubleTab&, const DoubleTab*, int, int, int, int, int, Type_Double& ) const  {/* do nothing */}
 
 
   template<Type_Flux_Arete Arete_Type, typename Type_Double> inline std::enable_if_t< Arete_Type == Type_Flux_Arete::MIXTE, void>
-  flux_arete(const DoubleTab&, const DoubleTab*, long, long, long, long, long, Type_Double& ) const ;
+  flux_arete(const DoubleTab&, const DoubleTab*, int, int, int, int, int, Type_Double& ) const ;
 
   template<Type_Flux_Arete Arete_Type, typename Type_Double>
   inline std::enable_if_t<(Arete_Type == Type_Flux_Arete::PAROI || Arete_Type == Type_Flux_Arete::NAVIER || Arete_Type == Type_Flux_Arete::NAVIER_PAROI), void>
-  flux_arete(const DoubleTab&, const DoubleTab*, long, long, long, long, long, Type_Double& ) const { /* do nothing */ }
+  flux_arete(const DoubleTab&, const DoubleTab*, int, int, int, int, int, Type_Double& ) const { /* do nothing */ }
 
   template<Type_Flux_Arete Arete_Type, typename Type_Double>
   inline std::enable_if_t<Arete_Type == Type_Flux_Arete::FLUIDE || Arete_Type == Type_Flux_Arete::NAVIER_FLUIDE || Arete_Type == Type_Flux_Arete::PAROI_FLUIDE, void>
-  flux_arete(const DoubleTab&, const DoubleTab*, long, long, long, long, long, Type_Double&, Type_Double& ) const;
+  flux_arete(const DoubleTab&, const DoubleTab*, int, int, int, int, int, Type_Double&, Type_Double& ) const;
 
   template<Type_Flux_Arete Arete_Type, typename Type_Double> inline std::enable_if_t< Arete_Type == Type_Flux_Arete::PERIODICITE, void>
-  flux_arete(const DoubleTab&, const DoubleTab*, long, long, long, long, long, Type_Double&, Type_Double& ) const ;
+  flux_arete(const DoubleTab&, const DoubleTab*, int, int, int, int, int, Type_Double&, Type_Double& ) const ;
 
   template<Type_Flux_Arete Arete_Type, typename Type_Double> inline std::enable_if_t< Arete_Type == Type_Flux_Arete::COIN_FLUIDE, void>
-  flux_arete(const DoubleTab&, const DoubleTab*, long, long, long, long, long, Type_Double&, Type_Double&) const;
+  flux_arete(const DoubleTab&, const DoubleTab*, int, int, int, int, int, Type_Double&, Type_Double&) const;
 
   /* ************************************** *
    * *********  POUR L'IMPLICITE ********** *
    * ************************************** */
 
   template<Type_Flux_Fa7 Fa7_Type, typename Type_Double> inline std::enable_if_t< Fa7_Type == Type_Flux_Fa7::SORTIE_LIBRE, void>
-  coeffs_fa7(const DoubleTab*, long , const Neumann_sortie_libre&, Type_Double& , Type_Double& ) const;
+  coeffs_fa7(const DoubleTab*, int , const Neumann_sortie_libre&, Type_Double& , Type_Double& ) const;
 
   template<Type_Flux_Fa7 Fa7_Type, typename Type_Double> inline std::enable_if_t< Fa7_Type == Type_Flux_Fa7::ELEM, void>
-  coeffs_fa7(const DoubleTab*, long, long, long, Type_Double& , Type_Double& ) const;
+  coeffs_fa7(const DoubleTab*, int, int, int, Type_Double& , Type_Double& ) const;
 
   template<Type_Flux_Arete Arete_Type, typename Type_Double>
   inline std::enable_if_t< Arete_Type == Type_Flux_Arete::INTERNE || Arete_Type == Type_Flux_Arete::INTERNE_FT || Arete_Type == Type_Flux_Arete::MIXTE || Arete_Type == Type_Flux_Arete::PERIODICITE, void>
-  coeffs_arete(const DoubleTab*, long, long, long, long, long, Type_Double& , Type_Double& ) const;
+  coeffs_arete(const DoubleTab*, int, int, int, int, int, Type_Double& , Type_Double& ) const;
 
   template<Type_Flux_Arete Arete_Type, typename Type_Double>
   inline std::enable_if_t< Arete_Type == Type_Flux_Arete::FLUIDE || Arete_Type == Type_Flux_Arete::NAVIER_FLUIDE || Arete_Type == Type_Flux_Arete::PAROI_FLUIDE || Arete_Type == Type_Flux_Arete::COIN_FLUIDE, void>
-  coeffs_arete(const DoubleTab*, long, long, long, long, long, Type_Double& , Type_Double& , Type_Double& ) const;
+  coeffs_arete(const DoubleTab*, int, int, int, int, int, Type_Double& , Type_Double& , Type_Double& ) const;
 
   template<Type_Flux_Arete Arete_Type, typename Type_Double> inline
   std::enable_if_t<(Arete_Type == Type_Flux_Arete::PAROI || Arete_Type == Type_Flux_Arete::NAVIER || Arete_Type == Type_Flux_Arete::NAVIER_PAROI), void>
-  coeffs_arete(const DoubleTab*, long, long, long, long, long, Type_Double& , Type_Double& , Type_Double& ) const { /* do nothing */ }
+  coeffs_arete(const DoubleTab*, int, int, int, int, int, Type_Double& , Type_Double& , Type_Double& ) const { /* do nothing */ }
 
 private:
   template <typename Type_Double>
-  inline void fill_coeffs_proto(const long, const double , const double, Type_Double& , Type_Double& ) const;
+  inline void fill_coeffs_proto(const int, const double , const double, Type_Double& , Type_Double& ) const;
 
   // CRTP pattern to static_cast the appropriate class and get the implementation: This is magic !
-  inline long premiere_face_bord() const { return static_cast<const DERIVED_T *>(this)->get_premiere_face_bord(); }
-  inline long orientation(long face) const { return static_cast<const DERIVED_T *>(this)->get_orientation(face); }
-  inline long elem_(long i, long j) const { return static_cast<const DERIVED_T *>(this)->get_elem(i,j); }
-  inline long face_amont_princ_(long num_face, long i) const { return static_cast<const DERIVED_T *>(this)->face_amont_princ(num_face,i); }
-  inline long face_amont_conj_(long num_face,long i, long k) const { return static_cast<const DERIVED_T *>(this)->face_amont_conj(num_face,i,k); }
-  inline double dt_vitesse(long face, long comp = 0) const { return static_cast<const DERIVED_T *>(this)->get_dt_vitesse(face, comp); }
-  inline double surface_porosite(long face) const { return static_cast<const DERIVED_T *>(this)->get_surface_porosite(face); }
-  inline double surface(long face) const { return static_cast<const DERIVED_T *>(this)->get_surface(face); }
-  inline double porosite(long face) const { return static_cast<const DERIVED_T *>(this)->get_porosite(face); }
-  inline double dim_face_(long n1,long k) const { return static_cast<const DERIVED_T *>(this)->dim_face(n1,k); }
-  inline double dim_elem_(long n1,long k) const { return static_cast<const DERIVED_T *>(this)->dim_elem(n1,k); }
-  inline double dist_face_(long n1,long n2,long k) const { return static_cast<const DERIVED_T *>(this)->dist_face(n1,n2,k); }
-  inline double dist_face_period_(long n1,long n2,long k) const { return static_cast<const DERIVED_T *>(this)->dist_face_period(n1,n2,k); }
-  inline double dist_elem_period_(long n1, long n2, long k) const { return static_cast<const DERIVED_T *>(this)->dist_elem_period(n1,n2,k); }
+  inline int premiere_face_bord() const { return static_cast<const DERIVED_T *>(this)->get_premiere_face_bord(); }
+  inline int orientation(int face) const { return static_cast<const DERIVED_T *>(this)->get_orientation(face); }
+  inline int elem_(int i, int j) const { return static_cast<const DERIVED_T *>(this)->get_elem(i,j); }
+  inline int face_amont_princ_(int num_face, int i) const { return static_cast<const DERIVED_T *>(this)->face_amont_princ(num_face,i); }
+  inline int face_amont_conj_(int num_face,int i, int k) const { return static_cast<const DERIVED_T *>(this)->face_amont_conj(num_face,i,k); }
+  inline double dt_vitesse(int face, int comp = 0) const { return static_cast<const DERIVED_T *>(this)->get_dt_vitesse(face, comp); }
+  inline double surface_porosite(int face) const { return static_cast<const DERIVED_T *>(this)->get_surface_porosite(face); }
+  inline double surface(int face) const { return static_cast<const DERIVED_T *>(this)->get_surface(face); }
+  inline double porosite(int face) const { return static_cast<const DERIVED_T *>(this)->get_porosite(face); }
+  inline double dim_face_(int n1,int k) const { return static_cast<const DERIVED_T *>(this)->dim_face(n1,k); }
+  inline double dim_elem_(int n1,int k) const { return static_cast<const DERIVED_T *>(this)->dim_elem(n1,k); }
+  inline double dist_face_(int n1,int n2,int k) const { return static_cast<const DERIVED_T *>(this)->dist_face(n1,n2,k); }
+  inline double dist_face_period_(int n1,int n2,int k) const { return static_cast<const DERIVED_T *>(this)->dist_face_period(n1,n2,k); }
+  inline double dist_elem_period_(int n1, int n2, int k) const { return static_cast<const DERIVED_T *>(this)->dist_elem_period(n1,n2,k); }
   inline const Domaine_Cl_VDF& la_zcl() const { return static_cast<const DERIVED_T *>(this)->get_la_zcl(); }
 
   inline double conv_quick_sharp_plus_(const double psc,const double vit_0, const double vit_1, const double vit_0_0, const double dx, const double dm, const double dxam) const

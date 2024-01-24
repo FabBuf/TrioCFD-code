@@ -401,7 +401,7 @@ protected:
   void duplique_bords_internes();
 
   //attributes necessary to perform surface extraction on a moving boundary (deformable domaine, like ALE)
-  IntTab les_elems_extrait_surf_reference_; // list of elements belonging to the extracted surface on a moving boundary defines at the initialization.
+  IntTab les_elems_extrait_surf_reference_; // list of elements beinting to the extracted surface on a moving boundary defines at the initialization.
   bool extrait_surf_dom_deformable_; // indicates whether the domain was defined by extraction on a moving boundary
 
 private:

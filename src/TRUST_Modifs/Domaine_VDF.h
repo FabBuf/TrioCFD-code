@@ -37,7 +37,7 @@ class Geometrie;
  *                 - les faces qui sont sur un Domaine_bord apparaissent ensuite
  *                (dans l'ordre du vecteur les_bords)
  *                - les faces internes apparaissent ensuite
- *       A chaque face on fait correspondre un long qui indique son orientation.
+ *       A chaque face on fait correspondre un int qui indique son orientation.
  *       On suppose qu'a l'interieur de chaque famille de faces (bord,joint,interne)
  *       on trouve:
  *            - le bloc des faces d'equation x = cte (faces d'orientation 0)
@@ -71,57 +71,57 @@ public :
   void discretiser() override;
   Faces* creer_faces() override;
   void reordonner(Faces& ) override;
-  inline long nb_faces_X() const;
-  inline long nb_faces_Y() const;
-  inline long nb_faces_Z() const;
-  inline long nb_aretes() const;
-  inline long nb_aretes_reelles() const;
-  inline long nb_aretes_tot() const;
-  inline long nb_aretes_joint() const;
-  inline long nb_aretes_coin() const;
-  inline long premiere_arete_coin() const;
-  inline long nb_aretes_bord() const;
-  inline long premiere_arete_bord() const;
-  inline long nb_aretes_mixtes() const;
-  inline long premiere_arete_mixte() const;
-  inline long nb_aretes_internes() const;
-  inline long premiere_arete_interne() const;
+  inline int nb_faces_X() const;
+  inline int nb_faces_Y() const;
+  inline int nb_faces_Z() const;
+  inline int nb_aretes() const;
+  inline int nb_aretes_reelles() const;
+  inline int nb_aretes_tot() const;
+  inline int nb_aretes_joint() const;
+  inline int nb_aretes_coin() const;
+  inline int premiere_arete_coin() const;
+  inline int nb_aretes_bord() const;
+  inline int premiere_arete_bord() const;
+  inline int nb_aretes_mixtes() const;
+  inline int premiere_arete_mixte() const;
+  inline int nb_aretes_internes() const;
+  inline int premiere_arete_interne() const;
   inline double h_x() const;
   inline double h_y() const;
   inline double h_z() const;
 
-  inline long Qdm(long num_arete,long ) const;
-  //inline double porosite_face(long ) const;
-  //inline double porosite_elem(long i) const;
+  inline int Qdm(int num_arete,int ) const;
+  //inline double porosite_face(int ) const;
+  //inline double porosite_elem(int i) const;
   using Domaine_VF::face_normales;
-  inline double face_normales(long , long ) const override;
-  inline long orientation(long ) const override;
-  inline double dist_face(long , long , long k) const;
-  inline double dist_norm(long num_face) const override;
-  inline double dist_norm_bord(long num_face) const override;
-  inline double dist_face_elem0(long ,long ) const override;
-  inline double dist_face_elem1(long ,long ) const override;
-  inline double dist_face_axi(long , long , long k) const;
-  inline double dist_face_period(long , long , long ) const;
-  inline double dist_norm_period(long ,double ) const;
-  inline double dist_face_elem0_period(long ,long ,double ) const override;
-  inline double dist_face_elem1_period(long ,long ,double ) const override;
-  inline double dist_norm_axi(long num_face) const ;
-  inline double dist_norm_bord_axi(long num_face) const;
-  inline double dist_face_elem0_axi(long ,long ) const;
-  inline double dist_face_elem1_axi(long ,long ) const;
-  inline double distance_face(long , long , long k) const;
-  inline double distance_normale(long num_face) const;
-  inline double dist_elem(long ,long ,long ) const;
-  inline double dist_elem_period(long ,long ,long ) const;
-  inline double dim_elem(long ,long ) const;
-  inline double dim_face(long ,long ) const;
-  inline double delta_C(long ) const;
-  inline long amont_amont(long, long ) const;
-  inline long face_amont_princ(long ,long ) const;
-  inline long face_amont_conj(long ,long ,long ) const;
-  inline long face_bord_amont(long ,long ,long ) const;
-  inline long elem_voisin(long , long , long ) const;
+  inline double face_normales(int , int ) const override;
+  inline int orientation(int ) const override;
+  inline double dist_face(int , int , int k) const;
+  inline double dist_norm(int num_face) const override;
+  inline double dist_norm_bord(int num_face) const override;
+  inline double dist_face_elem0(int ,int ) const override;
+  inline double dist_face_elem1(int ,int ) const override;
+  inline double dist_face_axi(int , int , int k) const;
+  inline double dist_face_period(int , int , int ) const;
+  inline double dist_norm_period(int ,double ) const;
+  inline double dist_face_elem0_period(int ,int ,double ) const override;
+  inline double dist_face_elem1_period(int ,int ,double ) const override;
+  inline double dist_norm_axi(int num_face) const ;
+  inline double dist_norm_bord_axi(int num_face) const;
+  inline double dist_face_elem0_axi(int ,int ) const;
+  inline double dist_face_elem1_axi(int ,int ) const;
+  inline double distance_face(int , int , int k) const;
+  inline double distance_normale(int num_face) const;
+  inline double dist_elem(int ,int ,int ) const;
+  inline double dist_elem_period(int ,int ,int ) const;
+  inline double dim_elem(int ,int ) const;
+  inline double dim_face(int ,int ) const;
+  inline double delta_C(int ) const;
+  inline int amont_amont(int, int ) const;
+  inline int face_amont_princ(int ,int ) const;
+  inline int face_amont_conj(int ,int ,int ) const;
+  inline int face_bord_amont(int ,int ,int ) const;
+  inline int elem_voisin(int , int , int ) const;
 
   inline IntVect& orientation();
   inline const IntVect& orientation() const override;
@@ -145,7 +145,7 @@ public :
 
   //std::map permettant de retrouver le couple (proc, item local) associe a un item virtuel pour le mdv_elem
   void init_virt_e_map() const;
-  mutable std::map<std::array<long, 2>, long> virt_e_map;
+  mutable std::map<std::array<int, 2>, int> virt_e_map;
 
 protected:
 
@@ -154,17 +154,17 @@ protected:
   // 0 si face perpendiculaire a l'axe des X
   // 1 si face perpendiculaire a l'axe des Y
   // 2 si face perpendiculaire a l'axe des Z
-  long nb_faces_X_ = -1;                         // nombre de faces perpendiculaires a l'axe des X
-  long nb_faces_Y_ = -1;                         // nombre de faces perpendiculaires a l'axe des Y
-  long nb_faces_Z_ = -1;                         // nombre de faces perpendiculaires a l'axe des Z
-  long nb_aretes_ = -1;                          // nombre d'aretes tous types confondus
-  long nb_aretes_reelles_ = -1; 			// EB
-  long nb_aretes_tot_ = -1; 			// EB
-  long nb_aretes_joint_ = -1;                    // nombre d'aretes joint
-  long nb_aretes_coin_ = -1;                     // nombre d'aretes coin
-  long nb_aretes_bord_ = -1;                     // nombre d'aretes bord
-  long nb_aretes_mixtes_ = -1;                   // nombre d'aretes mixtes
-  long nb_aretes_internes_ = -1;                 // nombre d'aretes internes
+  int nb_faces_X_ = -1;                         // nombre de faces perpendiculaires a l'axe des X
+  int nb_faces_Y_ = -1;                         // nombre de faces perpendiculaires a l'axe des Y
+  int nb_faces_Z_ = -1;                         // nombre de faces perpendiculaires a l'axe des Z
+  int nb_aretes_ = -1;                          // nombre d'aretes tous types confondus
+  int nb_aretes_reelles_ = -1; 			// EB
+  int nb_aretes_tot_ = -1; 			// EB
+  int nb_aretes_joint_ = -1;                    // nombre d'aretes joint
+  int nb_aretes_coin_ = -1;                     // nombre d'aretes coin
+  int nb_aretes_bord_ = -1;                     // nombre d'aretes bord
+  int nb_aretes_mixtes_ = -1;                   // nombre d'aretes mixtes
+  int nb_aretes_internes_ = -1;                 // nombre d'aretes internes
   IntTab Qdm_;                            // connectivites aretes/faces
   IntVect type_arete_; 						// EB : type des aretes
   DoubleVect volumes_aretes_;
@@ -194,9 +194,9 @@ inline IntTab& Domaine_VDF::Qdm()
   return Qdm_;
 }
 
-inline double Domaine_VDF::face_normales(long num_face,long k) const
+inline double Domaine_VDF::face_normales(int num_face,int k) const
 {
-  long ori = orientation(num_face);
+  int ori = orientation(num_face);
   double surf=0;
   if (ori == k)
     surf=face_surfaces(num_face);
@@ -225,7 +225,7 @@ inline const DoubleVect  Domaine_VDF::volumes_aretes() const
 /*! @brief
  *
  */
-inline long Domaine_VDF::nb_faces_X() const
+inline int Domaine_VDF::nb_faces_X() const
 {
   return nb_faces_X_;
 }
@@ -233,7 +233,7 @@ inline long Domaine_VDF::nb_faces_X() const
 /*! @brief
  *
  */
-inline long Domaine_VDF::nb_faces_Y() const
+inline int Domaine_VDF::nb_faces_Y() const
 {
   return nb_faces_Y_;
 }
@@ -241,7 +241,7 @@ inline long Domaine_VDF::nb_faces_Y() const
 /*! @brief
  *
  */
-inline long Domaine_VDF::nb_faces_Z() const
+inline int Domaine_VDF::nb_faces_Z() const
 {
   return nb_faces_Z_;
 }
@@ -249,12 +249,12 @@ inline long Domaine_VDF::nb_faces_Z() const
 /*! @brief
  *
  */
-inline long Domaine_VDF::Qdm(long num_arete,long i) const
+inline int Domaine_VDF::Qdm(int num_arete,int i) const
 {
   return Qdm_(num_arete,i);
 }
 
-/*! @brief inline double Domaine_VDF::porosite_face(long i) const {
+/*! @brief inline double Domaine_VDF::porosite_face(int i) const {
  *
  *   return porosite_face_[i];
  *  }
@@ -325,7 +325,7 @@ inline const IntVect& Domaine_VDF::type_arete() const
  *
  */
 
-/*! @brief inline double Domaine_VDF::porosite_elem(long i) const {
+/*! @brief inline double Domaine_VDF::porosite_elem(int i) const {
  *
  *   return porosite_elem_[i];
  *  }
@@ -335,7 +335,7 @@ inline const IntVect& Domaine_VDF::type_arete() const
 /*! @brief
  *
  */
-inline long Domaine_VDF::orientation(long i) const
+inline int Domaine_VDF::orientation(int i) const
 {
   return orientation_[i];
 }
@@ -346,7 +346,7 @@ inline long Domaine_VDF::orientation(long i) const
 /*! @brief
  *
  */
-inline double Domaine_VDF::dist_face(long fac1, long fac2, long k) const
+inline double Domaine_VDF::dist_face(int fac1, int fac2, int k) const
 {
   // Attention cette methode n'est plus appelee par les methodes dist_face de
   // Eval_Diff_VDF_Multi_inco_const.cpp et Eval_Diff_VDF_const.cpp pour optimiser les evaluateurs
@@ -359,7 +359,7 @@ inline double Domaine_VDF::dist_face(long fac1, long fac2, long k) const
 /*! @brief
  *
  */
-inline double Domaine_VDF::dist_face_axi(long fac1, long fac2, long k) const
+inline double Domaine_VDF::dist_face_axi(int fac1, int fac2, int k) const
 {
   if (k != 1)
     return xv_(fac2,k) - xv_(fac1,k);
@@ -380,11 +380,11 @@ inline double Domaine_VDF::dist_face_axi(long fac1, long fac2, long k) const
 /*! @brief
  *
  */
-inline double Domaine_VDF::dist_norm(long num_face) const
+inline double Domaine_VDF::dist_norm(int num_face) const
 {
-  long n1 = face_voisins_(num_face,0);
-  long n2 = face_voisins_(num_face,1);
-  long k = orientation_[num_face];
+  int n1 = face_voisins_(num_face,0);
+  int n2 = face_voisins_(num_face,1);
+  int k = orientation_[num_face];
   return (xp_(n2,k) - xp_(n1,k));
 }
 
@@ -394,11 +394,11 @@ inline double Domaine_VDF::dist_norm(long num_face) const
 /*! @brief
  *
  */
-inline double Domaine_VDF::dist_norm_axi(long num_face) const
+inline double Domaine_VDF::dist_norm_axi(int num_face) const
 {
-  long n1 = face_voisins_(num_face,0);
-  long n2 = face_voisins_(num_face,1);
-  long k = orientation_[num_face];
+  int n1 = face_voisins_(num_face,0);
+  int n2 = face_voisins_(num_face,1);
+  int k = orientation_[num_face];
   double dist;
   if (k != 1)
     dist = xp_(n2,k) - xp_(n1,k);
@@ -420,12 +420,12 @@ inline double Domaine_VDF::dist_norm_axi(long num_face) const
 /*! @brief
  *
  */
-inline double Domaine_VDF::dist_norm_bord(long num_face) const
+inline double Domaine_VDF::dist_norm_bord(int num_face) const
 {
-  long n1 = face_voisins_(num_face,0);
-  long n2 = face_voisins_(num_face,1);
+  int n1 = face_voisins_(num_face,0);
+  int n2 = face_voisins_(num_face,1);
   assert(num_face<nb_faces_bord() || n1==-1 || n2==-1); // Verifie que num_face est bien une face de bord reelle ou virtuelle
-  long k = orientation_[num_face];
+  int k = orientation_[num_face];
   if (n1!=-1)
     return (xv_(num_face,k) - xp_(n1,k));
   else
@@ -438,12 +438,12 @@ inline double Domaine_VDF::dist_norm_bord(long num_face) const
 /*! @brief
  *
  */
-inline double Domaine_VDF::dist_norm_bord_axi(long num_face) const
+inline double Domaine_VDF::dist_norm_bord_axi(int num_face) const
 {
-  long n1 = face_voisins_(num_face,0);
-  long n2 = face_voisins_(num_face,1);
+  int n1 = face_voisins_(num_face,0);
+  int n2 = face_voisins_(num_face,1);
   assert(num_face<nb_faces_bord() || n1==-1 || n2==-1); // Verifie que num_face est bien une face de bord reelle ou virtuelle
-  long k = orientation_[num_face];
+  int k = orientation_[num_face];
   double dist;
   if (n1!=-1)
     if (k != 1)
@@ -473,7 +473,7 @@ inline double Domaine_VDF::dist_norm_bord_axi(long num_face) const
 /*! @brief
  *
  */
-inline double Domaine_VDF::distance_face(long n1, long n2, long k) const
+inline double Domaine_VDF::distance_face(int n1, int n2, int k) const
 {
   double dist,d_teta;
   assert ( (orientation_[n1]==orientation_[n2]) );
@@ -495,13 +495,13 @@ inline double Domaine_VDF::distance_face(long n1, long n2, long k) const
 /*! @brief
  *
  */
-inline double Domaine_VDF::distance_normale(long num_face) const
+inline double Domaine_VDF::distance_normale(int num_face) const
 {
 
   double dist,d_teta;
-  long n1 = face_voisins_(num_face,0);
-  long n2 = face_voisins_(num_face,1);
-  long k = orientation_[num_face];
+  int n1 = face_voisins_(num_face,0);
+  int n2 = face_voisins_(num_face,1);
+  int k = orientation_[num_face];
   if ((n1!=-1) && (n2!=-1))
     {
       if ( (k!=1) || (axi!=1) )
@@ -544,7 +544,7 @@ inline double Domaine_VDF::distance_normale(long num_face) const
 /*! @brief
  *
  */
-inline long Domaine_VDF::nb_aretes_joint() const
+inline int Domaine_VDF::nb_aretes_joint() const
 {
   return nb_aretes_joint_;
 }
@@ -552,7 +552,7 @@ inline long Domaine_VDF::nb_aretes_joint() const
 /*! @brief
  *
  */
-inline long Domaine_VDF::nb_aretes_coin() const
+inline int Domaine_VDF::nb_aretes_coin() const
 {
   return nb_aretes_coin_;
 }
@@ -560,7 +560,7 @@ inline long Domaine_VDF::nb_aretes_coin() const
 /*! @brief
  *
  */
-inline long Domaine_VDF::premiere_arete_coin() const
+inline int Domaine_VDF::premiere_arete_coin() const
 {
   return nb_aretes_joint_;
 }
@@ -568,7 +568,7 @@ inline long Domaine_VDF::premiere_arete_coin() const
 /*! @brief
  *
  */
-inline long Domaine_VDF::nb_aretes_bord() const
+inline int Domaine_VDF::nb_aretes_bord() const
 {
   return nb_aretes_bord_;
 }
@@ -576,7 +576,7 @@ inline long Domaine_VDF::nb_aretes_bord() const
 /*! @brief
  *
  */
-inline long Domaine_VDF::premiere_arete_bord() const
+inline int Domaine_VDF::premiere_arete_bord() const
 {
   return nb_aretes_joint_+ nb_aretes_coin_;
 }
@@ -584,7 +584,7 @@ inline long Domaine_VDF::premiere_arete_bord() const
 /*! @brief
  *
  */
-inline long Domaine_VDF::nb_aretes_mixtes() const
+inline int Domaine_VDF::nb_aretes_mixtes() const
 {
   return nb_aretes_mixtes_;
 }
@@ -592,7 +592,7 @@ inline long Domaine_VDF::nb_aretes_mixtes() const
 /*! @brief
  *
  */
-inline long Domaine_VDF::premiere_arete_mixte() const
+inline int Domaine_VDF::premiere_arete_mixte() const
 {
   return nb_aretes_ - nb_aretes_mixtes_ - nb_aretes_internes_;
 }
@@ -600,7 +600,7 @@ inline long Domaine_VDF::premiere_arete_mixte() const
 /*! @brief
  *
  */
-inline long Domaine_VDF::nb_aretes_internes() const
+inline int Domaine_VDF::nb_aretes_internes() const
 {
   return nb_aretes_internes_;
 }
@@ -608,19 +608,19 @@ inline long Domaine_VDF::nb_aretes_internes() const
 /*! @brief
  *
  */
-inline long Domaine_VDF::nb_aretes() const
+inline int Domaine_VDF::nb_aretes() const
 {
   return nb_aretes_;
 }
 // debut EB
-inline long Domaine_VDF::nb_aretes_reelles() const { return nb_aretes_reelles_; }
-inline long Domaine_VDF::nb_aretes_tot() const { return nb_aretes_tot_; }
+inline int Domaine_VDF::nb_aretes_reelles() const { return nb_aretes_reelles_; }
+inline int Domaine_VDF::nb_aretes_tot() const { return nb_aretes_tot_; }
 // fin EB
 
 /*! @brief
  *
  */
-inline long Domaine_VDF::premiere_arete_interne() const
+inline int Domaine_VDF::premiere_arete_interne() const
 {
   return nb_aretes_ - nb_aretes_internes_;
 }
@@ -652,7 +652,7 @@ inline double Domaine_VDF::h_z() const
 /*! @brief
  *
  */
-inline double Domaine_VDF::dist_elem(long n1, long n2, long k) const
+inline double Domaine_VDF::dist_elem(int n1, int n2, int k) const
 {
   return xp_(n2,k)-xp_(n1,k);
 }
@@ -660,7 +660,7 @@ inline double Domaine_VDF::dist_elem(long n1, long n2, long k) const
 /*! @brief
  *
  */
-inline double Domaine_VDF::dist_elem_period(long n1, long n2, long k) const
+inline double Domaine_VDF::dist_elem_period(int n1, int n2, int k) const
 {
   return xp_(n2,k) - xv_(elem_faces(n2,k),k)
          + xv_(elem_faces(n1,k+dimension),k) - xp_(n1,k);
@@ -669,7 +669,7 @@ inline double Domaine_VDF::dist_elem_period(long n1, long n2, long k) const
 /*! @brief
  *
  */
-inline double Domaine_VDF::dim_elem(long n1, long k) const
+inline double Domaine_VDF::dim_elem(int n1, int k) const
 {
   return xv_(elem_faces_(n1,k+dimension),k)-xv_(elem_faces_(n1,k),k);
 }
@@ -677,19 +677,19 @@ inline double Domaine_VDF::dim_elem(long n1, long k) const
 /*! @brief
  *
  */
-inline double Domaine_VDF::dim_face(long n1, long k) const
+inline double Domaine_VDF::dim_face(int n1, int k) const
 {
-  long elem = std::max(face_voisins_(n1,0), face_voisins_(n1,1));
+  int elem = std::max(face_voisins_(n1,0), face_voisins_(n1,1));
   return dim_elem(elem, k);
 }
 
 /*! @brief
  *
  */
-inline double Domaine_VDF::delta_C(long elem) const
+inline double Domaine_VDF::delta_C(int elem) const
 {
   double dist= 1;
-  for (long i=0; i<dimension; i++)
+  for (int i=0; i<dimension; i++)
     dist *= dim_elem(elem,i);
   return pow(dist,1./3.);
 }
@@ -697,21 +697,21 @@ inline double Domaine_VDF::delta_C(long elem) const
 /*! @brief
  *
  */
-inline long Domaine_VDF::amont_amont(long num_face, long i) const
+inline int Domaine_VDF::amont_amont(int num_face, int i) const
 {
-  long k=orientation_[num_face];
-  long num_elem = face_voisins_(num_face,i);
-  long face = elem_faces_(num_elem,k+i*dimension);
+  int k=orientation_[num_face];
+  int num_elem = face_voisins_(num_face,i);
+  int face = elem_faces_(num_elem,k+i*dimension);
   return face_voisins_(face,i);
 }
 
 /*! @brief
  *
  */
-inline long Domaine_VDF::face_amont_princ(long num_face, long i) const
+inline int Domaine_VDF::face_amont_princ(int num_face, int i) const
 {
-  long ori=orientation(num_face);
-  long elem=face_voisins_(num_face,i);
+  int ori=orientation(num_face);
+  int elem=face_voisins_(num_face,i);
   if(elem !=-1)
     elem=elem_faces_(elem,ori+i*dimension);
   return elem;
@@ -720,11 +720,11 @@ inline long Domaine_VDF::face_amont_princ(long num_face, long i) const
 /*! @brief
  *
  */
-inline long Domaine_VDF::face_amont_conj(long num_face, long k, long i) const
+inline int Domaine_VDF::face_amont_conj(int num_face, int k, int i) const
 {
-  long ori = orientation(num_face);
-  long elem = face_voisins_(num_face,1);
-  long face_conj=-2,face,elem_bis=-2;
+  int ori = orientation(num_face);
+  int elem = face_voisins_(num_face,1);
+  int face_conj=-2,face,elem_bis=-2;
 
   if(elem != -1)
     {
@@ -755,14 +755,14 @@ inline long Domaine_VDF::face_amont_conj(long num_face, long k, long i) const
 /*! @brief Determine la face voisine de notre face en prevoyant que cette derniere puisse etre de type bord.
  *
  */
-inline long Domaine_VDF::face_bord_amont(long num_face, long k, long i) const
+inline int Domaine_VDF::face_bord_amont(int num_face, int k, int i) const
 {
-  long ori = orientation(num_face);
-  long elem = face_voisins_(num_face,1);
+  int ori = orientation(num_face);
+  int elem = face_voisins_(num_face,1);
   if(elem != -1)
     {
-      long face = elem_faces_(elem, k+i*dimension);
-      long elem_bis = face_voisins_(face,i);
+      int face = elem_faces_(elem, k+i*dimension);
+      int elem_bis = face_voisins_(face,i);
       if (elem_bis != -1)
         elem = elem_faces_(elem_bis, ori);
       else
@@ -773,8 +773,8 @@ inline long Domaine_VDF::face_bord_amont(long num_face, long k, long i) const
       elem = face_voisins_(num_face,0);
       if(elem != -1)
         {
-          long face = elem_faces_(elem, k+i*dimension);
-          long elem_bis = face_voisins_(face,i);
+          int face = elem_faces_(elem, k+i*dimension);
+          int elem_bis = face_voisins_(face,i);
           if (elem_bis != -1)
             elem = elem_faces_(elem_bis, ori+dimension);
           else
@@ -787,9 +787,9 @@ inline long Domaine_VDF::face_bord_amont(long num_face, long k, long i) const
 /*! @brief
  *
  */
-inline long Domaine_VDF::elem_voisin(long elem, long face , long indic) const
+inline int Domaine_VDF::elem_voisin(int elem, int face , int indic) const
 {
-  long ori = orientation_(face);
+  int ori = orientation_(face);
   return face_voisins_(elem_faces_(elem,ori+indic*dimension),indic);
 }
 
@@ -798,10 +798,10 @@ inline long Domaine_VDF::elem_voisin(long elem, long face , long indic) const
  *  le centre de face_voisins(face,0)
  *
  */
-inline double Domaine_VDF::dist_face_elem0(long num_face,long n0) const
+inline double Domaine_VDF::dist_face_elem0(int num_face,int n0) const
 
 {
-  long ori = orientation_[num_face];
+  int ori = orientation_[num_face];
   return xv_(num_face,ori) - xp_(n0,ori);
 }
 
@@ -810,9 +810,9 @@ inline double Domaine_VDF::dist_face_elem0(long num_face,long n0) const
  *  le centre de face_voisins(face,1)
  *
  */
-inline double Domaine_VDF::dist_face_elem1(long num_face,long n1) const
+inline double Domaine_VDF::dist_face_elem1(int num_face,int n1) const
 {
-  long ori = orientation_[num_face];
+  int ori = orientation_[num_face];
   return xp_(n1,ori) - xv_(num_face,ori);
 }
 
@@ -821,9 +821,9 @@ inline double Domaine_VDF::dist_face_elem1(long num_face,long n1) const
  *  le centre de face_voisins(face,0)
  *
  */
-inline double Domaine_VDF::dist_face_elem0_axi(long num_face,long n0) const
+inline double Domaine_VDF::dist_face_elem0_axi(int num_face,int n0) const
 {
-  long ori = orientation_[num_face];
+  int ori = orientation_[num_face];
   double dist;
   if (ori!=1)
     dist = xv_(num_face,ori) - xp_(n0,ori);
@@ -842,9 +842,9 @@ inline double Domaine_VDF::dist_face_elem0_axi(long num_face,long n0) const
  *  de face_voisins(face,1)
  *
  */
-inline double Domaine_VDF::dist_face_elem1_axi(long num_face,long n1) const
+inline double Domaine_VDF::dist_face_elem1_axi(int num_face,int n1) const
 {
-  long ori = orientation_[num_face];
+  int ori = orientation_[num_face];
   double dist;
   if (ori!=1)
     dist = xp_(n1,ori) - xv_(num_face,ori);
@@ -858,17 +858,17 @@ inline double Domaine_VDF::dist_face_elem1_axi(long num_face,long n1) const
   return dist;
 }
 
-inline double Domaine_VDF::dist_norm_period(long num_face,double l) const
+inline double Domaine_VDF::dist_norm_period(int num_face,double l) const
 {
-  long n1 = face_voisins_(num_face,0);
-  long n2 = face_voisins_(num_face,1);
-  long k = orientation_[num_face];
+  int n1 = face_voisins_(num_face,0);
+  int n2 = face_voisins_(num_face,1);
+  int k = orientation_[num_face];
   return (xp_(n2,k) + l - xp_(n1,k));
 }
 
-inline double Domaine_VDF::dist_face_elem0_period(long num_face,long n0,double l) const
+inline double Domaine_VDF::dist_face_elem0_period(int num_face,int n0,double l) const
 {
-  long ori = orientation_[num_face];
+  int ori = orientation_[num_face];
   double dist = xv_(num_face,ori) - xp_(n0,ori);
   if (dist > 0)
     return dist;
@@ -876,9 +876,9 @@ inline double Domaine_VDF::dist_face_elem0_period(long num_face,long n0,double l
     return dist + l;
 }
 
-inline double Domaine_VDF::dist_face_elem1_period(long num_face,long n1,double l) const
+inline double Domaine_VDF::dist_face_elem1_period(int num_face,int n1,double l) const
 {
-  long ori = orientation_[num_face];
+  int ori = orientation_[num_face];
   double dist = xp_(n1,ori) - xv_(num_face,ori);
   if (dist > 0)
     return dist;
@@ -886,7 +886,7 @@ inline double Domaine_VDF::dist_face_elem1_period(long num_face,long n1,double l
     return dist + l;
 }
 
-inline double Domaine_VDF::dist_face_period(long fac1 , long fac2, long k) const
+inline double Domaine_VDF::dist_face_period(int fac1 , int fac2, int k) const
 {
   const Domaine& le_domaine = domaine();
   const DoubleTab& coord_sommets = le_domaine.coord_sommets();

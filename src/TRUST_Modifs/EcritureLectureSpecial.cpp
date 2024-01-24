@@ -23,9 +23,9 @@
 #include <MD_Vector_composite.h>
 #include <TRUSTTab_parts.h>
 
-long EcritureLectureSpecial::mode_ecr=-1;
-long EcritureLectureSpecial::mode_lec=0;
-long EcritureLectureSpecial::Active=1;
+int EcritureLectureSpecial::mode_ecr=-1;
+int EcritureLectureSpecial::mode_lec=0;
+int EcritureLectureSpecial::Active=1;
 
 #ifdef MPI_
 Nom EcritureLectureSpecial::Input="LecFicDiffuseBin";    // "EFichierBin" was the past (<=1.6.9) and "LecFicPartageMPIIO" is may be the future
@@ -101,7 +101,7 @@ Entree& EcritureLectureSpecial::interpreter(Entree& is)
  * ...
  *
  */
-long EcritureLectureSpecial::is_lecture_special()
+int EcritureLectureSpecial::is_lecture_special()
 {
   return mode_lec;
 }
@@ -115,7 +115,7 @@ long EcritureLectureSpecial::is_lecture_special()
  *
  *
  */
-long EcritureLectureSpecial::is_ecriture_special(long& special,long& a_faire)
+int EcritureLectureSpecial::is_ecriture_special(int& special,int& a_faire)
 {
   special=0;
   a_faire=1;
@@ -128,44 +128,44 @@ long EcritureLectureSpecial::is_ecriture_special(long& special,long& a_faire)
   return mode_ecr;
 }
 
-/*! @brief simple appel a EcritureLectureSpecial::ecriture_special (const Domaine_VF& zvf,Sortie& fich,long nbval,const DoubleTab& val)
+/*! @brief simple appel a EcritureLectureSpecial::ecriture_special (const Domaine_VF& zvf,Sortie& fich,int nbval,const DoubleTab& val)
  *
  *     apres avoir recupere le tableau val
  *
  */
-long EcritureLectureSpecial::ecriture_special(const Champ_base& ch, Sortie& fich)
+int EcritureLectureSpecial::ecriture_special(const Champ_base& ch, Sortie& fich)
 {
   const Domaine_VF& zvf = ref_cast(Domaine_VF, ch.domaine_dis_base());
   const DoubleTab& val = ch.valeurs();
   return ecriture_special(zvf, fich, val);
 }
 
-long ecrit(Sortie& fich, const ArrOfBit& items_to_write, const DoubleTab& pos, const DoubleTab& val)
+int ecrit(Sortie& fich, const ArrOfBit& items_to_write, const DoubleTab& pos, const DoubleTab& val)
 {
-  const long nb_dim = val.nb_dim();
-  const long nb_comp = (nb_dim == 2) ? val.dimension(1) : 1;
-  const long nb_val = items_to_write.size_array();
-  const long dim = pos.dimension(1);
+  const int nb_dim = val.nb_dim();
+  const int nb_comp = (nb_dim == 2) ? val.dimension(1) : 1;
+  const int nb_val = items_to_write.size_array();
+  const int dim = pos.dimension(1);
 
   if (EcritureLectureSpecial::get_Output().finit_par("MPIIO"))
     {
       // No bufferisation needed for Parallel IO
-      long jmax = (dim + nb_comp) * nb_val;
+      int jmax = (dim + nb_comp) * nb_val;
       ArrOfDouble tmp(jmax);
-      long j=0;
-      for (long p = 0; p < nb_val; p++)
+      int j=0;
+      for (int p = 0; p < nb_val; p++)
         {
           // On n'ecrit que les items reels non communs afin d'avoir un fichier .xyz
           // de meme taille quelque soit le decoupage et surtout de pouvoir le relire
           // quelque soit le decoupage et les supports
           if (items_to_write[p])
             {
-              for (long k = 0; k < dim; k++)
+              for (int k = 0; k < dim; k++)
                 tmp[j++] = pos(p, k);
               if (nb_dim == 1)
                 tmp[j++] = val(p);
               else
-                for (long k = 0; k < nb_comp; k++)
+                for (int k = 0; k < nb_comp; k++)
                   tmp[j++] = val(p, k);
             }
         }
@@ -174,22 +174,22 @@ long ecrit(Sortie& fich, const ArrOfBit& items_to_write, const DoubleTab& pos, c
   else
     {
       // Bufferisation needed for EcrFicPartage
-      long jmax = (dim + nb_comp) * 128;
+      int jmax = (dim + nb_comp) * 128;
       ArrOfDouble tmp(jmax);
-      long j = 0;
-      for (long p = 0; p < nb_val; p++)
+      int j = 0;
+      for (int p = 0; p < nb_val; p++)
         {
           // On n'ecrit que les items reels non communs afin d'avoir un fichier .xyz
           // de meme taille quelque soit le decoupage et surtout de pouvoir le relire
           // quelque soit le decoupage et les supports
           if (items_to_write[p])
             {
-              for (long k = 0; k < dim; k++)
+              for (int k = 0; k < dim; k++)
                 tmp[j++] = pos(p, k);
               if (nb_dim == 1)
                 tmp[j++] = val(p);
               else
-                for (long k = 0; k < nb_comp; k++)
+                for (int k = 0; k < nb_comp; k++)
                   tmp[j++] = val(p, k);
               if (j == jmax)
                 {
@@ -212,16 +212,16 @@ long ecrit(Sortie& fich, const ArrOfBit& items_to_write, const DoubleTab& pos, c
  * Methode recursive, si le tableau a ecrire a un descripteur MD_Vector_composite
  *
  */
-static long ecriture_special_part2(const Domaine_VF& zvf, Sortie& fich, const DoubleTab& val)
+static int ecriture_special_part2(const Domaine_VF& zvf, Sortie& fich, const DoubleTab& val)
 {
   const MD_Vector& md = val.get_md_vector();
-  long bytes = 0;
+  int bytes = 0;
   if (sub_type(MD_Vector_composite, md.valeur()))
     {
       // Champs p1bulles et autres: appel recursif pour les differents sous-tableaux:
       ConstDoubleTab_parts parts(val);
-      long n = zvf.que_suis_je() == "Domaine_PolyMAC_P0P1NC" || zvf.que_suis_je() == "Domaine_PolyMAC_P0" ? 1 : parts.size();//on saute les variables auxiliaires de Champ_{P0,Face}_PolyMAC_P0P1NC
-      for (long i = 0; i < n; i++)
+      int n = zvf.que_suis_je() == "Domaine_PolyMAC_P0P1NC" || zvf.que_suis_je() == "Domaine_PolyMAC_P0" ? 1 : parts.size();//on saute les variables auxiliaires de Champ_{P0,Face}_PolyMAC_P0P1NC
+      for (int i = 0; i < n; i++)
         bytes += ecriture_special_part2(zvf, fich, parts[i]);
     }
   else if (sub_type(MD_Vector_std, md.valeur()))
@@ -246,16 +246,16 @@ static long ecriture_special_part2(const Domaine_VF& zvf, Sortie& fich, const Do
  * Methode recursive, si le tableau a ecrire a un descripteur MD_Vector_composite
  *
  */
-static long ecriture_special_part2_indic_aretes(const Domaine_VF& dvf, Sortie& fich, const DoubleTab& val)
+static int ecriture_special_part2_indic_aretes(const Domaine_VF& dvf, Sortie& fich, const DoubleTab& val)
 {
   const MD_Vector& md = val.get_md_vector();
-  long bytes = 0;
+  int bytes = 0;
   if (sub_type(MD_Vector_composite, md.valeur()))
     {
       // Champs p1bulles et autres: appel recursif pour les differents sous-tableaux:
       ConstDoubleTab_parts parts(val);
-      long n = dvf.que_suis_je() == "Zone_PolyMAC" || dvf.que_suis_je() == "Zone_CoviMAC" ? 1 : parts.size();//on saute les variables auxiliaires de Champ_{P0,Face}_PolyMAC
-      for (long i = 0; i < n; i++)
+      int n = dvf.que_suis_je() == "Zone_PolyMAC" || dvf.que_suis_je() == "Zone_CoviMAC" ? 1 : parts.size();//on saute les variables auxiliaires de Champ_{P0,Face}_PolyMAC
+      for (int i = 0; i < n; i++)
         bytes += ecriture_special_part2(dvf, fich, parts[i]);
     }
   else if (sub_type(MD_Vector_std, md.valeur()))
@@ -279,7 +279,7 @@ static long ecriture_special_part2_indic_aretes(const Domaine_VF& dvf, Sortie& f
 /*! @brief codage de l'ecriture des positions et des valeurs de val
  *
  */
-long EcritureLectureSpecial::ecriture_special(const Domaine_VF& zvf, Sortie& fich, const DoubleTab& val)
+int EcritureLectureSpecial::ecriture_special(const Domaine_VF& zvf, Sortie& fich, const DoubleTab& val)
 {
   const MD_Vector& md = val.get_md_vector();
   if (!md.non_nul())
@@ -287,40 +287,40 @@ long EcritureLectureSpecial::ecriture_special(const Domaine_VF& zvf, Sortie& fic
       Cerr << "EcritureLectureSpecial::ecriture_special: error, cannot save an array with no metadata" << finl;
       Process::exit();
     }
-  const long nb_items_seq = md.valeur().nb_items_seq_tot();
+  const int nb_items_seq = md.valeur().nb_items_seq_tot();
   if (nb_items_seq == 0)
     return 0;
 
-  const long nb_dim = val.nb_dim();
-  const long nb_comp = (nb_dim == 2) ? val.dimension(1) : 1;
-  const long dim = Objet_U::dimension;
-  const long n = nb_items_seq * (nb_comp + dim);
+  const int nb_dim = val.nb_dim();
+  const int nb_comp = (nb_dim == 2) ? val.dimension(1) : 1;
+  const int dim = Objet_U::dimension;
+  const int n = nb_items_seq * (nb_comp + dim);
 
 
   if (Process::je_suis_maitre())
     {
-      fich << (long)1 << finl;
+      fich << (int)1 << finl;
       fich	 << n << finl ;
-      fich << (long)1 << finl;
+      fich << (int)1 << finl;
       fich << n << finl ;
       fich << n <<finl;
     }
 
-  long bytes = ecriture_special_part2(zvf, fich, val);
+  int bytes = ecriture_special_part2(zvf, fich, val);
 
   if (Process::je_suis_maitre())
     {
       fich << n << finl;
-      fich << (long)0 << finl;
-      fich << (long)0 << finl;
-      fich << (long)0 << finl;
-      fich << (long)1 << finl;
-      fich << (long)0 << finl;
+      fich << (int)0 << finl;
+      fich << (int)0 << finl;
+      fich << (int)0 << finl;
+      fich << (int)1 << finl;
+      fich << (int)0 << finl;
       fich << n << finl;
       fich << finl;
-      fich << (long)1 << finl;
-      fich << (long)0 << finl;
-      fich << (long)0 <<finl;
+      fich << (int)1 << finl;
+      fich << (int)0 << finl;
+      fich << (int)0 <<finl;
     }
   fich.syncfile();
   return bytes;
@@ -330,7 +330,7 @@ long EcritureLectureSpecial::ecriture_special(const Domaine_VF& zvf, Sortie& fic
 // donc dvf est ici issue du champ de  l'indicatrice aux elements et donc get_ref_coordinates_items ne renvoie pas
 // les bonnes coordonnees
 // Actuellement pas utilise car on ne sauvegarde pas l'indicatrice aux aretes
-long EcritureLectureSpecial::ecriture_special_indic_aretes(const Domaine_VF& dvf, Sortie& fich, const DoubleTab& val)
+int EcritureLectureSpecial::ecriture_special_indic_aretes(const Domaine_VF& dvf, Sortie& fich, const DoubleTab& val)
 {
   const MD_Vector& md = val.get_md_vector();
   if (!md.non_nul())
@@ -338,40 +338,40 @@ long EcritureLectureSpecial::ecriture_special_indic_aretes(const Domaine_VF& dvf
       Cerr << "EcritureLectureSpecial::ecriture_special: error, cannot save an array with no metadata" << finl;
       Process::exit();
     }
-  const long nb_items_seq = md.valeur().nb_items_seq_tot();
+  const int nb_items_seq = md.valeur().nb_items_seq_tot();
   if (nb_items_seq == 0)
     return 0;
 
-  const long nb_dim = val.nb_dim();
-  const long nb_comp = (nb_dim == 2) ? val.dimension(1) : 1;
-  const long dim = Objet_U::dimension;
-  const long n = nb_items_seq * (nb_comp + dim);
+  const int nb_dim = val.nb_dim();
+  const int nb_comp = (nb_dim == 2) ? val.dimension(1) : 1;
+  const int dim = Objet_U::dimension;
+  const int n = nb_items_seq * (nb_comp + dim);
 
 
   if (Process::je_suis_maitre())
     {
-      fich << (long)1 << finl;
+      fich << (int)1 << finl;
       fich	 << n << finl ;
-      fich << (long)1 << finl;
+      fich << (int)1 << finl;
       fich << n << finl ;
       fich << n <<finl;
     }
 
-  long bytes = ecriture_special_part2_indic_aretes(dvf, fich, val);
+  int bytes = ecriture_special_part2_indic_aretes(dvf, fich, val);
 
   if (Process::je_suis_maitre())
     {
       fich << n << finl;
-      fich << (long)0 << finl;
-      fich << (long)0 << finl;
-      fich << (long)0 << finl;
-      fich << (long)1 << finl;
-      fich << (long)0 << finl;
+      fich << (int)0 << finl;
+      fich << (int)0 << finl;
+      fich << (int)0 << finl;
+      fich << (int)1 << finl;
+      fich << (int)0 << finl;
       fich << n << finl;
       fich << finl;
-      fich << (long)1 << finl;
-      fich << (long)0 << finl;
-      fich << (long)0 <<finl;
+      fich << (int)1 << finl;
+      fich << (int)0 << finl;
+      fich << (int)0 <<finl;
     }
   fich.syncfile();
 
@@ -380,7 +380,7 @@ long EcritureLectureSpecial::ecriture_special_indic_aretes(const Domaine_VF& dvf
 }
 // fin EB
 
-/*! @brief simple appel a EcritureLectureSpecial::lecture_special (const Domaine_VF& zvf,Entree& fich,long nbval, DoubleTab& val )
+/*! @brief simple appel a EcritureLectureSpecial::lecture_special (const Domaine_VF& zvf,Entree& fich,int nbval, DoubleTab& val )
  *
  */
 void EcritureLectureSpecial::lecture_special(Champ_base& ch, Entree& fich)
@@ -399,46 +399,46 @@ void EcritureLectureSpecial::lecture_special(Champ_base& ch, Entree& fich)
  *  Valeur de retour: nombre total d'items sequentiels lus (sur tous les procs)
  *
  */
-static long lire_special(Entree& fich, const DoubleTab& coords, DoubleTab& val, const double epsilon)
+static int lire_special(Entree& fich, const DoubleTab& coords, DoubleTab& val, const double epsilon)
 {
-  const long dim = coords.dimension(1);
-  const long nb_dim = val.nb_dim();
-  const long nb_comp = (nb_dim == 1) ? 1 : val.dimension(1);
+  const int dim = coords.dimension(1);
+  const int nb_dim = val.nb_dim();
+  const int nb_comp = (nb_dim == 1) ? 1 : val.dimension(1);
 
   const MD_Vector& md_vect = val.get_md_vector();
   // Dans un premier temps, 1 si l'item est a lire, 0 s'il est lu par un autre processeur.
   // Une fois que l'item est lu, on met le flag a 2.
   ArrOfInt items_to_read;
-  const long n_to_read = MD_Vector_tools::get_sequential_items_flags(md_vect, items_to_read);
+  const int n_to_read = MD_Vector_tools::get_sequential_items_flags(md_vect, items_to_read);
   Octree_Double octree;
   // Build an octree with "thick" nodes (epsilon size)
   octree.build_nodes(coords, 0 /* do not include virtual elements */, epsilon);
   const ArrOfInt& floor_elements = octree.floor_elements();
 
   // Le fichier contient ce nombre de lignes pour cette partie du tableau (nombre total d'items sequentiels)
-  const long ntot = Process::mp_sum(n_to_read);
+  const int ntot = Process::mp_sum(n_to_read);
 
   // On lit dans le fichier par blocs de buflines_max parce qu'il y a
   //  un broadcast reseau a chaque comm:
-  const long buflines_max = 2048; // pas trop, histoire d'avoir plusieurs blocs dans les cas tests
+  const int buflines_max = 2048; // pas trop, histoire d'avoir plusieurs blocs dans les cas tests
   DoubleTab buffer(buflines_max, dim + nb_comp);
-  long bufptr = buflines_max;
+  int bufptr = buflines_max;
   ArrOfInt items;
   items.set_smart_resize(1);
 
   double max_epsilon_needed = epsilon;
   // Combien de fois on a trouve plusieurs candidats a moins de epsilon ?
-  long error_too_many_matches = 0;
+  int error_too_many_matches = 0;
   // Combien de fois on est tombe plusieurs fois sur le meme sommet a lire ?
-  long error_duplicate_read = 0;
+  int error_duplicate_read = 0;
   // Combien d'items a-t-on lu ?
-  long count_items_read = 0;
+  int count_items_read = 0;
 
   // Boucle sur les items sequentiels du fichier:
-  long pourcent=0;
-  for (long i = 0; i < ntot; i++)
+  int pourcent=0;
+  for (int i = 0; i < ntot; i++)
     {
-      long tmp=(i*10)/(ntot-1);
+      int tmp=(i*10)/(ntot-1);
       if (tmp>pourcent || i==0)
         {
           pourcent=tmp;
@@ -447,7 +447,7 @@ static long lire_special(Entree& fich, const DoubleTab& coords, DoubleTab& val, 
       if (bufptr == buflines_max)
         {
           bufptr = 0;
-          long n = std::min(buflines_max, ntot - i) * (dim + nb_comp);
+          int n = std::min(buflines_max, ntot - i) * (dim + nb_comp);
           assert(n <= buffer.size_array());
           fich.get(buffer.addr(), n);
         }
@@ -455,20 +455,20 @@ static long lire_special(Entree& fich, const DoubleTab& coords, DoubleTab& val, 
       const double y = buffer(bufptr, 1);
       const double z = (dim == 3) ? buffer(bufptr, 2) : 0.;
       // Recherche des items correspondant potentiellement au point (x,y,z)
-      long index = -1;
-      long nb_items_proches = octree.search_elements(x, y, z, index);
+      int index = -1;
+      int nb_items_proches = octree.search_elements(x, y, z, index);
       if (nb_items_proches > 0)
         {
           items.resize_array(nb_items_proches, ArrOfInt::NOCOPY_NOINIT);
           // Voir doc de Octree_Double::search_elements: on copie les indices des items proches dans items:
-          for (long j = 0; j < nb_items_proches; j++)
+          for (int j = 0; j < nb_items_proches; j++)
             items[j] = floor_elements[index++];
           // On reduit la liste pour avoir uniquement les items a moins de epsilon
-          const long item_le_plus_proche = octree.search_nodes_close_to(x, y, z, coords, items, epsilon);
+          const int item_le_plus_proche = octree.search_nodes_close_to(x, y, z, coords, items, epsilon);
           nb_items_proches = items.size_array();
           if (nb_items_proches == 1)
             {
-              const long flag = items_to_read[item_le_plus_proche];
+              const int flag = items_to_read[item_le_plus_proche];
               if (flag == 1)
                 {
                   // Ok, il faut lire cette valeur
@@ -480,7 +480,7 @@ static long lire_special(Entree& fich, const DoubleTab& coords, DoubleTab& val, 
                     }
                   else
                     {
-                      for (long j = 0; j < nb_comp; j++)
+                      for (int j = 0; j < nb_comp; j++)
                         val(item_le_plus_proche, j) = buffer(bufptr, dim + j);
                     }
                 }
@@ -502,13 +502,13 @@ static long lire_special(Entree& fich, const DoubleTab& coords, DoubleTab& val, 
             {
               // Erreur: epsilon est trop grand, on a plusieurs candidats a moins de epsilon
               // Calcul de la distance avec le deuxieme plus proche pour afficher un message d'erreur a la fin:
-              for (long ii = 0; ii < nb_items_proches; ii++)
+              for (int ii = 0; ii < nb_items_proches; ii++)
                 {
-                  const long i_coord = items[ii];
+                  const int i_coord = items[ii];
                   if (i_coord == item_le_plus_proche)
                     continue; // celui-la est sans doute le bon, il faut un epsilon superieur a cette valeur la...
                   double xx = 0;
-                  for (long j = 0; j < dim; j++)
+                  for (int j = 0; j < dim; j++)
                     {
                       double yy = coords(i_coord, j) - buffer(bufptr, j);
                       xx += yy * yy;
@@ -525,7 +525,7 @@ static long lire_special(Entree& fich, const DoubleTab& coords, DoubleTab& val, 
     }
   Cerr << finl;
   // Erreurs ?
-  long err = (count_items_read != n_to_read) || (error_too_many_matches > 0) || (error_duplicate_read > 0);
+  int err = (count_items_read != n_to_read) || (error_too_many_matches > 0) || (error_duplicate_read > 0);
   err = Process::mp_sum(err);
   if (err)
     {
@@ -563,17 +563,17 @@ static long lire_special(Entree& fich, const DoubleTab& coords, DoubleTab& val, 
 }
 
 // Valeur de retour: nombre total d'items sequentiels lus (sur tous les procs)
-static long lecture_special_part2(const Domaine_VF& zvf, Entree& fich, DoubleTab& val)
+static int lecture_special_part2(const Domaine_VF& zvf, Entree& fich, DoubleTab& val)
 {
   const MD_Vector& md = val.get_md_vector();
 
-  long ntot = 0;
+  int ntot = 0;
   if (sub_type(MD_Vector_composite, md.valeur()))
     {
       // Champs p1bulles et autres: appel recursif pour les differents sous-tableaux:
       DoubleTab_parts parts(val);
-      const long n = parts.size();
-      for (long i = 0; i < n; i++)
+      const int n = parts.size();
+      for (int i = 0; i < n; i++)
         ntot += lecture_special_part2(zvf, fich, parts[i]);
     }
   else if (sub_type(MD_Vector_std, md.valeur()))
@@ -592,17 +592,17 @@ static long lecture_special_part2(const Domaine_VF& zvf, Entree& fich, DoubleTab
 }
 // debut EB
 // Valeur de retour: nombre total d'items sequentiels lus (sur tous les procs)
-static long lecture_special_part2_indic_arete(const Domaine_VF& dvf, Entree& fich, DoubleTab& val)
+static int lecture_special_part2_indic_arete(const Domaine_VF& dvf, Entree& fich, DoubleTab& val)
 {
   const MD_Vector& md = val.get_md_vector();
 
-  long ntot = 0;
+  int ntot = 0;
   if (sub_type(MD_Vector_composite, md.valeur()))
     {
       // Champs p1bulles et autres: appel recursif pour les differents sous-tableaux:
       DoubleTab_parts parts(val);
-      const long n = parts.size();
-      for (long i = 0; i < n; i++)
+      const int n = parts.size();
+      for (int i = 0; i < n; i++)
         ntot += lecture_special_part2_indic_arete(dvf, fich, parts[i]);
     }
   else if (sub_type(MD_Vector_std, md.valeur()))
@@ -633,14 +633,14 @@ void EcritureLectureSpecial::lecture_special(const Domaine_VF& zvf, Entree& fich
       Cerr << "EcritureLectureSpecial::ecriture_special: error, cannot save an array with no metadata" << finl;
       Process::exit();
     }
-  const long nb_items_seq = md_vect.valeur().nb_items_seq_tot();
+  const int nb_items_seq = md_vect.valeur().nb_items_seq_tot();
   if (nb_items_seq == 0)
     return;
 
-  long bidon;
+  int bidon;
   fich >> bidon >> bidon >> bidon >> bidon >> bidon;
 
-  long ntot = lecture_special_part2(zvf, fich, val);
+  int ntot = lecture_special_part2(zvf, fich, val);
   if (ntot != nb_items_seq)
     {
       Cerr << "Internal error in EcritureLectureSpecial::lecture_special" << finl;
@@ -661,14 +661,14 @@ void EcritureLectureSpecial::lecture_special_indic_arete(const Domaine_VF& dvf, 
       Cerr << "EcritureLectureSpecial::ecriture_special: error, cannot save an array with no metadata" << finl;
       Process::exit();
     }
-  const long nb_items_seq = md_vect.valeur().nb_items_seq_tot();
+  const int nb_items_seq = md_vect.valeur().nb_items_seq_tot();
   if (nb_items_seq == 0)
     return;
 
-  long bidon;
+  int bidon;
   fich >> bidon >> bidon >> bidon >> bidon >> bidon;
 
-  long ntot = lecture_special_part2_indic_arete(dvf, fich, val);
+  int ntot = lecture_special_part2_indic_arete(dvf, fich, val);
   if (ntot != nb_items_seq)
     {
       Cerr << "Internal error in EcritureLectureSpecial::lecture_special" << finl;

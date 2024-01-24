@@ -26,7 +26,7 @@
 //    |/     |/           |/  1  |/
 //    0------1            *------*
 //                       2(face z=0)
-static long faces_sommets_hexa[6][4] =
+static int faces_sommets_hexa[6][4] =
 {
   { 0, 2, 4, 6 },
   { 0, 1, 4, 5 },
@@ -98,7 +98,7 @@ void Hexaedre::reordonner()
 /*! @brief Reordonne les sommets de l'hexaedre
  *
  */
-long Hexaedre::reordonner_elem()
+int Hexaedre::reordonner_elem()
 {
   Domaine& domaine = mon_dom.valeur();
   const Domaine& dom = domaine;
@@ -108,18 +108,18 @@ long Hexaedre::reordonner_elem()
   ArrOfInt NS(8);
   double coord[8][3];
   double xmin[3];
-  long i, j;
-  const long nb_elem = domaine.nb_elem();
-  const long delta[3] = {1, 2, 4};
-  long changed_count = 0;
+  int i, j;
+  const int nb_elem = domaine.nb_elem();
+  const int delta[3] = {1, 2, 4};
+  int changed_count = 0;
 
-  for (long num_poly = 0; num_poly < nb_elem; num_poly++)
+  for (int num_poly = 0; num_poly < nb_elem; num_poly++)
     {
 
       xmin[0] = xmin[1] = xmin[2] = 1e40;
       for(i=0; i<8; i++)
         {
-          long s = elem(num_poly,i);
+          int s = elem(num_poly,i);
           S[i] = s;
           NS[i] = -1;
           for(j=0; j<3; j++)
@@ -135,7 +135,7 @@ long Hexaedre::reordonner_elem()
       // en fonction de ses coordonnees
       for (i=0; i<8; i++)
         {
-          long num_sommet = 0;
+          int num_sommet = 0;
           for (j=0; j<3; j++)
             {
               double x = coord[i][j];
@@ -151,7 +151,7 @@ long Hexaedre::reordonner_elem()
       if (min_array(NS)==-1)
         return -1;
       // Tous les sommets ont-ils ete trouves ?
-      long updated = 0;
+      int updated = 0;
       for(i=0; i<8; i++)
         {
           if (S[i] != NS[i])
@@ -184,16 +184,16 @@ const Nom& Hexaedre::nom_lml() const
  *     Renvoie 0 sinon.
  *
  * @param (DoubleVect& pos) coordonnees du point que l'on cherche a localiser
- * @param (long element) le numero de l'element du domaine dans lequel on cherche le point.
- * @return (long) 1 si le point de coordonnees specifiees appartient a l'element "element" 0 sinon
+ * @param (int element) le numero de l'element du domaine dans lequel on cherche le point.
+ * @return (int) 1 si le point de coordonnees specifiees appartient a l'element "element" 0 sinon
  */
-long Hexaedre::contient(const ArrOfDouble& pos, long element ) const
+int Hexaedre::contient(const ArrOfDouble& pos, int element ) const
 {
   assert(pos.size_array()==3);
   const Domaine& domaine=mon_dom.valeur();
   const Domaine& dom=domaine;
-  long som0 = domaine.sommet_elem(element,0);
-  long som7 = domaine.sommet_elem(element,7);
+  int som0 = domaine.sommet_elem(element,0);
+  int som7 = domaine.sommet_elem(element,7);
   if (    inf_ou_egal(dom.coord(som0,0),pos[0]) && inf_ou_egal(pos[0],dom.coord(som7,0))
           && inf_ou_egal(dom.coord(som0,1),pos[1]) && inf_ou_egal(pos[1],dom.coord(som7,1))
           && inf_ou_egal(dom.coord(som0,2),pos[2]) && inf_ou_egal(pos[2],dom.coord(som7,2)) )
@@ -208,10 +208,10 @@ long Hexaedre::contient(const ArrOfDouble& pos, long element ) const
  *     l'element geometrique.
  *
  * @param (IntVect& pos) les numeros des sommets a comparer avec ceux de l'elements "element"
- * @param (long element) le numero de l'element du domaine dont on veut comparer les sommets
- * @return (long) 1 si les sommets passes en parametre sont ceux de l'element specifie, 0 sinon
+ * @param (int element) le numero de l'element du domaine dont on veut comparer les sommets
+ * @return (int) 1 si les sommets passes en parametre sont ceux de l'element specifie, 0 sinon
  */
-long Hexaedre::contient(const ArrOfInt& som, long element ) const
+int Hexaedre::contient(const ArrOfInt& som, int element ) const
 {
   const Domaine& domaine=mon_dom.valeur();
   if((domaine.sommet_elem(element,0)==som[0])&&
@@ -236,11 +236,11 @@ void Hexaedre::calculer_volumes(DoubleVect& volumes) const
   const Domaine& domaine=mon_dom.valeur();
   const Domaine& dom=domaine;
   double dx,dy,dz;
-  long S1,S2,S3,S4;
+  int S1,S2,S3,S4;
 
-  long size_tot = domaine.nb_elem_tot();
+  int size_tot = domaine.nb_elem_tot();
   assert(volumes.size_totale()==size_tot);
-  for (long num_poly=0; num_poly<size_tot; num_poly++)
+  for (int num_poly=0; num_poly<size_tot; num_poly++)
     {
       S1 = domaine.sommet_elem(num_poly,0);
       S2 = domaine.sommet_elem(num_poly,1);
@@ -262,10 +262,10 @@ void Hexaedre::calculer_normales(const IntTab& Face_sommets ,DoubleTab& face_nor
 {
   const Domaine& domaine_geom = mon_dom.valeur();
   const DoubleTab& les_coords = domaine_geom.coord_sommets();
-  long nbfaces = Face_sommets.dimension(0);
+  int nbfaces = Face_sommets.dimension(0);
   double x1,y1,z1,x2,y2,z2;
-  long n0,n1,n2;
-  for (long numface=0; numface<nbfaces; numface++)
+  int n0,n1,n2;
+  for (int numface=0; numface<nbfaces; numface++)
     {
 
       n0 = Face_sommets(numface,0);
@@ -290,22 +290,22 @@ void Hexaedre::calculer_normales(const IntTab& Face_sommets ,DoubleTab& face_nor
 /*! @brief voir ElemGeomBase::get_tab_faces_sommets_locaux
  *
  */
-long Hexaedre::get_tab_faces_sommets_locaux(IntTab& faces_som_local) const
+int Hexaedre::get_tab_faces_sommets_locaux(IntTab& faces_som_local) const
 {
   faces_som_local.resize(6,4);
-  for (long i=0; i<6; i++)
-    for (long j=0; j<4; j++)
+  for (int i=0; i<6; i++)
+    for (int j=0; j<4; j++)
       faces_som_local(i,j) = faces_sommets_hexa[i][j];
   return 1;
 }
 
 /*! @brief Renvoie le numero du j-ieme sommet de la i-ieme face de l'element.
  *
- * @param (long i) un numero de face
- * @param (long j) un numero de sommet
- * @return (long) le numero du j-ieme sommet de la i-ieme face
+ * @param (int i) un numero de face
+ * @param (int j) un numero de sommet
+ * @return (int) le numero du j-ieme sommet de la i-ieme face
  */
-long Hexaedre::face_sommet(long i, long j) const
+int Hexaedre::face_sommet(int i, int j) const
 {
   assert(i<6);
   switch(i)

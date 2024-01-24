@@ -50,7 +50,7 @@ public:
     eval_diff_turb.associer_indicatrices(indic_elem,indic_arete);
   }
   // EB
-  inline void associer_proprietes_fluide(const long formule_mu, const double mu_particule, const double mu_fluide) override// EB
+  inline void associer_proprietes_fluide(const int formule_mu, const double mu_particule, const double mu_fluide) override// EB
   {
     Eval_Dift_VDF_Face& eval_diff_turb = dynamic_cast<Eval_Dift_VDF_Face&> (iter->evaluateur());
     eval_diff_turb.associer_proprietes_fluide(formule_mu,mu_particule,mu_fluide);
@@ -79,7 +79,7 @@ public:
     eval_diff_turb.associer_indicatrices(indic_elem,indic_arete);
   }
   // EB
-  inline void associer_proprietes_fluide(const long formule_mu, const double mu_particule, const double mu_fluide) override// EB
+  inline void associer_proprietes_fluide(const int formule_mu, const double mu_particule, const double mu_fluide) override// EB
   {
     Eval_Dift_VDF_Face_FT& eval_diff_turb = dynamic_cast<Eval_Dift_VDF_Face_FT&> (iter->evaluateur());
     eval_diff_turb.associer_proprietes_fluide(formule_mu,mu_particule,mu_fluide);
@@ -94,17 +94,17 @@ class Op_Dift_VDF_Face_Axi : public Op_Dift_VDF_Face_Axi_base
 public:
 
   inline bool is_var() const override { return is_var_ ? true : false; }
-  inline double nu_(const long i) const override
+  inline double nu_(const int i) const override
   {
     return diffusivite_->valeurs()(is_var_ * i);
   }
 
-  inline double nu_mean_2_pts_(const long i, const long j) const override
+  inline double nu_mean_2_pts_(const int i, const int j) const override
   {
     return 0.5 * (diffusivite_->valeurs()(is_var_ * i) + diffusivite_->valeurs()(is_var_ * j));
   }
-  inline double nu_mean_4_pts_(const long, const long) const override;
-  inline double nu_mean_4_pts_(const long i, const long j, const long k, const long l) const override
+  inline double nu_mean_4_pts_(const int, const int) const override;
+  inline double nu_mean_4_pts_(const int i, const int j, const int k, const int l) const override
   {
     return 0.25 * (diffusivite_->valeurs()(is_var_ * i) + diffusivite_->valeurs()(is_var_ * j) + diffusivite_->valeurs()(is_var_ * k) + diffusivite_->valeurs()(is_var_ * l));
   }
@@ -123,15 +123,15 @@ public:
   inline const Champ_base& diffusivite() const override { return diffusivite_; }
 
 protected:
-  long is_var_ = 0;
+  int is_var_ = 0;
   REF(Champ_base) diffusivite_;
 };
 
-inline double Op_Dift_VDF_Face_Axi::nu_mean_4_pts_(const long i, const long j) const
+inline double Op_Dift_VDF_Face_Axi::nu_mean_4_pts_(const int i, const int j) const
 {
   if (!is_var_) return nu_(i); // can help here ;)
 
-  long element;
+  int element;
   double d_visco_lam = 0;
   if ((element=face_voisins(i,0)) != -1) d_visco_lam += diffusivite_->valeurs()(element);
   if ((element=face_voisins(i,1)) != -1) d_visco_lam += diffusivite_->valeurs()(element);

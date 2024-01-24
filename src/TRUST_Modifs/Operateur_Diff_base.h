@@ -40,7 +40,7 @@ public:
   virtual void associer_diffusivite(const Champ_base&) = 0;
   virtual void associer_diffusivite_pour_pas_de_temps(const Champ_base&);
   virtual inline void associer_indicatrices(const DoubleTab&, const DoubleVect&) { /* do nothing */ };
-  virtual inline void associer_proprietes_fluide(const long, const double, const double) { /* do nothing */ };
+  virtual inline void associer_proprietes_fluide(const int, const double, const double) { /* do nothing */ };
   virtual const Champ_base& diffusivite() const=0;
   inline virtual void calculer_borne_locale(DoubleVect& ,double,double ) const {};
 

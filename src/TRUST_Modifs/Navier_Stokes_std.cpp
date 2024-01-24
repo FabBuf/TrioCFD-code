@@ -132,7 +132,7 @@ void Navier_Stokes_std::set_param(Param& param)
   set_param_IBM(param);
 }
 
-long Navier_Stokes_std::lire_motcle_non_standard(const Motcle& mot, Entree& is)
+int Navier_Stokes_std::lire_motcle_non_standard(const Motcle& mot, Entree& is)
 {
   if (mot=="diffusion")
     {
@@ -221,8 +221,8 @@ long Navier_Stokes_std::lire_motcle_non_standard(const Motcle& mot, Entree& is)
       Motcle motlu;
       Motcle accouverte = "{" , accfermee = "}" ;
       Nom type_solv("");
-      long acc=0;
-      long ok=0;
+      int acc=0;
+      int ok=0;
       while (acc!=0 || !ok)
         {
           is >> motlu;
@@ -350,13 +350,13 @@ void Navier_Stokes_std::completer()
       domaine.init_dist_paroi_globale(domaine_Cl_dis().les_conditions_limites());
       Cerr << "Initializing distance_paroi_globale ... " << finl;
       const DoubleTab& dist_calc = domaine.y_elem();
-      for (long e = 0 ; e < domaine.nb_elem() ; e++) distance_paroi_globale->valeurs()(e, 0) = dist_calc(e);
+      for (int e = 0 ; e < domaine.nb_elem() ; e++) distance_paroi_globale->valeurs()(e, 0) = dist_calc(e);
       distance_paroi_globale->valeurs().echange_espace_virtuel();
     }
 
 }
 
-long Navier_Stokes_std::verif_Cl() const
+int Navier_Stokes_std::verif_Cl() const
 {
   return Equation_base::verif_Cl();
 }
@@ -432,14 +432,14 @@ void Navier_Stokes_std::discretiser_assembleur_pression()
 
 /*! @brief Renvoie le nombre d'operateurs de l'equation: Pour Navier Stokes Standard c'est 2.
  *
- * @return (long) le nombre d'operateur de l'equation
+ * @return (int) le nombre d'operateur de l'equation
  */
-long Navier_Stokes_std::nombre_d_operateurs() const
+int Navier_Stokes_std::nombre_d_operateurs() const
 {
   return 2;
 }
 
-long Navier_Stokes_std::nombre_d_operateurs_tot() const
+int Navier_Stokes_std::nombre_d_operateurs_tot() const
 {
   return 4;
 }
@@ -450,10 +450,10 @@ long Navier_Stokes_std::nombre_d_operateurs_tot() const
  *      exit si i>1
  *     (version const)
  *
- * @param (long i) l'index de l'operateur a renvoyer
+ * @param (int i) l'index de l'operateur a renvoyer
  * @return (Operateur&) l'operateur indexe par i
  */
-const Operateur& Navier_Stokes_std::operateur(long i) const
+const Operateur& Navier_Stokes_std::operateur(int i) const
 {
   switch(i)
     {
@@ -462,7 +462,7 @@ const Operateur& Navier_Stokes_std::operateur(long i) const
     case 1:
       return terme_convectif;
     default :
-      Cerr << "Error for Navier_Stokes_std::operateur(long i)" << finl;
+      Cerr << "Error for Navier_Stokes_std::operateur(int i)" << finl;
       Cerr << "Navier_Stokes_std has " << nombre_d_operateurs() <<" operators "<<finl;
       Cerr << "and you are trying to access the " << i <<" th one."<< finl;
       exit();
@@ -476,10 +476,10 @@ const Operateur& Navier_Stokes_std::operateur(long i) const
  *       - le terme_convectif si i = 1
  *      exit si i>1
  *
- * @param (long i) l'index de l'operateur a renvoyer
+ * @param (int i) l'index de l'operateur a renvoyer
  * @return (Operateur&) l'operateur indexe par i
  */
-Operateur& Navier_Stokes_std::operateur(long i)
+Operateur& Navier_Stokes_std::operateur(int i)
 {
   switch(i)
     {
@@ -488,7 +488,7 @@ Operateur& Navier_Stokes_std::operateur(long i)
     case 1:
       return terme_convectif;
     default :
-      Cerr << "Error for Navier_Stokes_std::operateur(long i)" << finl;
+      Cerr << "Error for Navier_Stokes_std::operateur(int i)" << finl;
       Cerr << "Navier_Stokes_std has " << nombre_d_operateurs() <<" operators "<<finl;
       Cerr << "and you are trying to access the " << i <<" th one."<< finl;
       exit();
@@ -497,7 +497,7 @@ Operateur& Navier_Stokes_std::operateur(long i)
   return terme_diffusif;
 }
 
-const Operateur& Navier_Stokes_std::operateur_fonctionnel(long i) const
+const Operateur& Navier_Stokes_std::operateur_fonctionnel(int i) const
 {
   switch(i)
     {
@@ -506,7 +506,7 @@ const Operateur& Navier_Stokes_std::operateur_fonctionnel(long i) const
     case 1:
       return divergence;
     default :
-      Cerr << "Error for Navier_Stokes_std::operateur_fonctionnel(long i)" << finl;
+      Cerr << "Error for Navier_Stokes_std::operateur_fonctionnel(int i)" << finl;
       Cerr << "Navier_Stokes_std has " << nombre_d_operateurs() <<" functional operators "<<finl;
       Cerr << "and you are trying to access the " << i <<" th one."<< finl;
       exit();
@@ -515,7 +515,7 @@ const Operateur& Navier_Stokes_std::operateur_fonctionnel(long i) const
   return Navier_Stokes_std::operateur_fonctionnel(i);
 }
 
-Operateur& Navier_Stokes_std::operateur_fonctionnel(long i)
+Operateur& Navier_Stokes_std::operateur_fonctionnel(int i)
 {
   switch(i)
     {
@@ -524,7 +524,7 @@ Operateur& Navier_Stokes_std::operateur_fonctionnel(long i)
     case 1:
       return divergence;
     default :
-      Cerr << "Error for Navier_Stokes_std::operateur_fonctionnel(long i)" << finl;
+      Cerr << "Error for Navier_Stokes_std::operateur_fonctionnel(int i)" << finl;
       Cerr << "Navier_Stokes_std has " << nombre_d_operateurs() <<" functional operators "<<finl;
       Cerr << "and you are trying to access the " << i <<" th one."<< finl;
       exit();
@@ -650,7 +650,7 @@ Entree& Navier_Stokes_std::lire_cond_init(Entree& is)
   compris[0]="}";
   compris[1]="vitesse";
   compris[2]="pression";
-  long ind = -1;
+  int ind = -1;
   while (ind!=0)
     {
       is >> nom;
@@ -909,7 +909,7 @@ void Navier_Stokes_std::projeter()
   projection_initiale = 0;
 }
 
-long Navier_Stokes_std::projection_a_faire()
+int Navier_Stokes_std::projection_a_faire()
 {
   // Pas de projection si l'equation n'est pas resolue
   // if (equation_non_resolue()) return 0;
@@ -933,9 +933,9 @@ long Navier_Stokes_std::projection_a_faire()
  *
  *      initialisation de la pression.
  *
- * @return (long) renvoie toujours 1
+ * @return (int) renvoie toujours 1
  */
-long Navier_Stokes_std::preparer_calcul()
+int Navier_Stokes_std::preparer_calcul()
 // assemblage du systeme en pression
 {
   const double temps = schema_temps().temps_courant();
@@ -983,11 +983,11 @@ long Navier_Stokes_std::preparer_calcul()
       vpoint-=gradient_P.valeurs();
       if ( is_IBM() ) reprise_calcul_IBM(vpoint);
       if (methode_calcul_pression_initiale_>=2)
-        for (long op=0; op<nombre_d_operateurs(); op++)
+        for (int op=0; op<nombre_d_operateurs(); op++)
           operateur(op).ajouter(vpoint);
       if (methode_calcul_pression_initiale_>=1)
         {
-          long mod=0;
+          int mod=0;
           if (le_schema_en_temps->pas_de_temps()==0)
             {
               double dt = std::max(le_schema_en_temps->pas_temps_min(),calculer_pas_de_temps());
@@ -1135,11 +1135,11 @@ bool Navier_Stokes_std::initTimeStep(double dt)
   // de vitesse nul et diffusion_implicite active <=> dt_conv=INF
   const Schema_Temps_base& sch_tps = le_schema_en_temps.valeur();
   const double dt_max = sch_tps.pas_temps_max();
-  const long diff_implicite = sch_tps.diffusion_implicite();
+  const int diff_implicite = sch_tps.diffusion_implicite();
   if (diff_implicite)
     {
       const DoubleTab& tab_vitesse = inconnue().valeurs();
-      long size = tab_vitesse.nb_dim()==1?1:tab_vitesse.dimension(1);
+      int size = tab_vitesse.nb_dim()==1?1:tab_vitesse.dimension(1);
       DoubleVect max_vit;
       max_vit.resize(size);
       mp_max_abs_tab(tab_vitesse,max_vit);
@@ -1173,7 +1173,7 @@ bool Navier_Stokes_std::initTimeStep(double dt)
 
   double ddt = Equation_base::initTimeStep(dt);
 
-  for (long i=1; i<=sch_tps.nb_valeurs_futures(); i++)
+  for (int i=1; i<=sch_tps.nb_valeurs_futures(); i++)
     if (i <= pression().nb_valeurs_temporelles())
       {
         double tps=sch_tps.temps_futur(i);
@@ -1220,11 +1220,11 @@ void Navier_Stokes_std::calculer_la_pression_en_pa()
 /*! @brief Appelle Equation_base::sauvegarder(Sortie&) et sauvegarde la pression sur un flot de sortie.
  *
  * @param (Sortie& os) un flot de sortie sur lequel sauvegarder
- * @return (long) renvoie toujours 1
+ * @return (int) renvoie toujours 1
  */
-long Navier_Stokes_std::sauvegarder(Sortie& os) const
+int Navier_Stokes_std::sauvegarder(Sortie& os) const
 {
-  long bytes=0;
+  int bytes=0;
   bytes += Equation_base::sauvegarder(os);
   bytes += la_pression.sauvegarder(os);
   //La methode sauver() assurant la sauvegarde pour le traitement particulier
@@ -1240,10 +1240,10 @@ long Navier_Stokes_std::sauvegarder(Sortie& os) const
  *      et reprend la pression.
  *
  * @param (Entree& is) un flot d'entree
- * @return (long) renvoie toujours 1
+ * @return (int) renvoie toujours 1
  * @throws la reprise a echoue, identificateur de la pression non trouve
  */
-long Navier_Stokes_std::reprendre(Entree& is)
+int Navier_Stokes_std::reprendre(Entree& is)
 {
   Equation_base::reprendre(is);
   double temps = schema_temps().temps_courant();
@@ -1420,12 +1420,12 @@ void  Navier_Stokes_std::calculer_pression_hydrostatique(Champ_base& pression_hy
   const DoubleTab& gravite = milieu().gravite().valeurs();
 
   val=rho.valeurs()(0,0);
-  const long nb_som=val.dimension(0);
+  const int nb_som=val.dimension(0);
 
-  for (long som=0; som<nb_som; som++)
+  for (int som=0; som<nb_som; som++)
     {
       double gz=0;
-      for (long dir=0; dir<dimension; dir++)
+      for (int dir=0; dir<dimension; dir++)
         gz+=coords(som,dir)*gravite(0,dir);
       val[som]*=gz;
     }
@@ -1547,9 +1547,9 @@ void Navier_Stokes_std::get_noms_champs_postraitables(Noms& nom,Option opt) cons
  *        - gradient
  *
  * @param (Sortie& os) un flot de sortie
- * @return (long) renvoie toujours 1
+ * @return (int) renvoie toujours 1
  */
-long Navier_Stokes_std::impr(Sortie& os) const
+int Navier_Stokes_std::impr(Sortie& os) const
 {
   // Affichage des bilans volumiques si on n'est pas en QC, ni en Front Tracking
   if (!probleme().is_dilatable() && probleme().que_suis_je()!="Probleme_FT_Disc_gen")
@@ -1577,7 +1577,7 @@ long Navier_Stokes_std::impr(Sortie& os) const
             }
         }
       // Since 1.6.6, warning to use PETSc Cholesky instead of an iterative method for pressure solver
-      long nw=100;
+      int nw=100;
       if (solveur_pression_->solveur_direct()==0 && le_schema_en_temps->nb_pas_dt()<nw && Process::nproc()<256 && la_pression.valeurs().size_array()<40000)
         {
           Cerr << finl << "********************** Advice (printed only on the first " << nw << " time steps) *********************" << finl;
@@ -1650,7 +1650,7 @@ void Navier_Stokes_std::dimensionner_matrice_sans_mem(Matrice_Morse& matrice)
     gradient.valeur().dimensionner_blocs({{ "vitesse", &matrice }});
 }
 
-long Navier_Stokes_std::has_interface_blocs() const
+int Navier_Stokes_std::has_interface_blocs() const
 {
   return Equation_base::has_interface_blocs() && gradient.valeur().has_interface_blocs();
 }
@@ -1681,7 +1681,7 @@ DoubleTab& Navier_Stokes_std::derivee_en_temps_inco(DoubleTab& derivee)
       // Calcul implicite d'un ou plusieurs operateurs (peu utilise)
       // Syntaxe jeu de donnees: operateur { implicite solveur cholesky|gcp ... }
       derivee = 0;
-      for(long i=0; i<nombre_d_operateurs(); i++)
+      for(int i=0; i<nombre_d_operateurs(); i++)
         operateur(i).ajouter(derivee);
 
       les_sources.ajouter(derivee);
@@ -1690,7 +1690,7 @@ DoubleTab& Navier_Stokes_std::derivee_en_temps_inco(DoubleTab& derivee)
       const double dt=schema_temps().pas_de_temps();
       static double dt_old=dt;
 
-      for(long i=0; i<nombre_d_operateurs(); i++)
+      for(int i=0; i<nombre_d_operateurs(); i++)
         {
           Operateur_base& op=operateur(i).l_op_base();
           // If matrix not build or matrix time dependant:
@@ -1785,8 +1785,8 @@ void Navier_Stokes_std::uzawa(const DoubleTab& secmem, const Matrice_Base& A, So
   dnew = dold;
 
   double s=0;
-  long niter=0;
-  long nmax=Cp.size();
+  int niter=0;
+  int nmax=Cp.size();
   Cerr << "Uzawa, initial residue : " << dnew << finl;
   //     seuil=std::max(seuil, dnew*1.e-12);
   while ( ( dnew > seuil ) && (niter++ < nmax) )

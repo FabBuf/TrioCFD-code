@@ -42,7 +42,7 @@ Entree& Modele_turbulence_hyd::readOn(Entree& s)
   Motcle nom1("Modele_turbulence_hyd_");
   nom1 += typ;
   Nom discr = equation().discretisation().que_suis_je();
-  if (typ.debute_par("SOUS_MAILLE") || discr == "VDF_Hyper" || typ.debute_par("LONGUEUR_MELANGE") || (typ == "K_Epsilon_V2"))
+  if (typ.debute_par("SOUS_MAILLE") || discr == "VDF_Hyper" || typ.debute_par("intUEUR_MELANGE") || (typ == "K_Epsilon_V2"))
     {
       if (dimension == 2 && discr != "VDF_Hyper")
         {
@@ -59,7 +59,7 @@ Entree& Modele_turbulence_hyd::readOn(Entree& s)
     }
   if (nom1 == "MODELE_TURBULENCE_HYD_SOUS_MAILLE_LM_VEF")
     {
-      Cerr << "Le mot cle Sous_maille_LM s'appelle desormais Longueur_Melange pour etre coherent en VDF et VEF." << finl;
+      Cerr << "Le mot cle Sous_maille_LM s'appelle desormais intueur_Melange pour etre coherent en VDF et VEF." << finl;
       Cerr << "Changer votre jeu de donnees." << finl;
       exit();
     }

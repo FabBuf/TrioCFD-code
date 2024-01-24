@@ -52,12 +52,12 @@ class Eval_Dift_VDF_Elem : public Eval_Diff_VDF_Elem_Gen<Eval_Dift_VDF_Elem>, pu
 {
 public:
   static constexpr bool IS_MODIF_DEQ = true;
-  inline long get_ind_Fluctu_Term() const { return ind_Fluctu_Term; }
+  inline int get_ind_Fluctu_Term() const { return ind_Fluctu_Term; }
   void init_ind_fluctu_term() override;
   void associer_loipar(const Turbulence_paroi_scal& loi_paroi) override;
 
 private:
-  long ind_Fluctu_Term = 1;
+  int ind_Fluctu_Term = 1;
 };
 
 class Eval_Dift_Multiphase_VDF_Elem : public Eval_Diff_VDF_Elem_Gen<Eval_Dift_Multiphase_VDF_Elem>, public Eval_Dift_Multiphase_VDF
@@ -98,14 +98,14 @@ public:
   inline void associer_modele_turbulence(const Modele_turbulence_hyd_base& mod) { le_modele_turbulence = mod;  }
   inline bool uses_wall() const { return le_modele_turbulence.valeur().utiliser_loi_paroi(); }
   void mettre_a_jour() override;
-  double tau_tan_impl(long face,long k) const;
+  double tau_tan_impl(int face,int k) const;
   inline void associer_indicatrices(const DoubleTab& indic_elem, const DoubleVect& indic_arete)
   {
     indicatrice_elem_.ref(indic_elem);
     indicatrice_arete_.ref(indic_arete);
     is_solid_particle_=1;
   }
-  inline void associer_proprietes_fluide(const long formule_mu, const double mu_particule, const double mu_fluide)
+  inline void associer_proprietes_fluide(const int formule_mu, const double mu_particule, const double mu_fluide)
   {
     formule_mu_=formule_mu;
     mu_solide_=mu_particule;

@@ -61,7 +61,7 @@ class Param;
 //     Equation Equation_base Probleme_base Algo_MG_base
 //     Classe abstraite dont tous les schemas en temps doivent deriver.
 //     Methodes abstraites:
-//       long faire_un_pas_de_temps_eqn_base(Equation_base&)
+//       int faire_un_pas_de_temps_eqn_base(Equation_base&)
 //////////////////////////////////////////////////////////////////////////////
 class Schema_Temps_base : public Objet_U
 {
@@ -77,8 +77,8 @@ public :
   virtual void abortTimeStep();
 
   virtual bool iterateTimeStep(bool& converged);
-  long limpr() const;
-  long limpr_fpi() const;
+  int limpr() const;
+  int limpr_fpi() const;
 
   ////////////////////////////////
   //                            //
@@ -86,9 +86,9 @@ public :
   //                            //
   ////////////////////////////////
 
-  virtual long nb_valeurs_temporelles() const =0;
-  virtual long nb_valeurs_futures() const =0;
-  virtual double temps_futur(long i) const =0;
+  virtual int nb_valeurs_temporelles() const =0;
+  virtual int nb_valeurs_futures() const =0;
+  virtual double temps_futur(int i) const =0;
   virtual double temps_defaut() const =0;
 
   /////////////////////////////////////////
@@ -100,12 +100,12 @@ public :
   Schema_Temps_base();
   inline void nommer(const Nom&) override;
   inline const Nom& le_nom() const override;
-  virtual long faire_un_pas_de_temps_eqn_base(Equation_base&) =0;
+  virtual int faire_un_pas_de_temps_eqn_base(Equation_base&) =0;
 
   virtual void set_param(Param& titi);
-  long sauvegarder(Sortie& ) const override;
-  long reprendre(Entree& ) override ;
-  virtual long mettre_a_jour();
+  int sauvegarder(Sortie& ) const override;
+  int reprendre(Entree& ) override ;
+  virtual int mettre_a_jour();
   // pour empecher ancienne methode
   virtual void mettre_a_jour_dt(double toto)
   {
@@ -118,18 +118,18 @@ public :
 
   virtual bool corriger_dt_calcule(double& dt) const;
   virtual void imprimer(Sortie& os) const;
-  virtual long impr(Sortie& os) const;
+  virtual int impr(Sortie& os) const;
   void imprimer(Sortie& os,Probleme_base& pb) const;
   void imprimer(Sortie& os,const Probleme_base& pb) const;
-  virtual long impr(Sortie& os,Probleme_base& pb) const;
-  virtual long impr(Sortie& os,const Probleme_base& pb) const;
+  virtual int impr(Sortie& os,Probleme_base& pb) const;
+  virtual int impr(Sortie& os,const Probleme_base& pb) const;
   void imprimer_temps_courant(SFichier&) const;
   inline double pas_temps_min() const;
   inline double& pas_temps_min();
   inline double pas_temps_max() const;
   inline double& pas_temps_max();
-  inline long nb_impr() const;
-  inline long nb_impr_fpi() const;
+  inline int nb_impr() const;
+  inline int nb_impr_fpi() const;
   inline double temps_courant() const;
   inline double temps_precedent() const;
   inline double temps_calcul() const;
@@ -137,44 +137,44 @@ public :
   void update_critere_statio(const DoubleTab& tab_critere, Equation_base& equation);
   inline double facteur_securite_pas() const;
   inline double& facteur_securite_pas();
-  virtual long stop() const;
-  long lsauv() const;
-  inline long temps_final_atteint() const;
-  inline long nb_pas_dt_max_atteint() const;
-  inline long temps_cpu_max_atteint() const;
-  inline long stationnaire_atteint() const
+  virtual int stop() const;
+  int lsauv() const;
+  inline int temps_final_atteint() const;
+  inline int nb_pas_dt_max_atteint() const;
+  inline int temps_cpu_max_atteint() const;
+  inline int stationnaire_atteint() const
   {
     assert(stationnaire_atteint_!=-1);
     return stationnaire_atteint_;
   };
-  long stop_lu() const;
-  inline long diffusion_implicite() const;
+  int stop_lu() const;
+  inline int diffusion_implicite() const;
   inline double seuil_diffusion_implicite() const
   {
     return seuil_diff_impl_;
   };        // Seuil pour implicitation de la diffusion par GC
-  inline long impr_diffusion_implicite() const
+  inline int impr_diffusion_implicite() const
   {
     return impr_diff_impl_;
   };        // Impression ou non de GC implicitation
-  inline long impr_extremums() const
+  inline int impr_extremums() const
   {
     return impr_extremums_;
   };
-  inline long niter_max_diffusion_implicite() const
+  inline int niter_max_diffusion_implicite() const
   {
     return niter_max_diff_impl_;
   };// Iterations maximale pour GC implicitation
 
-  inline long no_conv_subiteration_diffusion_implicite() const
+  inline int no_conv_subiteration_diffusion_implicite() const
   {
     return no_conv_subiteration_diff_impl_;
   };
-  inline long no_error_if_not_converged_diffusion_implicite() const
+  inline int no_error_if_not_converged_diffusion_implicite() const
   {
     return no_error_if_not_converged_diff_impl_;
   };
-  long lire_motcle_non_standard(const Motcle&, Entree&) override;
+  int lire_motcle_non_standard(const Motcle&, Entree&) override;
   virtual Entree& lire_nb_pas_dt_max(Entree&);
   virtual Entree& lire_periode_sauvegarde_securite_en_heures(Entree&);
   virtual Entree& lire_temps_cpu_max(Entree&);
@@ -187,35 +187,35 @@ public :
   inline double temps_sauv() const ;
   inline double temps_impr() const ;
   inline double temps_impr_fpi() const ; // EB
-  inline long precision_impr() const
+  inline int precision_impr() const
   {
     return precision_impr_;
   };
-  inline long wcol() const
+  inline int wcol() const
   {
     // largeur minimale des colonnes des fichiers .out
-    // precision_impr_ + 9 car : -1.000e+150 on ajoute la longueur de "-1." et de "e+150" plus un espace
+    // precision_impr_ + 9 car : -1.000e+150 on ajoute la intueur de "-1." et de "e+150" plus un espace
     return precision_impr_ + 9;
   };
-  inline long gnuplot_header() const
+  inline int gnuplot_header() const
   {
     return gnuplot_header_;
   };
   inline double seuil_statio() const ;
-  inline long nb_pas_dt_max() const ;
-  inline long nb_pas_dt() const ;
+  inline int nb_pas_dt_max() const ;
+  inline int nb_pas_dt() const ;
   inline double mode_dt_start() const { return mode_dt_start_; }
-  inline long indice_tps_final_atteint() const { return ind_tps_final_atteint; }
-  inline long indice_nb_pas_dt_max_atteint() const { return ind_nb_pas_dt_max_atteint; }
-  inline long lu() const { return lu_; }
-  inline long file_allocation() const { return file_allocation_; }
+  inline int indice_tps_final_atteint() const { return ind_tps_final_atteint; }
+  inline int indice_nb_pas_dt_max_atteint() const { return ind_nb_pas_dt_max_atteint; }
+  inline int lu() const { return lu_; }
+  inline int file_allocation() const { return file_allocation_; }
 
   inline double& set_temps_init() { return tinit_; }
   inline double& set_temps_max() { return tmax_; }
   inline double& set_temps_courant() { return temps_courant_; }
   inline double& set_temps_precedent() { return temps_precedent_; }
-  inline long& set_nb_pas_dt() { return nb_pas_dt_; }
-  inline long& set_nb_pas_dt_max() { return nb_pas_dt_max_; }
+  inline int& set_nb_pas_dt() { return nb_pas_dt_; }
+  inline int& set_nb_pas_dt_max() { return nb_pas_dt_max_; }
   inline double& set_dt_min() { return dt_min_; }
   inline double& set_dt_max()
   {
@@ -224,31 +224,31 @@ public :
   } ;
   inline double& set_dt_sauv() { return dt_sauv_; }
   inline double& set_dt_impr() { return dt_impr_; }
-  inline long& set_precision_impr() { return precision_impr_; }
+  inline int& set_precision_impr() { return precision_impr_; }
   inline double& set_dt() { return dt_; }
   inline double& set_facsec() { return facsec_; }
   inline double& set_dt_impr_fpi() { return dt_impr_fpi_; } ;
   inline double& set_seuil_statio() { return seuil_statio_; }
-  inline long& set_stationnaire_atteint()
+  inline int& set_stationnaire_atteint()
   {
     if (stationnaire_atteint_==-1)
       stationnaire_atteint_=1;
     return stationnaire_atteint_;
   } ;
   inline void set_stationnaires_atteints(bool flag) { stationnaires_atteints_=flag; }
-  inline long& set_diffusion_implicite() { return ind_diff_impl_; }
+  inline int& set_diffusion_implicite() { return ind_diff_impl_; }
   inline double& set_seuil_diffusion_implicite() { return seuil_diff_impl_; }
-  inline long& set_niter_max_diffusion_implicite() { return niter_max_diff_impl_; }
+  inline int& set_niter_max_diffusion_implicite() { return niter_max_diff_impl_; }
   inline double& set_mode_dt_start() { return mode_dt_start_; }
-  inline long& set_indice_tps_final_atteint() { return ind_tps_final_atteint; }
-  inline long& set_indice_nb_pas_dt_max_atteint() { return ind_nb_pas_dt_max_atteint; }
-  inline long& set_lu() { return lu_; }
+  inline int& set_indice_tps_final_atteint() { return ind_tps_final_atteint; }
+  inline int& set_indice_nb_pas_dt_max_atteint() { return ind_nb_pas_dt_max_atteint; }
+  inline int& set_lu() { return lu_; }
   inline const double& residu() const { return residu_ ; }
   inline double& residu() { return residu_ ; }
   inline const Nom& norm_residu() const { return norm_residu_ ; }
 
-  inline long& schema_impr() { return schema_impr_ ; }
-  inline const long& schema_impr() const { return schema_impr_ ; }
+  inline int& schema_impr() { return schema_impr_ ; }
+  inline const int& schema_impr() const { return schema_impr_ ; }
 
   virtual void associer_pb(const Probleme_base&);
   Probleme_base& pb_base();
@@ -264,12 +264,12 @@ public :
   virtual void ajouter_blocs(matrices_t matrices, DoubleTab& secmem, const Equation_base& eqn, const tabs_t& semi_impl = {}) const;
 
   // Flag to disable the writing of the .progress file
-  inline long disable_progress() const
+  inline int disable_progress() const
   {
     return disable_progress_ ;
   };
   // Flag to disable the writing of the .dt_ev file
-  inline long disable_dt_ev() const
+  inline int disable_dt_ev() const
   {
     return disable_dt_ev_ ;
   };
@@ -287,10 +287,10 @@ protected :
   double tinit_;
   double tmax_;
   double tcpumax_;
-  long nb_pas_dt_;
-  long nb_pas_dt_max_;
-  mutable long nb_impr_;
-  mutable long nb_impr_fpi_;
+  int nb_pas_dt_;
+  int nb_pas_dt_max_;
+  mutable int nb_impr_;
+  mutable int nb_impr_fpi_;
   double dt_min_;                        // Pas de temps min fixe par l'utilisateur
   mutable double dt_max_;                // Pas de temps max fixe par l'utilisateur
   Nom dt_max_str_;                       //reglage de dt_max comme une fonction du temps
@@ -298,7 +298,7 @@ protected :
   double dt_stab_=-100.;                // Pas de temps de stabilite
   double facsec_;
   double seuil_statio_;
-  long seuil_statio_relatif_deconseille_;                // Drapeau pour specifier si seuil_statio_ est une valeur absolue (defaut) ou relative
+  int seuil_statio_relatif_deconseille_;                // Drapeau pour specifier si seuil_statio_ est une valeur absolue (defaut) ou relative
   Nom norm_residu_;
   double dt_sauv_;
   double limite_cpu_sans_sauvegarde_;
@@ -306,33 +306,33 @@ protected :
   double temps_cpu_ecoule_;
   double dt_impr_;                        // Pas de temps d'impression
   double dt_impr_fpi_; // EB
-  long precision_impr_;                // Nombre de chiffres significatifs impression
+  int precision_impr_;                // Nombre de chiffres significatifs impression
   double mode_dt_start_;                // mode calcul du pas de temps de depart
   double residu_;        // Residu
   double residu_old_slope_;
   double cumul_slope_;
-  long gnuplot_header_;
+  int gnuplot_header_;
 
-  long ind_tps_final_atteint;
-  long ind_nb_pas_dt_max_atteint;
-  long ind_temps_cpu_max_atteint;
-  long lu_;
-  long ind_diff_impl_ ;
+  int ind_tps_final_atteint;
+  int ind_nb_pas_dt_max_atteint;
+  int ind_temps_cpu_max_atteint;
+  int lu_;
+  int ind_diff_impl_ ;
   double seuil_diff_impl_;
-  long impr_diff_impl_;
-  long impr_extremums_;
-  long niter_max_diff_impl_;
-  long no_conv_subiteration_diff_impl_;
-  long no_error_if_not_converged_diff_impl_;
-  long schema_impr_;                  // 1 si le schema a le droit d'imprimer dans le .out et dt_ev
-  long file_allocation_;                // 1 = allocation espace disque (par defaut), 0 sinon
-  long max_length_cl_ = -10;
+  int impr_diff_impl_;
+  int impr_extremums_;
+  int niter_max_diff_impl_;
+  int no_conv_subiteration_diff_impl_;
+  int no_error_if_not_converged_diff_impl_;
+  int schema_impr_;                  // 1 si le schema a le droit d'imprimer dans le .out et dt_ev
+  int file_allocation_;                // 1 = allocation espace disque (par defaut), 0 sinon
+  int max_length_cl_ = -10;
 private:
-  long stationnaire_atteint_;	// Stationary reached by the problem using this scheme
+  int stationnaire_atteint_;	// Stationary reached by the problem using this scheme
   bool stationnaires_atteints_;	// Stationary reached by the calculation (means all the problems reach stationary)
   SFichier progress_;
-  long disable_progress_; // Flag to disable the writing of the .progress file
-  long disable_dt_ev_; // Flag to disable the writing of the .dt_ev file
+  int disable_progress_; // Flag to disable the writing of the .progress file
+  int disable_dt_ev_; // Flag to disable the writing of the .dt_ev file
 };
 
 
@@ -360,7 +360,7 @@ inline const Nom& Schema_Temps_base::le_nom() const
  *
  * @return (double&)
  */
-inline long Schema_Temps_base::nb_pas_dt_max() const
+inline int Schema_Temps_base::nb_pas_dt_max() const
 {
   return nb_pas_dt_max_;
 }
@@ -519,26 +519,26 @@ inline double Schema_Temps_base::temps_init() const
 
 /*! @brief Renvoie le nombre de pas de temps effectues.
  *
- * @return (long) le nombre de pas de temps effectues
+ * @return (int) le nombre de pas de temps effectues
  */
-inline long Schema_Temps_base::nb_pas_dt() const
+inline int Schema_Temps_base::nb_pas_dt() const
 {
   return nb_pas_dt_;
 }
 
 /*! @brief Renvoie le nombre d'impressions effectuees.
  *
- * @return (long) le nombre d'impressions effectuees
+ * @return (int) le nombre d'impressions effectuees
  */
-inline long Schema_Temps_base::nb_impr() const
+inline int Schema_Temps_base::nb_impr() const
 {
   return nb_impr_;
 }
 /*! @brief Renvoie le nombre d'impressions effectuees pour le module fluid_particle_interaction
  *
- * @return (long) le nombre d'impressions effectuees
+ * @return (int) le nombre d'impressions effectuees
  */
-inline long Schema_Temps_base::nb_impr_fpi() const
+inline int Schema_Temps_base::nb_impr_fpi() const
 {
   return nb_impr_fpi_;
 }
@@ -584,10 +584,10 @@ inline double& Schema_Temps_base::facteur_securite_pas()
  * Renvoie 1 si temps_courant_ >= tmax
  *     Renvoie 0 sinon
  *
- * @return (long) 1 si le temps final est atteint 0 sinon
+ * @return (int) 1 si le temps final est atteint 0 sinon
  * @throws temps final atteint
  */
-inline long Schema_Temps_base::temps_final_atteint() const
+inline int Schema_Temps_base::temps_final_atteint() const
 {
   return ind_tps_final_atteint;
 }
@@ -596,24 +596,24 @@ inline long Schema_Temps_base::temps_final_atteint() const
  *
  * Renvoie 0 sinon
  *
- * @return (long) 1 si le nombre de pas de temps maximum est depasse 0 sinon
+ * @return (int) 1 si le nombre de pas de temps maximum est depasse 0 sinon
  * @throws nombre de pas de temps maximum atteint
  */
-inline long Schema_Temps_base::nb_pas_dt_max_atteint() const
+inline int Schema_Temps_base::nb_pas_dt_max_atteint() const
 {
   return ind_nb_pas_dt_max_atteint;
 }
 
-inline long Schema_Temps_base::temps_cpu_max_atteint() const
+inline int Schema_Temps_base::temps_cpu_max_atteint() const
 {
   return ind_temps_cpu_max_atteint;
 }
 
 /*! @brief Renvoie 1 si le schema en temps a ete lu diffusion_implicite.
  *
- * @return (long) 1 si le schema en temps a ete lu 0 sinon.
+ * @return (int) 1 si le schema en temps a ete lu 0 sinon.
  */
-inline long Schema_Temps_base::diffusion_implicite() const
+inline int Schema_Temps_base::diffusion_implicite() const
 {
   return ind_diff_impl_;
 }

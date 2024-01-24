@@ -56,7 +56,7 @@ void Matrice_Base::build_stencil( void )
   Process::exit( );
 }
 
-long Matrice_Base::get_stencil_size( void ) const
+int Matrice_Base::get_stencil_size( void ) const
 {
   return stencil_.dimension( 0 );
 }

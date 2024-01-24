@@ -105,16 +105,16 @@ void Faces_builder::creer_faces_reeles(Domaine& domaine,
   //                    tableaux faces_sommets et faces_voisins
   //   (les faces de l'element sont dans l'ordre donne par faces_element_reference)
   //  espaces distants et virtuels appropries pour les elements
-  const long nb_elements          = les_elements().dimension(0);
-  const long nb_faces_par_element = faces_element_reference(0).dimension(0) ? faces_element_reference(0).dimension(0) : 4;
+  const int nb_elements          = les_elements().dimension(0);
+  const int nb_faces_par_element = faces_element_reference(0).dimension(0) ? faces_element_reference(0).dimension(0) : 4;
   elem_faces.resize(nb_elements, nb_faces_par_element);
   elem_faces = -1;
 
-  const long nb_sommets_par_face = faces_element_reference(0).dimension(0) ? faces_element_reference(0).dimension(1) : 3;
+  const int nb_sommets_par_face = faces_element_reference(0).dimension(0) ? faces_element_reference(0).dimension(1) : 3;
   // On ajoute chaque face avec resize(n+1,...), donc smart_resize:
   // Calcul du nombre theorique de faces:
-  const long nb_faces_front = domaine.nb_faces_frontiere() + domaine.nb_faces_joint();
-  long nb_faces_prevision = (nb_elements * nb_faces_par_element + nb_faces_front) / 2;
+  const int nb_faces_front = domaine.nb_faces_frontiere() + domaine.nb_faces_joint();
+  int nb_faces_prevision = (nb_elements * nb_faces_par_element + nb_faces_front) / 2;
   if (is_polyedre_)
     {
       // les faces sont toutes deja connues....
@@ -136,8 +136,8 @@ void Faces_builder::creer_faces_reeles(Domaine& domaine,
   // Creation des faces de bord
   {
     Bords& bords = domaine.faces_bord();
-    const long n = bords.size();
-    for (long i = 0; i < n; i++)
+    const int n = bords.size();
+    for (int i = 0; i < n; i++)
       {
         Frontiere& frontiere = bords[i];
         creer_faces_frontiere(1, /* un element voisin par face */
@@ -150,8 +150,8 @@ void Faces_builder::creer_faces_reeles(Domaine& domaine,
   // Raccords
   {
     Raccords& raccords = domaine.faces_raccord();
-    const long n = raccords.size();
-    for (long i = 0; i < n; i++)
+    const int n = raccords.size();
+    for (int i = 0; i < n; i++)
       {
         Frontiere& frontiere = raccords[i].valeur();
         creer_faces_frontiere(1, /* un element voisin par face */
@@ -165,8 +165,8 @@ void Faces_builder::creer_faces_reeles(Domaine& domaine,
   // Faces de "bord internes"
   {
     Bords_Internes& faces_int = domaine.bords_int();
-    const long n = faces_int.size();
-    for (long i = 0; i < n; i++)
+    const int n = faces_int.size();
+    for (int i = 0; i < n; i++)
       {
         Frontiere& frontiere = faces_int[i];
         creer_faces_frontiere(2, /* deux elements voisin par face */
@@ -191,8 +191,8 @@ void Faces_builder::creer_faces_reeles(Domaine& domaine,
   // Faces de joint
   {
     Joints& joints = domaine.faces_joint();
-    const long n = joints.size();
-    for (long i = 0; i < n; i++)
+    const int n = joints.size();
+    for (int i = 0; i < n; i++)
       {
         Frontiere& frontiere = joints[i];
         creer_faces_frontiere(2, /* elements voisins par face */
@@ -205,10 +205,10 @@ void Faces_builder::creer_faces_reeles(Domaine& domaine,
         Joint& joint = joints[i];
         ArrOfInt& indices_faces =
           joint.set_joint_item(Joint::FACE).set_items_communs();
-        const long nb_faces  = joint.nb_faces();
+        const int nb_faces  = joint.nb_faces();
         indices_faces.resize_array(nb_faces);
-        const long num_premiere_face = joint.num_premiere_face();
-        for (long i2 = 0; i2 < nb_faces; i2++)
+        const int num_premiere_face = joint.num_premiere_face();
+        for (int i2 = 0; i2 < nb_faces; i2++)
           indices_faces[i2] = num_premiere_face + i2;
       }
   }
@@ -224,8 +224,8 @@ void Faces_builder::creer_faces_reeles(Domaine& domaine,
   // Identification des groupes de faces
   {
     Groupes_Faces& groupes_faces = domaine.groupes_faces();
-    const long n = groupes_faces.size();
-    for (long i = 0; i < n; i++)
+    const int n = groupes_faces.size();
+    for (int i = 0; i < n; i++)
       {
         Groupe_Faces& groupe_faces = groupes_faces[i];
         identification_groupe_faces(groupe_faces,
@@ -255,8 +255,8 @@ void Faces_builder::creer_faces_reeles(Domaine& domaine,
 void Faces_builder::check_erreur_faces(const char * message,
                                        const ArrOfInt& liste_faces) const
 {
-  const long nmax = 100;
-  long n = liste_faces.size_array();
+  const int nmax = 100;
+  int n = liste_faces.size_array();
   if (n > 0)
     {
       Cerr << "==========================" << finl;
@@ -271,7 +271,7 @@ void Faces_builder::check_erreur_faces(const char * message,
           J << "Too many faces to display (" << n << ") display only " << nmax << " first faces" << finl;
           n = nmax;
         }
-      long i;
+      int i;
       J << "Display format:\n"
         << " facenumber = face index in faces_sommet array\n"
         << " som1..som4 = node index\n"
@@ -281,23 +281,23 @@ void Faces_builder::check_erreur_faces(const char * message,
       const DoubleTab& coord = ref_domaine_.valeur().coord_sommets();
       const IntTab&     faces = faces_sommets_.valeur();
       const IntTab&     face_elem = face_elem_.valeur();
-      const long dim = Objet_U::dimension;
-      const long nb_som_faces = faces.dimension(1);
+      const int dim = Objet_U::dimension;
+      const int nb_som_faces = faces.dimension(1);
       for (i = 0; i < n; i++)
         {
           char *sptr = s;
-          const long iface = liste_faces[i];
-          sptr += snprintf(sptr, 100, "%4ld ",(long) iface);
-          for (long j = 0; j < nb_som_faces; j++)
+          const int iface = liste_faces[i];
+          sptr += snprintf(sptr, 100, "%4ld ",(int) iface);
+          for (int j = 0; j < nb_som_faces; j++)
             {
-              const long isom = faces(iface,j);
-              sptr += snprintf(sptr, 100, "%5ld(", (long)isom);
-              for (long k = 0; k < dim; k++)
+              const int isom = faces(iface,j);
+              sptr += snprintf(sptr, 100, "%5ld(", (int)isom);
+              for (int k = 0; k < dim; k++)
                 if (isom!=-1)
                   sptr += snprintf(sptr, 100, "%10.6f", coord(isom, k));
               sptr += snprintf(sptr, 100, ")");
             }
-          sptr += snprintf(sptr, 100, "%4ld %4ld", (long)face_elem(iface,0),(long) face_elem(iface,1));
+          sptr += snprintf(sptr, 100, "%4ld %4ld", (int)face_elem(iface,0),(int) face_elem(iface,1));
           J << s << finl;
         }
       NettoieNoeuds::verifie_noeuds(ref_domaine_.valeur());
@@ -308,16 +308,16 @@ void Faces_builder::check_erreur_faces(const char * message,
 /*! @brief ajoute une face reelle dans faces_sommets et faces_voisins.
  *
  */
-long Faces_builder::ajouter_une_face(const ArrOfInt& une_face,
-                                     const long elem0,
-                                     const long elem1,
-                                     IntTab& faces_sommets,
-                                     IntTab& faces_voisins)
+int Faces_builder::ajouter_une_face(const ArrOfInt& une_face,
+                                    const int elem0,
+                                    const int elem1,
+                                    IntTab& faces_sommets,
+                                    IntTab& faces_voisins)
 {
-  long i;
-  const long num_new_face        = faces_sommets.dimension(0);
-  const long nb_sommets_par_face = faces_sommets.dimension(1);
-  const long new_size = num_new_face + 1;
+  int i;
+  const int num_new_face        = faces_sommets.dimension(0);
+  const int nb_sommets_par_face = faces_sommets.dimension(1);
+  const int new_size = num_new_face + 1;
 
   assert(une_face.size_array() == nb_sommets_par_face);
   faces_sommets.resize(new_size, nb_sommets_par_face);
@@ -331,29 +331,29 @@ long Faces_builder::ajouter_une_face(const ArrOfInt& une_face,
   return num_new_face;
 }
 
-long Faces_builder::chercher_face_element(const IntTab&    elem_som,
-                                          const IntTab&    faces_element_ref,
-                                          const ArrOfInt& une_face,
-                                          const long     elem)
+int Faces_builder::chercher_face_element(const IntTab&    elem_som,
+                                         const IntTab&    faces_element_ref,
+                                         const ArrOfInt& une_face,
+                                         const int     elem)
 {
 #ifdef old
 #ifndef NDEBUG
   ArrOfInt sommets_element(8);
 #else
-  long sommets_element[8];
+  int sommets_element[8];
 #endif
 #endif
 
-  const long nb_faces_element          = faces_element_ref.dimension(0);
-  const long nb_sommets_par_face       = faces_element_ref.dimension(1);
+  const int nb_faces_element          = faces_element_ref.dimension(0);
+  const int nb_sommets_par_face       = faces_element_ref.dimension(1);
 
-  long i_face, i_som, i_som2;
+  int i_face, i_som, i_som2;
   for (i_face = 0; i_face < nb_faces_element; i_face++)
     {
       for (i_som = 0; i_som < nb_sommets_par_face; i_som++)
         {
-          const long sommet_elem_ref = faces_element_ref(i_face, i_som);
-          long sommet_domaine ;
+          const int sommet_elem_ref = faces_element_ref(i_face, i_som);
+          int sommet_domaine ;
           if (sommet_elem_ref==-1)
             sommet_domaine=-1;
           else
@@ -372,7 +372,7 @@ long Faces_builder::chercher_face_element(const IntTab&    elem_som,
   else
     return i_face;
 }
-const IntTab& Faces_builder::faces_element_reference(long elem) const
+const IntTab& Faces_builder::faces_element_reference(int elem) const
 {
   if (is_polyedre_==1 && les_elements_ptr_->dimension(0))
     {
@@ -395,12 +395,12 @@ const IntTab& Faces_builder::faces_element_reference(long elem) const
  *   l'element, on renvoie -1.
  *
  */
-long Faces_builder::chercher_face_element(const ArrOfInt& une_face,
-                                          const long     elem) const
+int Faces_builder::chercher_face_element(const ArrOfInt& une_face,
+                                         const int     elem) const
 {
   const IntTab& elem_som                = les_elements();
   const IntTab& faces_element_ref       = faces_element_reference(elem);
-  long i_face = chercher_face_element(elem_som, faces_element_ref, une_face, elem);
+  int i_face = chercher_face_element(elem_som, faces_element_ref, une_face, elem);
   return i_face;
 }
 
@@ -414,7 +414,7 @@ long Faces_builder::chercher_face_element(const ArrOfInt& une_face,
  *    faces_voisins
  *
  */
-void Faces_builder::creer_faces_frontiere(const long nb_voisins_attendus,
+void Faces_builder::creer_faces_frontiere(const int nb_voisins_attendus,
                                           Frontiere&   frontiere,
                                           IntTab& faces_sommets,
                                           IntTab& faces_voisins,
@@ -423,14 +423,14 @@ void Faces_builder::creer_faces_frontiere(const long nb_voisins_attendus,
   assert(nb_voisins_attendus == 1 || nb_voisins_attendus == 2);
 
   const Static_Int_Lists& som_elem   = connectivite_som_elem();
-  const long   nb_sommets_par_face  = faces_element_reference(0).dimension(0) ? faces_element_reference(0).dimension(1) : 3;
-  const long   num_premiere_face    = faces_sommets.dimension(0);
-  const long   nb_elem_reels        = elem_faces.dimension(0);
+  const int   nb_sommets_par_face  = faces_element_reference(0).dimension(0) ? faces_element_reference(0).dimension(1) : 3;
+  const int   num_premiere_face    = faces_sommets.dimension(0);
+  const int   nb_elem_reels        = elem_faces.dimension(0);
   frontiere.fixer_num_premiere_face(num_premiere_face);
 
   const Faces&   faces_frontiere  = frontiere.faces();
   const IntTab& sommets_faces_fr = faces_frontiere.les_sommets();
-  const long   nb_faces         = faces_frontiere.nb_faces();
+  const int   nb_faces         = faces_frontiere.nb_faces();
   ArrOfInt       une_face(nb_sommets_par_face);
   ArrOfInt       voisins;
   voisins.set_smart_resize(1);
@@ -443,22 +443,22 @@ void Faces_builder::creer_faces_frontiere(const long nb_voisins_attendus,
   ArrOfInt liste_faces_erreur3;
   liste_faces_erreur3.set_smart_resize(1);
 
-  long i_face;
+  int i_face;
   for (i_face = 0; i_face < nb_faces; i_face++)
     {
       {
-        long nb_sommets_par_face_fr=sommets_faces_fr.dimension(1);
-        for (long i = 0; i < std::min(nb_sommets_par_face, nb_sommets_par_face_fr); i++)
+        int nb_sommets_par_face_fr=sommets_faces_fr.dimension(1);
+        for (int i = 0; i < std::min(nb_sommets_par_face, nb_sommets_par_face_fr); i++)
           une_face[i] = sommets_faces_fr(i_face, i);
-        for (long i = std::min(nb_sommets_par_face, nb_sommets_par_face_fr); i < nb_sommets_par_face; i++)
+        for (int i = std::min(nb_sommets_par_face, nb_sommets_par_face_fr); i < nb_sommets_par_face; i++)
           une_face[i] = -1;
       }
       // Quels sont les elements voisins de cette face ?
       find_adjacent_elements(som_elem, une_face, voisins);
-      const long nb_voisins = voisins.size_array();
-      const long elem0 = (nb_voisins > 0) ? voisins[0] : -1;
-      const long elem1 = (nb_voisins > 1) ? voisins[1] : -1;
-      const long indice_face =
+      const int nb_voisins = voisins.size_array();
+      const int elem0 = (nb_voisins > 0) ? voisins[0] : -1;
+      const int elem1 = (nb_voisins > 1) ? voisins[1] : -1;
+      const int indice_face =
         ajouter_une_face(une_face, elem0, elem1, faces_sommets, faces_voisins);
 
       switch(nb_voisins)
@@ -474,12 +474,12 @@ void Faces_builder::creer_faces_frontiere(const long nb_voisins_attendus,
           {
             if (nb_voisins_attendus == nb_voisins)
               {
-                long i_voisin;
+                int i_voisin;
                 for (i_voisin = 0; i_voisin < nb_voisins; i_voisin++)
                   {
-                    const long elem = voisins[i_voisin];
+                    const int elem = voisins[i_voisin];
                     // Quelle est la face de l'element ?
-                    const long i_face_elem = chercher_face_element(une_face, elem);
+                    const int i_face_elem = chercher_face_element(une_face, elem);
                     if (i_face_elem >= 0)
                       {
                         // Si c'est un element reel, on associe la face
@@ -510,12 +510,12 @@ void Faces_builder::creer_faces_frontiere(const long nb_voisins_attendus,
   Nom msg;
   msg = "Boundary \"";
   msg += frontiere.le_nom();
-  msg += "\" contains faces which do not belong to any element.";
+  msg += "\" contains faces which do not beint to any element.";
   check_erreur_faces(msg, liste_faces_erreur0);
 
   msg = "Boundary \"";
   msg += frontiere.le_nom();
-  msg += "\" contains faces that belong to ";
+  msg += "\" contains faces that beint to ";
   msg += Nom(3-nb_voisins_attendus);
   msg += " elements.\n";
   switch(nb_voisins_attendus)
@@ -541,7 +541,7 @@ void Faces_builder::creer_faces_frontiere(const long nb_voisins_attendus,
 
   msg = "Boundary \"";
   msg += frontiere.le_nom();
-  msg += "\" contains faces that belong to more than 2 elements.\n";
+  msg += "\" contains faces that beint to more than 2 elements.\n";
   check_erreur_faces(msg, liste_faces_erreur2);
 
   msg = "Boundary \"";
@@ -562,9 +562,9 @@ void Faces_builder::creer_faces_internes(IntTab& faces_sommets,
   const IntTab& elem_som             = les_elements();
   const Static_Int_Lists& som_elem   = connectivite_som_elem();
   //  const IntTab & faces_elem_ref       = faces_element_reference();
-  const long   nb_elem              = elem_som.dimension(0);
-  const long   nb_faces_par_element = faces_element_reference(0).dimension(0);
-  const long   nb_sommets_par_face  = nb_faces_par_element ? faces_element_reference(0).dimension(1) : 3;
+  const int   nb_elem              = elem_som.dimension(0);
+  const int   nb_faces_par_element = faces_element_reference(0).dimension(0);
+  const int   nb_sommets_par_face  = nb_faces_par_element ? faces_element_reference(0).dimension(1) : 3;
 
   // Tableau temporaire dans lequel on stocke les indices des sommets
   // de la face en cours de traitement
@@ -585,33 +585,33 @@ void Faces_builder::creer_faces_internes(IntTab& faces_sommets,
   liste_faces_erreurs_connectivite.set_smart_resize(1);
 
   // Boucle sur les elements
-  long i_elem;
+  int i_elem;
   for (i_elem = 0; i_elem < nb_elem; i_elem++)
     {
-      long i_face;
+      int i_face;
       // Boucle sur les faces de l'element
       for (i_face = 0; i_face < nb_faces_par_element; i_face++)
         {
 
           // L'indice de cette face dans le tableau faces_sommets.
           // Il vaut -1 si la face n'a pas encore ete creee,
-          long indice_face = elem_faces(i_elem, i_face);
+          int indice_face = elem_faces(i_elem, i_face);
 
           // Calcul des indices des sommets de la face dans le domaine:
-          long i;
+          int i;
           // Attention il ne faut laisser l'appel ici...
           const IntTab& faces_elem_ref       = faces_element_reference(i_elem);
 
           for (i = 0; i < nb_sommets_par_face; i++)
             {
               // indice du sommet sur l'element de reference
-              const long i_som_ref = faces_elem_ref(i_face, i);
+              const int i_som_ref = faces_elem_ref(i_face, i);
               // indice du sommet dans le domaine
               if (i_som_ref==-1)
                 une_face[i] = -1;
               else
                 {
-                  const long i_som = elem_som(i_elem, i_som_ref);
+                  const int i_som = elem_som(i_elem, i_som_ref);
                   une_face[i] = i_som;
                 }
             }
@@ -626,7 +626,7 @@ void Faces_builder::creer_faces_internes(IntTab& faces_sommets,
               // Le tableau "voisins" est classe dans l'ordre croissant.
               find_adjacent_elements(som_elem, une_face, voisins);
 
-              const long nb_voisins = voisins.size_array();
+              const int nb_voisins = voisins.size_array();
               assert (nb_voisins > 0); // Il devrait au moins y avoir i_elem !!! (ou alors on a une face constitues de -1);
 
               if (nb_voisins == 1)   // ***** La face a 1 voisin ********
@@ -651,8 +651,8 @@ void Faces_builder::creer_faces_internes(IntTab& faces_sommets,
               else if (nb_voisins == 2)     // ***** La face a 2 voisins ********
                 {
 
-                  const long elem0 = voisins[0];
-                  const long elem1 = voisins[1];
+                  const int elem0 = voisins[0];
+                  const int elem1 = voisins[1];
                   assert(elem0 < elem1);
                   if (indice_face >= 0)
                     {
@@ -670,7 +670,7 @@ void Faces_builder::creer_faces_internes(IntTab& faces_sommets,
                                                          faces_sommets, faces_voisins);
 
                           // Ou est cette face sur l'element voisin ?
-                          const long i_face_elem1 = chercher_face_element(une_face, elem1);
+                          const int i_face_elem1 = chercher_face_element(une_face, elem1);
                           if (i_face_elem1 >= 0)
                             {
                               if (elem1 < nb_elem) // Element voisin reel ?
@@ -709,8 +709,8 @@ void Faces_builder::creer_faces_internes(IntTab& faces_sommets,
                 {
                   if (indice_face < 0)
                     {
-                      const long elem0 = voisins[0];
-                      const long elem1 = voisins[1];
+                      const int elem0 = voisins[0];
+                      const int elem1 = voisins[1];
                       indice_face = ajouter_une_face(une_face, elem0, elem1,
                                                      faces_sommets, faces_voisins);
                     }
@@ -727,9 +727,9 @@ void Faces_builder::creer_faces_internes(IntTab& faces_sommets,
 
   // Traitement des erreurs:
   {
-    const char * const msg1 = "We found faces which belong to one element/cell only and are not declared in any boundary ! You forgot to define at least one boundary in your mesh. Fix your mesh.\n";
+    const char * const msg1 = "We found faces which beint to one element/cell only and are not declared in any boundary ! You forgot to define at least one boundary in your mesh. Fix your mesh.\n";
     const char * const msg2 = "Joint faces are incomplete: internal error in the mesh splitter\n";
-    const char * const msg3 = "Connectivity error in the mesh elements. Possible errors:\n- one face of one element belongs to more than 2 elements\n- two element have at least 3 common nodes but these nodes are not faces of these elements\n";
+    const char * const msg3 = "Connectivity error in the mesh elements. Possible errors:\n- one face of one element beints to more than 2 elements\n- two element have at least 3 common nodes but these nodes are not faces of these elements\n";
     check_erreur_faces(msg1, liste_faces_frontiere_non_declarees);
     check_erreur_faces(msg2, liste_faces_joint_non_declarees);
     check_erreur_faces(msg3, liste_faces_erreurs_connectivite);
@@ -745,11 +745,11 @@ void Faces_builder::identification_groupe_faces(Groupe_Faces& groupe_faces,
                                                 const IntTab& elem_faces) const
 {
   const Static_Int_Lists& som_elem   = connectivite_som_elem();
-  const long   nb_sommets_par_face  = faces_element_reference(0).dimension(0) ? faces_element_reference(0).dimension(1) : 3;
+  const int   nb_sommets_par_face  = faces_element_reference(0).dimension(0) ? faces_element_reference(0).dimension(1) : 3;
 
   const Faces&   faces_specifiees  = groupe_faces.faces();
   const IntTab& sommets_faces_fr = faces_specifiees.les_sommets();
-  const long   nb_faces         = faces_specifiees.nb_faces();
+  const int   nb_faces         = faces_specifiees.nb_faces();
   ArrOfInt& indices_faces = groupe_faces.get_indices_faces();
   indices_faces.resize_array(nb_faces);
 
@@ -761,18 +761,18 @@ void Faces_builder::identification_groupe_faces(Groupe_Faces& groupe_faces,
   ArrOfInt liste_faces_erreur1;
   liste_faces_erreur1.set_smart_resize(1);
 
-  for (long i_face = 0; i_face < nb_faces; i_face++)
+  for (int i_face = 0; i_face < nb_faces; i_face++)
     {
       {
-        long nb_sommets_par_face_fr=sommets_faces_fr.dimension(1);
-        for (long i = 0; i < std::min(nb_sommets_par_face, nb_sommets_par_face_fr); i++)
+        int nb_sommets_par_face_fr=sommets_faces_fr.dimension(1);
+        for (int i = 0; i < std::min(nb_sommets_par_face, nb_sommets_par_face_fr); i++)
           une_face[i] = sommets_faces_fr(i_face, i);
-        for (long i = std::min(nb_sommets_par_face, nb_sommets_par_face_fr); i < nb_sommets_par_face; i++)
+        for (int i = std::min(nb_sommets_par_face, nb_sommets_par_face_fr); i < nb_sommets_par_face; i++)
           une_face[i] = -1;
       }
       // Quels sont les elements voisins de cette face ?
       find_adjacent_elements(som_elem, une_face, voisins);
-      const long nb_voisins = voisins.size_array();
+      const int nb_voisins = voisins.size_array();
 
       switch(nb_voisins)
         {
@@ -785,9 +785,9 @@ void Faces_builder::identification_groupe_faces(Groupe_Faces& groupe_faces,
         case 1:
         case 2:
           {
-            const long elem = voisins[0];
+            const int elem = voisins[0];
             // Quelle est la face de l'element ?
-            const long i_face_elem = chercher_face_element(une_face, elem);
+            const int i_face_elem = chercher_face_element(une_face, elem);
 
             if (i_face_elem >= 0)
               // Quel est le numero de la face
@@ -803,12 +803,12 @@ void Faces_builder::identification_groupe_faces(Groupe_Faces& groupe_faces,
   Nom msg;
   msg = "Group of Faces \"";
   msg += groupe_faces.le_nom();
-  msg += "\" contains faces which do not belong to any element or not virtual element.";
+  msg += "\" contains faces which do not beint to any element or not virtual element.";
   check_erreur_faces(msg, liste_faces_erreur0);
 
   msg = "Group of Faces \"";
   msg += groupe_faces.le_nom();
-  msg += "\" contains faces that belong to more than 2 elements.\n";
+  msg += "\" contains faces that beint to more than 2 elements.\n";
   check_erreur_faces(msg, liste_faces_erreur1);
 }
 
@@ -816,14 +816,14 @@ void Faces_builder::identification_groupe_faces(Groupe_Faces& groupe_faces,
 //  Cette methode permet de faire un echange espace virtuel d'un tableau aux aretes
 //  sans passer par le descripteur des aretes. On utilise le tableau elem_aretes et l'echange
 //  espace virtuel des elements
-static void echanger_tableau_aretes(const IntTab& elem_aretes, long nb_aretes_reelles, ArrOfInt& tab_aretes)
+static void echanger_tableau_aretes(const IntTab& elem_aretes, int nb_aretes_reelles, ArrOfInt& tab_aretes)
 {
-  const long moi = Process::me();
+  const int moi = Process::me();
 
-  const long nb_elem = elem_aretes.dimension(0);
-  const long nb_elem_tot = elem_aretes.dimension_tot(0);
-  const long nb_aretes_elem = elem_aretes.dimension(1);
-  long i;
+  const int nb_elem = elem_aretes.dimension(0);
+  const int nb_elem_tot = elem_aretes.dimension_tot(0);
+  const int nb_aretes_elem = elem_aretes.dimension(1);
+  int i;
 
   // **********************
   // I) Echange pour mettre a jour les items communs
@@ -846,7 +846,7 @@ static void echanger_tableau_aretes(const IntTab& elem_aretes, long nb_aretes_re
     // Inutile de parcourir les elements reels, on va trouver pe_elem[i]==moi...
     // Si l'arete se trouve sur un processeur de rang inferieur, on lui attribue
     for (i = nb_elem; i < nb_elem_tot; i++)
-      for (long pe = pe_elem[i], j = 0, a; j < nb_aretes_elem && (a = elem_aretes(i, j)) >= 0; j++)
+      for (int pe = pe_elem[i], j = 0, a; j < nb_aretes_elem && (a = elem_aretes(i, j)) >= 0; j++)
         if (a < nb_aretes_reelles && pe_arete[a] > pe)
           pe_arete[a] = pe;
   }
@@ -860,7 +860,7 @@ static void echanger_tableau_aretes(const IntTab& elem_aretes, long nb_aretes_re
 
   // Copier tab_aretes dans la structure tmp (on sait echanger tmp, pas tab_aretes)
   for (i = 0; i < nb_elem; i++)
-    for (long j = 0, a; j < nb_aretes_elem && (a = elem_aretes(i, j)) >= 0; j++)
+    for (int j = 0, a; j < nb_aretes_elem && (a = elem_aretes(i, j)) >= 0; j++)
       tmp(i, j) = tab_aretes[a];
 
   // 2) Echange du tableau
@@ -872,7 +872,7 @@ static void echanger_tableau_aretes(const IntTab& elem_aretes, long nb_aretes_re
   //    qui donne la valeur
   // Inutile de parcourir les elements reels, la valeur ne changerait pas
   for (i = nb_elem; i < nb_elem_tot; i++)
-    for (long pe = pe_elem[i], j = 0, a; j < nb_aretes_elem && (a = elem_aretes(i, j)) >= 0; j++)
+    for (int pe = pe_elem[i], j = 0, a; j < nb_aretes_elem && (a = elem_aretes(i, j)) >= 0; j++)
       if (a < nb_aretes_reelles && pe_arete[a] == pe)
         tab_aretes[a] = tmp(i, j);
 
@@ -885,7 +885,7 @@ static void echanger_tableau_aretes(const IntTab& elem_aretes, long nb_aretes_re
 
   // Copier encore une fois tab_aretes dans la structure tmp
   for (i = 0; i < nb_elem; i++)
-    for (long j = 0, a; j < nb_aretes_elem && (a = elem_aretes(i, j)) >= 0; j++)
+    for (int j = 0, a; j < nb_aretes_elem && (a = elem_aretes(i, j)) >= 0; j++)
       tmp(i, j) = tab_aretes[a];
 
   // Echange du tableau
@@ -893,17 +893,17 @@ static void echanger_tableau_aretes(const IntTab& elem_aretes, long nb_aretes_re
   */
   // Recopie de tmp dans tab_aretes
   for (i = nb_elem; i < nb_elem_tot; i++)
-    for (long j = 0, a; j < nb_aretes_elem && (a = elem_aretes(i, j)) >= 0; j++)
+    for (int j = 0, a; j < nb_aretes_elem && (a = elem_aretes(i, j)) >= 0; j++)
       {
         tab_aretes[a] = tmp(i, j);
       }
 }
-void Domaine::creer_structure_parallelle_aretes(const long nb_aretes_reelles, IntTab& Les_Aretes_som, IntTab& Les_Elem_Aretes)
+void Domaine::creer_structure_parallelle_aretes(const int nb_aretes_reelles, IntTab& Les_Aretes_som, IntTab& Les_Elem_Aretes)
 {
 
   Cerr << "Domaine::creer_structure_parallelle_aretes" << finl;
-  const long n_aretes_tot=Les_Aretes_som.dimension(0);
-  const long moi = Process::me();
+  const int n_aretes_tot=Les_Aretes_som.dimension(0);
+  const int moi = Process::me();
   ArrOfInt pe_aretes(n_aretes_tot);
   pe_aretes=moi;
   echanger_tableau_aretes(Les_Elem_Aretes, nb_aretes_reelles, pe_aretes);
@@ -912,7 +912,7 @@ void Domaine::creer_structure_parallelle_aretes(const long nb_aretes_reelles, In
   ArrOfInt indice_aretes_owner(n_aretes_tot);
   indice_aretes_owner=0;
 
-  for (long i = 0; i < nb_aretes_reelles; i++)
+  for (int i = 0; i < nb_aretes_reelles; i++)
     indice_aretes_owner[i] = i;
 
   echanger_tableau_aretes(Les_Elem_Aretes, nb_aretes_reelles, indice_aretes_owner);
@@ -921,7 +921,7 @@ void Domaine::creer_structure_parallelle_aretes(const long nb_aretes_reelles, In
   // Construction de pe_voisins
   ArrOfInt pe_voisins;
   pe_voisins.set_smart_resize(1);
-  for (long i=0; i<n_aretes_tot; i++)
+  for (int i=0; i<n_aretes_tot; i++)
     if (pe_aretes[i]!=moi)
       pe_voisins.append_array(pe_aretes[i]);
 
@@ -931,19 +931,19 @@ void Domaine::creer_structure_parallelle_aretes(const long nb_aretes_reelles, In
 
 
   // On concatene les deux listes.
-  for (long i = 0; i < liste_pe.size_array(); i++)
+  for (int i = 0; i < liste_pe.size_array(); i++)
     pe_voisins.append_array(liste_pe[i]);
   array_trier_retirer_doublons(pe_voisins);
-  long nb_voisins = pe_voisins.size_array();
+  int nb_voisins = pe_voisins.size_array();
   ArrOfInt indices_pe(nproc());
   indices_pe= -1;
-  for (long i = 0; i < nb_voisins; i++)
+  for (int i = 0; i < nb_voisins; i++)
     indices_pe[pe_voisins[i]] = i;
 
   VECT(ArrOfInt) aretes_communes_to_recv(nb_voisins);
   VECT(ArrOfInt) blocs_aretes_virt(nb_voisins);
   VECT(ArrOfInt) aretes_to_send(nb_voisins);
-  for (long i = 0; i < nb_voisins; i++)
+  for (int i = 0; i < nb_voisins; i++)
     {
       aretes_communes_to_recv[i].set_smart_resize(1);
       blocs_aretes_virt[i].set_smart_resize(1);
@@ -951,12 +951,12 @@ void Domaine::creer_structure_parallelle_aretes(const long nb_aretes_reelles, In
     }
   // Parcours des aretes: recherche des aretes a recevoir d'un autre processeur.
   // Aretes reeles (items communs)
-  for (long i = 0; i < nb_aretes_reelles; i++)
+  for (int i = 0; i < nb_aretes_reelles; i++)
     {
-      const long pe = pe_aretes[i];
+      const int pe = pe_aretes[i];
       if (pe != moi)
         {
-          const long indice_pe = indices_pe[pe];
+          const int indice_pe = indices_pe[pe];
           if (indice_pe < 0)
             {
               Cerr << "Error: indice_pe=" << indice_pe << " shouldn't be negative in Zone::creer_structure_parallelle_aretes." << finl;
@@ -965,17 +965,17 @@ void Domaine::creer_structure_parallelle_aretes(const long nb_aretes_reelles, In
               exit();
             }
           // Je recois cette arete d'un autre proc
-          const long indice_distant = indice_aretes_owner[i];
+          const int indice_distant = indice_aretes_owner[i];
           aretes_to_send[indice_pe].append_array(indice_distant); // indice sur le pe voisin
           aretes_communes_to_recv[indice_pe].append_array(i); // indice local de l'arete
         }
     }
   // Aretes virtuelles
-  for (long i = nb_aretes_reelles; i < n_aretes_tot; i++)
+  for (int i = nb_aretes_reelles; i < n_aretes_tot; i++)
     {
-      const long pe = pe_aretes[i];
+      const int pe = pe_aretes[i];
       assert(pe < nproc() && pe != moi);
-      const long indice_pe = indices_pe[pe];
+      const int indice_pe = indices_pe[pe];
       if (indice_pe < 0)
         {
           Cerr << "Error: indice_pe=" << indice_pe << " shouldn't be negative in Zone::creer_structure_parallelle_aretes." << finl;
@@ -983,7 +983,7 @@ void Domaine::creer_structure_parallelle_aretes(const long nb_aretes_reelles, In
           Cerr << "You could also try another partitioned mesh to get around this issue." << finl;
           exit();
         }
-      const long indice_distant = indice_aretes_owner[i];
+      const int indice_distant = indice_aretes_owner[i];
       aretes_to_send[indice_pe].append_array(indice_distant); // indice sur le pe voisin
       MD_Vector_base2::append_item_to_blocs(blocs_aretes_virt[indice_pe], i);
     }
@@ -993,11 +993,11 @@ void Domaine::creer_structure_parallelle_aretes(const long nb_aretes_reelles, In
     schema.set_send_recv_pe_list(pe_voisins, pe_voisins);
     schema.begin_comm();
     // On empile le tableau aretes_to_send et le nombre d'aretes commune avec ce pe:
-    for (long i = 0; i < nb_voisins; i++)
+    for (int i = 0; i < nb_voisins; i++)
       schema.send_buffer(pe_voisins[i]) << aretes_to_send[i];
     schema.echange_taille_et_messages();
     // Reception
-    for (long i = 0; i < nb_voisins; i++)
+    for (int i = 0; i < nb_voisins; i++)
       schema.recv_buffer(pe_voisins[i]) >> aretes_to_send[i];
     schema.end_comm();
   }

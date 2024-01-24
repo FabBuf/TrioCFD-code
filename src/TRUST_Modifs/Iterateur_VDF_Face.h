@@ -25,7 +25,7 @@ template <class _TYPE_>
 class Iterateur_VDF_Face : public Iterateur_VDF_base
 {
   inline unsigned taille_memoire() const override { throw; }
-  inline long duplique() const override
+  inline int duplique() const override
   {
     Iterateur_VDF_Face* xxx = new  Iterateur_VDF_Face(*this);
     if(!xxx) Process::exit("Not enough memory !");
@@ -39,7 +39,7 @@ public:
   inline Evaluateur_VDF& evaluateur() override { return static_cast<Evaluateur_VDF&> (flux_evaluateur); }
   inline const Evaluateur_VDF& evaluateur() const override { return static_cast<const Evaluateur_VDF&> (flux_evaluateur); }
 
-  long impr(Sortie& os) const override;
+  int impr(Sortie& os) const override;
   void completer_() override;
 
   // INTERFACE  BLOCS
@@ -47,17 +47,17 @@ public:
 
 protected:
   _TYPE_ flux_evaluateur;
-  long nb_elem = -100, premiere_arete_interne = -100, derniere_arete_interne = -100, premiere_arete_mixte = -100, derniere_arete_mixte = -100;
-  long premiere_arete_bord = -100, derniere_arete_bord = -100, premiere_arete_coin = -100, derniere_arete_coin = -100;
+  int nb_elem = -100, premiere_arete_interne = -100, derniere_arete_interne = -100, premiere_arete_mixte = -100, derniere_arete_mixte = -100;
+  int premiere_arete_bord = -100, derniere_arete_bord = -100, premiere_arete_coin = -100, derniere_arete_coin = -100;
   mutable SFichier Flux, Flux_moment, Flux_sum;
   IntTab Qdm, elem, elem_faces;
   IntVect orientation, type_arete_bord, type_arete_coin;
 
 private:
   void multiply_by_rho_if_hydraulique(DoubleTab&) const;
-  template<typename Type_Double> void fill_resu_tab(const long, const long, const long, const Type_Double&, DoubleTab&) const;
-  template<typename Type_Double> void fill_coeff_matrice_morse(const long, const long, const long, const long, const Type_Double&, Matrice_Morse&) const;
-  template<typename Type_Double> void fill_coeff_matrice_morse(const long, const long, const long, const long, const Type_Double&, const Type_Double&, Matrice_Morse&) const;
+  template<typename Type_Double> void fill_resu_tab(const int, const int, const int, const Type_Double&, DoubleTab&) const;
+  template<typename Type_Double> void fill_coeff_matrice_morse(const int, const int, const int, const int, const Type_Double&, Matrice_Morse&) const;
+  template<typename Type_Double> void fill_coeff_matrice_morse(const int, const int, const int, const int, const Type_Double&, const Type_Double&, Matrice_Morse&) const;
 
   /* ************************************** *
    * *********  INTERFACE BLOCS  ********** *
@@ -66,64 +66,64 @@ private:
 
   /* ====== BORDS ===== */
   template<typename Type_Double>
-  void ajouter_blocs_aretes_bords(const long, matrices_t, DoubleTab&, const tabs_t&) const;
+  void ajouter_blocs_aretes_bords(const int, matrices_t, DoubleTab&, const tabs_t&) const;
 
   template <bool should_calc_flux, Type_Flux_Arete Arete_Type, typename Type_Double>
   std::enable_if_t< Arete_Type == Type_Flux_Arete::PAROI || Arete_Type == Type_Flux_Arete::NAVIER || Arete_Type == Type_Flux_Arete::NAVIER_PAROI, void>
-  ajouter_blocs_aretes_bords_(const long , const long , matrices_t , DoubleTab& , const tabs_t& ) const;
+  ajouter_blocs_aretes_bords_(const int , const int , matrices_t , DoubleTab& , const tabs_t& ) const;
 
   template <bool should_calc_flux, Type_Flux_Arete Arete_Type, typename Type_Double>
   std::enable_if_t< Arete_Type == Type_Flux_Arete::FLUIDE || Arete_Type == Type_Flux_Arete::PAROI_FLUIDE || Arete_Type == Type_Flux_Arete::NAVIER_FLUIDE, void>
-  ajouter_blocs_aretes_bords_(const long , const long , matrices_t , DoubleTab& , const tabs_t& ) const;
+  ajouter_blocs_aretes_bords_(const int , const int , matrices_t , DoubleTab& , const tabs_t& ) const;
 
   template <bool should_calc_flux, Type_Flux_Arete Arete_Type, typename Type_Double>
   std::enable_if_t< Arete_Type == Type_Flux_Arete::PERIODICITE, void>
-  ajouter_blocs_aretes_bords_(const long , const long , matrices_t , DoubleTab& , const tabs_t& ) const;
+  ajouter_blocs_aretes_bords_(const int , const int , matrices_t , DoubleTab& , const tabs_t& ) const;
 
   /* ====== COINS ===== */
   template<typename Type_Double>
-  void ajouter_blocs_aretes_coins(const long, matrices_t, DoubleTab&, const tabs_t&) const;
+  void ajouter_blocs_aretes_coins(const int, matrices_t, DoubleTab&, const tabs_t&) const;
 
   template <bool should_calc_flux, Type_Flux_Arete Arete_Type, TypeAreteCoinVDF::type_arete Arete_Type_Coin, typename Type_Double>
   std::enable_if_t< Arete_Type == Type_Flux_Arete::PAROI, void>
-  ajouter_blocs_aretes_coins_(const long , const long , matrices_t , DoubleTab& , const tabs_t& ) const;
+  ajouter_blocs_aretes_coins_(const int , const int , matrices_t , DoubleTab& , const tabs_t& ) const;
 
   template <bool should_calc_flux, Type_Flux_Arete Arete_Type, typename Type_Double>
   std::enable_if_t<Arete_Type == Type_Flux_Arete::COIN_FLUIDE, void>
-  ajouter_blocs_aretes_coins_(const long , const long , matrices_t , DoubleTab& , const tabs_t& ) const;
+  ajouter_blocs_aretes_coins_(const int , const int , matrices_t , DoubleTab& , const tabs_t& ) const;
 
   template <bool should_calc_flux, Type_Flux_Arete Arete_Type, typename Type_Double>
   std::enable_if_t<Arete_Type == Type_Flux_Arete::PERIODICITE, void>
-  ajouter_blocs_aretes_coins_(const long , const long , matrices_t , DoubleTab& , const tabs_t& ) const;
+  ajouter_blocs_aretes_coins_(const int , const int , matrices_t , DoubleTab& , const tabs_t& ) const;
 
   /* ====== INTERNES  & MIXTES ===== */
   template<typename Type_Double>
-  void ajouter_blocs_aretes_internes(const long, matrices_t, DoubleTab&, const tabs_t&) const;
+  void ajouter_blocs_aretes_internes(const int, matrices_t, DoubleTab&, const tabs_t&) const;
 
   template<typename Type_Double>
-  void ajouter_blocs_aretes_mixtes(const long, matrices_t, DoubleTab&, const tabs_t&) const;
+  void ajouter_blocs_aretes_mixtes(const int, matrices_t, DoubleTab&, const tabs_t&) const;
 
   template <bool should_calc_flux, Type_Flux_Arete Arete_Type, typename Type_Double>
   std::enable_if_t< Arete_Type == Type_Flux_Arete::INTERNE || Arete_Type == Type_Flux_Arete::INTERNE_FT || Arete_Type == Type_Flux_Arete::MIXTE, void>
-  ajouter_blocs_aretes_generique_(const long , const long , const long , matrices_t , DoubleTab& , const tabs_t& ) const;
+  ajouter_blocs_aretes_generique_(const int , const int , const int , matrices_t , DoubleTab& , const tabs_t& ) const;
 
   /* ====== FA7 SORTIE LIBRE ===== */
   template<typename Type_Double>
-  void ajouter_blocs_fa7_sortie_libre(const long, matrices_t, DoubleTab&, const tabs_t& ) const;
+  void ajouter_blocs_fa7_sortie_libre(const int, matrices_t, DoubleTab&, const tabs_t& ) const;
 
   template <bool should_calc_flux, Type_Flux_Fa7 Fa7_Type, typename Type_Double>
-  void ajouter_blocs_fa7_sortie_libre_(const long , const long , matrices_t , DoubleTab& , const tabs_t& ) const;
+  void ajouter_blocs_fa7_sortie_libre_(const int , const int , matrices_t , DoubleTab& , const tabs_t& ) const;
 
   /* ====== FA7 ELEM ===== */
   template<typename Type_Double>
-  void ajouter_blocs_fa7_elem(const long, matrices_t, DoubleTab&, const tabs_t& ) const;
+  void ajouter_blocs_fa7_elem(const int, matrices_t, DoubleTab&, const tabs_t& ) const;
 
-  void corriger_fa7_elem_periodicite__(const long, long&, long&, long&, long&) const;
-  template<typename Type_Double> void corriger_fa7_elem_periodicite(const long, matrices_t, DoubleTab&, const tabs_t& ) const;
+  void corriger_fa7_elem_periodicite__(const int, int&, int&, int&, int&) const;
+  template<typename Type_Double> void corriger_fa7_elem_periodicite(const int, matrices_t, DoubleTab&, const tabs_t& ) const;
 
   /* ====== Compressible ===== */
   template<typename Type_Double>
-  void ajouter_pour_compressible(const long, matrices_t, DoubleTab&, const tabs_t&) const;
+  void ajouter_pour_compressible(const int, matrices_t, DoubleTab&, const tabs_t&) const;
 };
 
 #include <Iterateur_VDF_Face.tpp> // templates specializations ici ;)

@@ -41,7 +41,7 @@ void Navier_Stokes_Turbulent::set_param(Param& param)
   param.ajouter_non_std("modele_turbulence", (this), Param::REQUIRED);
 }
 
-long Navier_Stokes_Turbulent::lire_motcle_non_standard(const Motcle& mot, Entree& is)
+int Navier_Stokes_Turbulent::lire_motcle_non_standard(const Motcle& mot, Entree& is)
 {
   if (mot == "diffusion")
     {
@@ -193,9 +193,9 @@ Entree& Navier_Stokes_Turbulent::lire_op_diff_turbulent(Entree& is)
  * Simple appe a Modele_turbulence_hyd::preparer_caclul() sur
  *     le membre reprresentant la turbulence.
  *
- * @return (long) renvoie toujours 1
+ * @return (int) renvoie toujours 1
  */
-long Navier_Stokes_Turbulent::preparer_calcul()
+int Navier_Stokes_Turbulent::preparer_calcul()
 {
 
   Turbulence_paroi& loipar = le_modele_turbulence.valeur().loi_paroi();
@@ -217,11 +217,11 @@ bool Navier_Stokes_Turbulent::initTimeStep(double dt)
 /*! @brief Sauvegarde l'equation (et son modele de turbulence) sur un flot de sortie.
  *
  * @param (Sortie& os) un flot de sortie
- * @return (long) renvoie toujours 1
+ * @return (int) renvoie toujours 1
  */
-long Navier_Stokes_Turbulent::sauvegarder(Sortie& os) const
+int Navier_Stokes_Turbulent::sauvegarder(Sortie& os) const
 {
-  long bytes = 0;
+  int bytes = 0;
   bytes += Navier_Stokes_std::sauvegarder(os);
   assert(bytes % 4 == 0);
   bytes += le_modele_turbulence.sauvegarder(os);
@@ -232,10 +232,10 @@ long Navier_Stokes_Turbulent::sauvegarder(Sortie& os) const
 /*! @brief Reprise de l'equation et de son modele de turbulence a partir d'un flot d'entree.
  *
  * @param (Entree& is) un flot d'entree
- * @return (long) renvoie toujours 1
+ * @return (int) renvoie toujours 1
  * @throws fin de fichier rencontre pendant la reprise
  */
-long Navier_Stokes_Turbulent::reprendre(Entree& is)
+int Navier_Stokes_Turbulent::reprendre(Entree& is)
 {
   Navier_Stokes_std::reprendre(is);
   double temps = schema_temps().temps_courant();

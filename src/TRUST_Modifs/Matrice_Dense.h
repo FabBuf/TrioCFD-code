@@ -28,24 +28,24 @@ class Matrice_Dense : public Matrice_Base
 
 public :
   Matrice_Dense( void );
-  Matrice_Dense( const long nb_lines , const long nb_cols );
-  void dimensionner( const long nb_lines , const long nb_cols );
+  Matrice_Dense( const int nb_lines , const int nb_cols );
+  void dimensionner( const int nb_lines , const int nb_cols );
   void read_from_file( const Nom& filename );
   void convert_to_morse_matrix( Matrice_Morse& morse_matrix ) const;
-  inline const double& operator( )( const long line , const long col ) const;
-  inline double& operator( )( const long line , const long col );
+  inline const double& operator( )( const int line , const int col ) const;
+  inline double& operator( )( const int line , const int col );
   friend Matrice_Dense operator+(const Matrice_Dense& A, const Matrice_Dense& B); // EB
   friend Matrice_Dense operator*(const double& a, const Matrice_Dense& B); // EB
   void build_matrix_from_coefficients_line_by_line( const DoubleVect& coefficients );
   void build_matrix_from_coefficients_column_by_column( const DoubleVect& coefficients );
   bool is_the_same( const Matrice_Dense& other_matrix , const double tol=1e-14 ) const;
   void build_the_transposed( Matrice_Dense& transposed ) const;
-  void set_coefficient( const long i , const long j , const double value );
+  void set_coefficient( const int i , const int j , const double value );
   Sortie& imprimer_formatte( Sortie& s ) const override;
 
-  long ordre() const override;
-  long nb_lignes() const override;
-  long nb_colonnes() const override;
+  int ordre() const override;
+  int nb_lignes() const override;
+  int nb_colonnes() const override;
 
   DoubleVect& ajouter_multvect_(const DoubleVect& x, DoubleVect& r) const override;
   DoubleVect& ajouter_multvectT_(const DoubleVect& x, DoubleVect& r) const override;
@@ -69,14 +69,14 @@ private :
 };
 
 // Access operators
-inline const double& Matrice_Dense::operator( )(const long line, const long col) const
+inline const double& Matrice_Dense::operator( )(const int line, const int col) const
 {
   assert( line < nb_lignes( ) );
   assert( col < nb_colonnes( ) );
   return Matrix_( line , col );
 }
 
-inline double& Matrice_Dense::operator( )(const long line, const long col)
+inline double& Matrice_Dense::operator( )(const int line, const int col)
 {
   assert( line < nb_lignes( ) );
   assert( col < nb_colonnes( ) );

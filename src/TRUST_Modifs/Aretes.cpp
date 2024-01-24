@@ -49,16 +49,16 @@ Entree& Aretes::readOn(Entree& s )
  *  En dimension 2 il n'y a que des aretes XY
  *
  */
-void Aretes::affecter(long& numero_a, long dir, long type, long nb_face,
-                      long f1, long f2, long f3, long f4, const ArrOfInt& est_une_plaque)
+void Aretes::affecter(int& numero_a, int dir, int type, int nb_face,
+                      int f1, int f2, int f3, int f4, const ArrOfInt& est_une_plaque)
 {
-  long nb_plaques = 0;
+  int nb_plaques = 0;
   nb_plaques += f1>=0 ? est_une_plaque[f1] : 0;
   nb_plaques += f2>=0 ? est_une_plaque[f2] : 0;
   nb_plaques += f3>=0 ? est_une_plaque[f3] : 0;
   nb_plaques += f4>=0 ? est_une_plaque[f4] : 0;
-  long coin = -1 ;
-  long bord = 0 ;
+  int coin = -1 ;
+  int bord = 0 ;
   if (type>0)
     {
       if (nb_plaques!=0) return;
@@ -99,8 +99,8 @@ void Aretes::affecter(long& numero_a, long dir, long type, long nb_face,
 }
 
 // debut EB
-// Je ne prends pas la liberte de modifier les return de la fonction Aretes::void Aretes::affecter(long& numero_a, long dir, long type, long nb_face,
-// long f1, long f2, long f3, long f4, const ArrOfInt& est_une_plaque)
+// Je ne prends pas la liberte de modifier les return de la fonction Aretes::void Aretes::affecter(int& numero_a, int dir, int type, int nb_face,
+// int f1, int f2, int f3, int f4, const ArrOfInt& est_une_plaque)
 // Les return de cette fonction indique si l'arete numero_a a ete creee ou non
 // Cela est utile pour remplir les tableaux Aretes_Som et Elem_Aretes de Zone_VDF_plus::genere_et_cree_aretes
 /*! @brief affecte a l'arete numero les faces f1, f2, f3, f4
@@ -118,16 +118,16 @@ void Aretes::affecter(long& numero_a, long dir, long type, long nb_face,
  *
  *  @return renvoie 0 si l'arete n'a pas ete creee et 1 si l'arete a ete creee
  */
-long Aretes::affecter_aretes(long& numero_a, long dir, long type, long nb_face,
-                             long f1, long f2, long f3, long f4, const ArrOfInt& est_une_plaque)
+int Aretes::affecter_aretes(int& numero_a, int dir, int type, int nb_face,
+                            int f1, int f2, int f3, int f4, const ArrOfInt& est_une_plaque)
 {
-  long nb_plaques = 0;
+  int nb_plaques = 0;
   nb_plaques += f1>=0 ? est_une_plaque(f1) : 0;
   nb_plaques += f2>=0 ? est_une_plaque(f2) : 0;
   nb_plaques += f3>=0 ? est_une_plaque(f3) : 0;
   nb_plaques += f4>=0 ? est_une_plaque(f4) : 0;
-  long coin = -1 ;
-  long bord = 0 ;
+  int coin = -1 ;
+  int bord = 0 ;
   if (type>0)
     {
       if (nb_plaques!=0) return 0;
@@ -172,8 +172,8 @@ long Aretes::affecter_aretes(long& numero_a, long dir, long type, long nb_face,
  *
  *
  */
-long Aretes::affecter_aretes_virtuelle(long& numero_a, long dir, long type, long nb_face,
-                                       long f1, long f2, long f3, long f4)
+int Aretes::affecter_aretes_virtuelle(int& numero_a, int dir, int type, int nb_face,
+                                      int f1, int f2, int f3, int f4)
 {
 
   numero_a++;
@@ -200,10 +200,10 @@ void Aretes::calculer_centre_de_gravite(Domaine_VDF& domaine)
   const IntTab& so = domaine.face_sommets();
   const DoubleTab& co = domaine.domaine().les_sommets();
   DoubleTab& xa_ = domaine.xa();
-  long i,j,k;
-  long f0=-1,f1=-1,s00,s01,s10,s11;
-  long type;
-  long nb_aretes = faces_.dimension(0);
+  int i,j,k;
+  int f0=-1,f1=-1,s00,s01,s10,s11;
+  int type;
+  int nb_aretes = faces_.dimension(0);
   //const IntVect& orient =  domaine.orientation();
   // Calcul des ccordonnees de l'arete
   if(dimension==2)
@@ -283,8 +283,8 @@ void Aretes::calculer_centre_de_gravite(Domaine_VDF& domaine)
             {
               f0 = faces_(i,0);
               f1 = faces_(i,1);
-              long s0,s1,s0j;
-              long deux;
+              int s0,s1,s0j;
+              int deux;
               for(j=0; j<4; j++)
                 {
                   s0j=so(f0,j);
@@ -310,9 +310,9 @@ void Aretes::calculer_centre_de_gravite(Domaine_VDF& domaine)
             }
           else if((type == 0)||(type == -1)) // arete bord ou coin
             {
-              long f,fdeux;
-              long s0,s1,s0j;
-              long deux;
+              int f,fdeux;
+              int s0,s1,s0j;
+              int deux;
               for(f=0; f<4; f++)
                 {
                   f0=faces_(i,f);
@@ -355,7 +355,7 @@ void Aretes::calculer_centre_de_gravite(Domaine_VDF& domaine)
 /*! @brief Dimensionne les tableaux.
  *
  */
-void Aretes::dimensionner(long n)
+void Aretes::dimensionner(int n)
 {
   faces_.resize(n,4);
   type1_.resize(n);
@@ -365,9 +365,9 @@ void Aretes::dimensionner(long n)
 /*! @brief appelee par trier Echange les aretes a1 et a2
  *
  */
-void Aretes::swap(long a1, long a2)
+void Aretes::swap(int a1, int a2)
 {
-  long tmp;
+  int tmp;
   tmp = faces_(a1, 0);
   faces_(a1, 0) = faces_(a2, 0);
   faces_(a2, 0)=tmp;
@@ -392,9 +392,9 @@ void Aretes::swap(long a1, long a2)
 /*! @brief appelee par trier Echange les aretes a1 et a2 de Aretes_Som
  *
  */
-void Aretes::swap_Aretes_Som(long a1, long a2, IntTab& Aretes_Som)
+void Aretes::swap_Aretes_Som(int a1, int a2, IntTab& Aretes_Som)
 {
-  long tmp;
+  int tmp;
   tmp = Aretes_Som(a1, 0);
   Aretes_Som(a1, 0) = Aretes_Som(a2, 0);
   Aretes_Som(a2, 0)=tmp;
@@ -408,13 +408,13 @@ void Aretes::swap_Aretes_Som(long a1, long a2, IntTab& Aretes_Som)
 /*! @brief appelee par trier Echange les aretes a1 et a2 de Elem_Aretes
  *
  */
-void Aretes::swap_Elem_Arete(long a1, long a2, IntTab& Elem_Aretes)
+void Aretes::swap_Elem_Arete(int a1, int a2, IntTab& Elem_Aretes)
 {
-  const long nb_aretes_elem=Elem_Aretes.dimension(1);
-  const long nb_elem_tot=Elem_Aretes.dimension_tot(0);
-  for (long elem=0; elem<nb_elem_tot; elem++)
+  const int nb_aretes_elem=Elem_Aretes.dimension(1);
+  const int nb_elem_tot=Elem_Aretes.dimension_tot(0);
+  for (int elem=0; elem<nb_elem_tot; elem++)
     {
-      for (long j=0; j<nb_aretes_elem; j++)
+      for (int j=0; j<nb_aretes_elem; j++)
         {
           if (Elem_Aretes(elem,j)==a1) Elem_Aretes(elem,j)=a2;
           else if (Elem_Aretes(elem,j)==a2) Elem_Aretes(elem,j)=a1;
@@ -429,18 +429,18 @@ void Aretes::swap_Elem_Arete(long a1, long a2, IntTab& Elem_Aretes)
  *  puis les aretes_internes (elles ont quatre faces internes)
  *
  */
-void Aretes::trier(long& nb_aretes_coin, long& nb_aretes_bord,
-                   long& nb_aretes_mixte, long& nb_aretes_interne)
+void Aretes::trier(int& nb_aretes_coin, int& nb_aretes_bord,
+                   int& nb_aretes_mixte, int& nb_aretes_interne)
 {
   //
   nb_aretes_coin=nb_aretes_bord=nb_aretes_mixte=nb_aretes_interne=0;
-  long coin = -1 ;
-  long bord = 0 ;
-  long mixte = 1 ;
-  long interne = 2 ;
-  long nb_aretes = type1_.size();
-  long courante=0;
-  long arete;
+  int coin = -1 ;
+  int bord = 0 ;
+  int mixte = 1 ;
+  int interne = 2 ;
+  int nb_aretes = type1_.size();
+  int courante=0;
+  int arete;
   while( (courante<nb_aretes)&&(type2_(courante)==coin) )
     {
       courante++;
@@ -533,26 +533,26 @@ void Aretes::trier(long& nb_aretes_coin, long& nb_aretes_bord,
  *
  *  La procedure est appliquee aux tableaux faces_, type1_, type2_, Aretes_Som, Elem_Aretes
  */
-void Aretes::trier(long& nb_aretes_coin, long& nb_aretes_bord,
-                   long& nb_aretes_mixte, long& nb_aretes_interne, const long nb_aretes_reelles,
-                   const long nb_elem_reels,
+void Aretes::trier(int& nb_aretes_coin, int& nb_aretes_bord,
+                   int& nb_aretes_mixte, int& nb_aretes_interne, const int nb_aretes_reelles,
+                   const int nb_elem_reels,
                    IntTab& Aretes_Som, IntTab& Elem_Aretes)
 {
   //IntVect nouveau_num_aretes(Aretes_Som.dimension(0));
   IntVect nouveau_num_aretes(nb_aretes_reelles);
   nouveau_num_aretes=-1;
   IntTab copie_Elem_Aretes=Elem_Aretes;
-  const long nb_aretes=nb_aretes_reelles;
+  const int nb_aretes=nb_aretes_reelles;
   Cerr << "nb_aretes " << nb_aretes << finl;
 
-  //const long nb_elem_tot=Elem_Aretes.dimension_tot(0);
+  //const int nb_elem_tot=Elem_Aretes.dimension_tot(0);
   nb_aretes_coin=nb_aretes_bord=nb_aretes_mixte=nb_aretes_interne=0;
-  long coin = -1 ;
-  long bord = 0 ;
-  long mixte = 1 ;
-  long interne = 2 ;
-  long courante=0;
-  long arete;
+  int coin = -1 ;
+  int bord = 0 ;
+  int mixte = 1 ;
+  int interne = 2 ;
+  int courante=0;
+  int arete;
   while( (courante<nb_aretes)&&(type2_(courante)==coin) )
     {
       courante++;
@@ -643,12 +643,12 @@ void Aretes::trier(long& nb_aretes_coin, long& nb_aretes_bord,
         }
     }
   /*
-  for (long elem=0; elem<nb_elem_tot; elem++)
+  for (int elem=0; elem<nb_elem_tot; elem++)
     {
-      for (long j=0; j<12; j++)
+      for (int j=0; j<12; j++)
         {
-          long ancienne_arete=copie_Elem_Aretes(elem,j);
-          long nouvelle_arete=nouveau_num_aretes(ancienne_arete);
+          int ancienne_arete=copie_Elem_Aretes(elem,j);
+          int nouvelle_arete=nouveau_num_aretes(ancienne_arete);
           if (nouvelle_arete>=0 && ancienne_arete<nb_aretes) Elem_Aretes(elem,j)=nouvelle_arete;
         }
     }
@@ -656,18 +656,18 @@ void Aretes::trier(long& nb_aretes_coin, long& nb_aretes_bord,
 }
 
 // fin EB
-void Aretes::trier_pour_debog(long& nb_aretes_coin, long& nb_aretes_bord,
-                              long& nb_aretes_mixte, long& nb_aretes_interne,const DoubleTab&
+void Aretes::trier_pour_debog(int& nb_aretes_coin, int& nb_aretes_bord,
+                              int& nb_aretes_mixte, int& nb_aretes_interne,const DoubleTab&
                               xv)
 {
 
   ArrOfDouble XVref(dimension),XVref2(dimension);
-  long nb_aretes = type1_.size();
-  long arete;
-  for (long boucle=0; boucle<3; boucle++)
+  int nb_aretes = type1_.size();
+  int arete;
+  for (int boucle=0; boucle<3; boucle++)
     {
-      long deb=nb_aretes - nb_aretes_interne;
-      long fin=nb_aretes;
+      int deb=nb_aretes - nb_aretes_interne;
+      int fin=nb_aretes;
       if (boucle==1)
         {
           fin=deb;
@@ -685,16 +685,16 @@ void Aretes::trier_pour_debog(long& nb_aretes_coin, long& nb_aretes_bord,
               Cerr<<"gros pb "<<arete<<finl;
               exit();
             }
-          long ref=faces_(arete,0);
-          for (long i=0; i<dimension; i++) XVref[i]=xv(ref,i);
-          long marq=-1;
-          long ref2;
-          for (long arete2=arete; arete2<fin; arete2++)
+          int ref=faces_(arete,0);
+          for (int i=0; i<dimension; i++) XVref[i]=xv(ref,i);
+          int marq=-1;
+          int ref2;
+          for (int arete2=arete; arete2<fin; arete2++)
             {
               ref2=faces_(arete2,0);
-              for (long i=0; i<dimension; i++) XVref2[i]=xv(ref2,i);
-              long test=-1;
-              //              long testsa=-1;
+              for (int i=0; i<dimension; i++) XVref2[i]=xv(ref2,i);
+              int test=-1;
+              //              int testsa=-1;
               if (dimension==2)
                 {
                   if (sup_strict(XVref2[1],XVref[1])) test=1;

@@ -31,31 +31,31 @@ class Aretes: public Objet_U
   Declare_instanciable(Aretes);
 public:
 
-  inline Aretes(long n);
-  void affecter(long&, long, long, long, long, long, long, long, const ArrOfInt&);
-  long affecter_aretes(long&, long, long, long,long, long, long, long, const ArrOfInt&); // EB
-  long affecter_aretes_virtuelle(long&, long, long, long, long, long, long, long); // EB
+  inline Aretes(int n);
+  void affecter(int&, int, int, int, int, int, int, int, const ArrOfInt&);
+  int affecter_aretes(int&, int, int, int,int, int, int, int, const ArrOfInt&); // EB
+  int affecter_aretes_virtuelle(int&, int, int, int, int, int, int, int); // EB
   inline IntTab& faces();
   inline IntVect& type1(); // EB
   inline IntVect& type2(); // EB
-  void dimensionner(long);
-  void trier(long&, long&, long&, long&);
-  void trier(long&, long&, long&, long&, const long nb_aretes_reelles,const long nb_elem_reels,IntTab& Aretes_Som, IntTab& Elem_Aretes); // EB
-  void trier_pour_debog(long&, long&, long&, long&, const DoubleTab&);
+  void dimensionner(int);
+  void trier(int&, int&, int&, int&);
+  void trier(int&, int&, int&, int&, const int nb_aretes_reelles,const int nb_elem_reels,IntTab& Aretes_Som, IntTab& Elem_Aretes); // EB
+  void trier_pour_debog(int&, int&, int&, int&, const DoubleTab&);
   void calculer_centre_de_gravite(Domaine_VDF& domaine);
 
 private:
   IntTab faces_;
   IntVect type1_, type2_;
-  void swap(long, long);
-  void swap_Aretes_Som(long a1, long a2, IntTab& Aretes_Som); // EB
-  void swap_Elem_Arete(long a1, long a2, IntTab& Elem_Aretes); // EB
+  void swap(int, int);
+  void swap_Aretes_Som(int a1, int a2, IntTab& Aretes_Som); // EB
+  void swap_Elem_Arete(int a1, int a2, IntTab& Elem_Aretes); // EB
 };
 
 /*! @brief Constructeur : dimensionne les tableaux
  *
  */
-inline Aretes::Aretes(long n) : faces_(n,4),type1_(n),type2_(n)
+inline Aretes::Aretes(int n) : faces_(n,4),type1_(n),type2_(n)
 {
 }
 

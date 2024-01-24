@@ -30,19 +30,19 @@
  * @param (faces_elem)
  * @param (num_compo)
  */
-long search_connex_components_local(const IntTab& elem_faces, const IntTab& faces_elem, IntVect& num_compo)
+int search_connex_components_local(const IntTab& elem_faces, const IntTab& faces_elem, IntVect& num_compo)
 {
-  const long nbelem = num_compo.size_totale();
-  const long nb_voisins = elem_faces.dimension(1);
+  const int nbelem = num_compo.size_totale();
+  const int nb_voisins = elem_faces.dimension(1);
   assert(elem_faces.dimension_tot(0) == nbelem);
   {
-    long i;
+    int i;
     for (i = 0; i < nbelem; i++)
       if (num_compo[i] != -1)
         num_compo[i] = -2;
   }
-  long start_element = 0;
-  long num_compo_courant = 0;
+  int start_element = 0;
+  int num_compo_courant = 0;
   ArrOfInt liste_elems;
   liste_elems.set_smart_resize(1);
   ArrOfInt tmp_liste;
@@ -61,19 +61,19 @@ long search_connex_components_local(const IntTab& elem_faces, const IntTab& face
       while (liste_elems.size_array() > 0)
         {
           tmp_liste.resize_array(0);
-          const long liste_elems_size = liste_elems.size_array();
-          for (long i_elem = 0; i_elem < liste_elems_size; i_elem++)
+          const int liste_elems_size = liste_elems.size_array();
+          for (int i_elem = 0; i_elem < liste_elems_size; i_elem++)
             {
-              const long elem = liste_elems[i_elem];
+              const int elem = liste_elems[i_elem];
               // Ajout des voisins non attribues de cet element dans la liste a
               // traiter a l'etape suivante
-              for (long j = 0; j < nb_voisins; j++)
+              for (int j = 0; j < nb_voisins; j++)
                 {
-                  const long face = elem_faces(elem, j);
-                  const long voisin = faces_elem(face, 0) + faces_elem(face, 1) - elem;
+                  const int face = elem_faces(elem, j);
+                  const int voisin = faces_elem(face, 0) + faces_elem(face, 1) - elem;
                   if (voisin >= 0)
                     {
-                      const long num = num_compo[voisin];
+                      const int num = num_compo[voisin];
                       if (num == -2)
                         {
                           num_compo[voisin] = num_compo_courant;
@@ -93,21 +93,21 @@ long search_connex_components_local(const IntTab& elem_faces, const IntTab& face
 
 // EB : on dupplique la fonction precedente pour compatibilite avec DoubleTab : num_compo est declare
 // comme un Champ_Fonc donc valeurs() renvoie un DoubleTab
-long search_connex_components_local(const IntTab& elem_faces,
-                                    const IntTab& faces_elem,
-                                    DoubleTab& num_compo)
+int search_connex_components_local(const IntTab& elem_faces,
+                                   const IntTab& faces_elem,
+                                   DoubleTab& num_compo)
 {
-  const long nbelem = num_compo.size_totale();
-  const long nb_voisins = elem_faces.dimension(1);
+  const int nbelem = num_compo.size_totale();
+  const int nb_voisins = elem_faces.dimension(1);
   assert(elem_faces.dimension_tot(0) == nbelem);
   {
-    long i;
+    int i;
     for (i = 0; i < nbelem; i++)
       if (num_compo[i] != -1)
         num_compo[i] = -2;
   }
-  long start_element = 0;
-  long num_compo_courant = 0;
+  int start_element = 0;
+  int num_compo_courant = 0;
   ArrOfInt liste_elems;
   liste_elems.set_smart_resize(1);
   ArrOfInt tmp_liste;
@@ -126,19 +126,19 @@ long search_connex_components_local(const IntTab& elem_faces,
       while (liste_elems.size_array() > 0)
         {
           tmp_liste.resize_array(0);
-          const long liste_elems_size = liste_elems.size_array();
-          for (long i_elem = 0; i_elem < liste_elems_size; i_elem++)
+          const int liste_elems_size = liste_elems.size_array();
+          for (int i_elem = 0; i_elem < liste_elems_size; i_elem++)
             {
-              const long elem = liste_elems[i_elem];
+              const int elem = liste_elems[i_elem];
               // Ajout des voisins non attribues de cet element dans la liste a
               // traiter a l'etape suivante
-              for (long j = 0; j < nb_voisins; j++)
+              for (int j = 0; j < nb_voisins; j++)
                 {
-                  const long face = elem_faces(elem, j);
-                  const long voisin = faces_elem(face, 0) + faces_elem(face, 1) - elem;
+                  const int face = elem_faces(elem, j);
+                  const int voisin = faces_elem(face, 0) + faces_elem(face, 1) - elem;
                   if (voisin >= 0)
                     {
-                      const long num = static_cast<long> (num_compo[voisin]);
+                      const int num = static_cast<int> (num_compo[voisin]);
                       if (num == -2)
                         {
                           num_compo[voisin] = num_compo_courant;
@@ -161,10 +161,10 @@ long search_connex_components_local(const IntTab& elem_faces,
  * @param (graph)
  * @param (connex_components)
  */
-long compute_graph_connex_components(const IntTab& graph, ArrOfInt& connex_components)
+int compute_graph_connex_components(const IntTab& graph, ArrOfInt& connex_components)
 {
   // connex_components doit deja avoir la bonne taille en entree !
-  const long nb_sommets = connex_components.size_array();
+  const int nb_sommets = connex_components.size_array();
 
   // renum_data definit des listes chainees de numeros de "sommets" appartenant a
   //  la meme composante connexe.
@@ -172,17 +172,17 @@ long compute_graph_connex_components(const IntTab& graph, ArrOfInt& connex_compo
   // renum_data(i,1)= numero du "sommet" suivant dans la liste
   IntTab renum_data(nb_sommets, 2);
   // Au debut, chaque sommet est toute seule dans une liste:
-  long i_sommet;
+  int i_sommet;
   for (i_sommet = 0; i_sommet < nb_sommets; i_sommet++)
     {
       renum_data(i_sommet, 0) = i_sommet;
       renum_data(i_sommet, 1) = -1; // fin de liste
     }
-  const long nbcouples = graph.dimension(0);
-  for (long i_couple = 0; i_couple < nbcouples; i_couple++)
+  const int nbcouples = graph.dimension(0);
+  for (int i_couple = 0; i_couple < nbcouples; i_couple++)
     {
-      const long compo1 = graph(i_couple, 0); // la plus petite
-      const long compo2 = graph(i_couple, 1); // la plus grande
+      const int compo1 = graph(i_couple, 0); // la plus petite
+      const int compo2 = graph(i_couple, 1); // la plus grande
       assert(compo1 != compo2);
       // Si les deux composantes sont deja dans la meme liste,
       // ne rien faire.
@@ -190,20 +190,20 @@ long compute_graph_connex_components(const IntTab& graph, ArrOfInt& connex_compo
         continue;
       // Reunir la liste1 contenant compo1 et la liste2 contenant compo2:
       // 1) trouver la fin de la premiere liste
-      long fin_liste1 = compo1;
+      int fin_liste1 = compo1;
       for (;;)
         {
-          const long next = renum_data(fin_liste1, 1);
+          const int next = renum_data(fin_liste1, 1);
           if (next < 0)
             break;
           fin_liste1 = next;
         }
       // 2) brancher la liste2 a la fin de la liste1 :
-      const long debut_liste2 = renum_data(compo2, 0);
+      const int debut_liste2 = renum_data(compo2, 0);
       renum_data(fin_liste1, 1) = debut_liste2;
       // 2) mettre a jour le debut de liste pour liste2 :
       i_sommet = debut_liste2;
-      const long debut_liste1 = renum_data(compo1, 0);
+      const int debut_liste1 = renum_data(compo1, 0);
       do
         {
           renum_data(i_sommet, 0) = debut_liste1;
@@ -214,7 +214,7 @@ long compute_graph_connex_components(const IntTab& graph, ArrOfInt& connex_compo
 
   // Creation d'une numerotation contigue pour les composantes:
   // Prochain numero a attribuer
-  long count = 0;
+  int count = 0;
   connex_components = -1;
   for (i_sommet = 0; i_sommet < nb_sommets; i_sommet++)
     {
@@ -223,7 +223,7 @@ long compute_graph_connex_components(const IntTab& graph, ArrOfInt& connex_compo
           // sommet pas encore traite
           // Associe un nouveau numero a tous les sommets de la composante
           // connexe a laquelle appartient i_sommet:
-          for (long i = renum_data(i_sommet, 0); i >= 0; i = renum_data(i, 1))
+          for (int i = renum_data(i_sommet, 0); i >= 0; i = renum_data(i, 1))
             connex_components[i] = count;
           // Nouveau numero pour la prochaine composante
           count++;
@@ -241,17 +241,17 @@ long compute_graph_connex_components(const IntTab& graph, ArrOfInt& connex_compo
  * @param (num_compo)
  * @param (nb_local_components)
  */
-long compute_global_connex_components(IntVect& num_compo, long nb_local_components)
+int compute_global_connex_components(IntVect& num_compo, int nb_local_components)
 {
-  const long nbelem = num_compo.size();
-  const long nbelem_tot = num_compo.size_totale();
-  //long i;
+  const int nbelem = num_compo.size();
+  const int nbelem_tot = num_compo.size_totale();
+  //int i;
 
   // Transformation des indices locaux de composantes connexes en un indice global
   // (on ajoute un decalage aux indices globaux avec mppartial_sum())
-  const long decalage = mppartial_sum(nb_local_components);
-  const long nb_total_components = Process::mp_sum(nb_local_components);
-  for (long i = 0; i < nbelem_tot; i++)
+  const int decalage = mppartial_sum(nb_local_components);
+  const int nb_total_components = Process::mp_sum(nb_local_components);
+  for (int i = 0; i < nbelem_tot; i++)
     if (num_compo[i] >= 0)
       num_compo[i] += decalage;
 
@@ -276,27 +276,27 @@ long compute_global_connex_components(IntVect& num_compo, long nb_local_componen
   // Tableau de correspondances entre composantes connexes locales et distantes
   IntTab graph;
   graph.set_smart_resize(1);
-  long graph_size = 0;
+  int graph_size = 0;
   // Parcours des elements virtuels uniquement
-  for (long i = nbelem; i < nbelem_tot; i++)
+  for (int i = nbelem; i < nbelem_tot; i++)
     {
-      long compo = num_compo[i];
+      int compo = num_compo[i];
       if (compo < 0)
         continue;
-      long compo2 = copie_compo[i];
+      int compo2 = copie_compo[i];
       // Index du couple compo2/compo dans le tableau markers
       // Le tableau num_compo ne doit contenir que des composantes locales:
       assert(compo >= decalage && compo - decalage < nb_local_components);
       // compo2 est forcement une composante distante.
       assert(compo2 < decalage || compo2 - decalage >= nb_local_components);
-      const long index = (compo - decalage) * nb_total_components + compo2;
+      const int index = (compo - decalage) * nb_total_components + compo2;
       if (!markers.testsetbit(index))
         {
           graph.resize(graph_size+1, 2);
           // On met le plus petit numero de composante en colonne 0:
           if (compo2 < compo)
             {
-              long tmp = compo;
+              int tmp = compo;
               compo = compo2;
               compo2 = tmp;
             }
@@ -311,14 +311,14 @@ long compute_global_connex_components(IntVect& num_compo, long nb_local_componen
     {
       // Reception des portions de graphe des autres processeurs
       IntTab tmp;
-      const long nproc = Process::nproc();
-      long pe;
+      const int nproc = Process::nproc();
+      int pe;
       for (pe = 1; pe < nproc; pe++)
         {
           recevoir(tmp, pe, 54 /* tag */);
-          const long n2 = tmp.dimension(0);
+          const int n2 = tmp.dimension(0);
           graph.resize(graph_size + n2, 2);
-          for (long i = 0; i < n2; i++)
+          for (int i = 0; i < n2; i++)
             {
               graph(graph_size, 0) = tmp(i, 0);
               graph(graph_size, 1) = tmp(i, 1);
@@ -327,7 +327,7 @@ long compute_global_connex_components(IntVect& num_compo, long nb_local_componen
         }
       // Calcul des composantes connexes du graphe
       renum.resize_array(nb_total_components);
-      const long n = compute_graph_connex_components(graph, renum);
+      const int n = compute_graph_connex_components(graph, renum);
       Process::Journal() << "compute_global_connex_components: nb_components=" << n << finl;
     }
   else
@@ -340,12 +340,12 @@ long compute_global_connex_components(IntVect& num_compo, long nb_local_componen
   envoyer_broadcast(renum, 0 /* processeur source */);
 
   // Renumerotation des composantes dans num_compo
-  for (long i = 0; i < nbelem_tot; i++)
+  for (int i = 0; i < nbelem_tot; i++)
     {
-      const long x = num_compo[i];
+      const int x = num_compo[i];
       if (x >= 0)
         {
-          const long new_x = renum[x];
+          const int new_x = renum[x];
           num_compo[i] = new_x;
         }
     }
@@ -353,7 +353,7 @@ long compute_global_connex_components(IntVect& num_compo, long nb_local_componen
   //  cela ne doit par changer le numero des composantes
   //  connexes !
 
-  long nb_components = 0;
+  int nb_components = 0;
   // Tous les processeurs possedent le meme tableau renum, tout le monde
   //  calcule donc le meme maximum !
   if (renum.size_array() > 0)
@@ -361,17 +361,17 @@ long compute_global_connex_components(IntVect& num_compo, long nb_local_componen
   return nb_components;
 }
 // EB : copie fonction precedent mais DoubleTab en entree
-long compute_global_connex_components(DoubleTab& num_compo, long nb_local_components)
+int compute_global_connex_components(DoubleTab& num_compo, int nb_local_components)
 {
-  const long nbelem = num_compo.size();
-  const long nbelem_tot = num_compo.size_totale();
-  //long i;
+  const int nbelem = num_compo.size();
+  const int nbelem_tot = num_compo.size_totale();
+  //int i;
 
   // Transformation des indices locaux de composantes connexes en un indice global
   // (on ajoute un decalage aux indices globaux avec mppartial_sum())
-  const long decalage = mppartial_sum(nb_local_components);
-  const long nb_total_components = Process::mp_sum(nb_local_components);
-  for (long i = 0; i < nbelem_tot; i++)
+  const int decalage = mppartial_sum(nb_local_components);
+  const int nb_total_components = Process::mp_sum(nb_local_components);
+  for (int i = 0; i < nbelem_tot; i++)
     if (num_compo[i] >= 0)
       num_compo[i] += decalage;
 
@@ -396,27 +396,27 @@ long compute_global_connex_components(DoubleTab& num_compo, long nb_local_compon
   // Tableau de correspondances entre composantes connexes locales et distantes
   IntTab graph;
   graph.set_smart_resize(1);
-  long graph_size = 0;
+  int graph_size = 0;
   // Parcours des elements virtuels uniquement
-  for (long i = nbelem; i < nbelem_tot; i++)
+  for (int i = nbelem; i < nbelem_tot; i++)
     {
-      long compo = static_cast<long>(num_compo[i]);
+      int compo = static_cast<int>(num_compo[i]);
       if (compo < 0)
         continue;
-      long compo2 = static_cast<long>(copie_compo[i]);
+      int compo2 = static_cast<int>(copie_compo[i]);
       // Index du couple compo2/compo dans le tableau markers
       // Le tableau num_compo ne doit contenir que des composantes locales:
       assert(compo >= decalage && compo - decalage < nb_local_components);
       // compo2 est forcement une composante distante.
       assert(compo2 < decalage || compo2 - decalage >= nb_local_components);
-      const long index = (compo - decalage) * nb_total_components + compo2;
+      const int index = (compo - decalage) * nb_total_components + compo2;
       if (!markers.testsetbit(index))
         {
           graph.resize(graph_size+1, 2);
           // On met le plus petit numero de composante en colonne 0:
           if (compo2 < compo)
             {
-              long tmp = compo;
+              int tmp = compo;
               compo = compo2;
               compo2 = tmp;
             }
@@ -431,14 +431,14 @@ long compute_global_connex_components(DoubleTab& num_compo, long nb_local_compon
     {
       // Reception des portions de graphe des autres processeurs
       IntTab tmp;
-      const long nproc = Process::nproc();
-      long pe;
+      const int nproc = Process::nproc();
+      int pe;
       for (pe = 1; pe < nproc; pe++)
         {
           recevoir(tmp, pe, 54 /* tag */);
-          const long n2 = tmp.dimension(0);
+          const int n2 = tmp.dimension(0);
           graph.resize(graph_size + n2, 2);
-          for (long i = 0; i < n2; i++)
+          for (int i = 0; i < n2; i++)
             {
               graph(graph_size, 0) = tmp(i, 0);
               graph(graph_size, 1) = tmp(i, 1);
@@ -447,7 +447,7 @@ long compute_global_connex_components(DoubleTab& num_compo, long nb_local_compon
         }
       // Calcul des composantes connexes du graphe
       renum.resize_array(nb_total_components);
-      const long n = compute_graph_connex_components(graph, renum);
+      const int n = compute_graph_connex_components(graph, renum);
       Process::Journal() << "compute_global_connex_components: nb_components=" << n << finl;
     }
   else
@@ -460,12 +460,12 @@ long compute_global_connex_components(DoubleTab& num_compo, long nb_local_compon
   envoyer_broadcast(renum, 0 /* processeur source */);
 
   // Renumerotation des composantes dans num_compo
-  for (long i = 0; i < nbelem_tot; i++)
+  for (int i = 0; i < nbelem_tot; i++)
     {
-      const long x = static_cast<long>(num_compo[i]);
+      const int x = static_cast<int>(num_compo[i]);
       if (x >= 0)
         {
-          const long new_x = renum[x];
+          const int new_x = renum[x];
           num_compo[i] = new_x;
         }
     }
@@ -473,7 +473,7 @@ long compute_global_connex_components(DoubleTab& num_compo, long nb_local_compon
   //  cela ne doit par changer le numero des composantes
   //  connexes !
 
-  long nb_components = 0;
+  int nb_components = 0;
   // Tous les processeurs possedent le meme tableau renum, tout le monde
   //  calcule donc le meme maximum !
   if (renum.size_array() > 0)

@@ -22,12 +22,12 @@ Implemente_instanciable_sans_constructeur(Matrice_Dense,"Matrice_Dense",Matrice_
 
 Sortie& Matrice_Dense::printOn(Sortie& s) const
 {
-  long nb_lines = nb_lignes( );
-  long nb_cols  = nb_colonnes( );
+  int nb_lines = nb_lignes( );
+  int nb_cols  = nb_colonnes( );
   // s << nb_lines << " "<< nb_cols << "\n";
-  for(long i=0; i<nb_lines; i++)
+  for(int i=0; i<nb_lines; i++)
     {
-      for( long j=0; j<nb_cols; j++)
+      for( int j=0; j<nb_cols; j++)
         {
           s << Matrix_( i , j )<<" ";
         }
@@ -44,13 +44,13 @@ Entree& Matrice_Dense::readOn(Entree& s)
 
 Sortie& Matrice_Dense::imprimer_formatte( Sortie& s ) const
 {
-  long nb_lines = nb_lignes( );
-  long nb_cols  = nb_colonnes( );
+  int nb_lines = nb_lignes( );
+  int nb_cols  = nb_colonnes( );
   s << nb_lines << " ";
   s << nb_cols << "\n\n";
-  for(long i=0; i<nb_lines; i++)
+  for(int i=0; i<nb_lines; i++)
     {
-      for(long j=0; j<nb_cols; j++)
+      for(int j=0; j<nb_cols; j++)
         {
           s << Matrix_( i , j )<<" ";
         }
@@ -65,7 +65,7 @@ Matrice_Dense::Matrice_Dense( void )
   dimensionner( 0 , 0 );
 }
 
-Matrice_Dense::Matrice_Dense( const long nb_lines , const long nb_cols )
+Matrice_Dense::Matrice_Dense( const int nb_lines , const int nb_cols )
 {
   dimensionner( nb_lines , nb_cols );
 }
@@ -81,16 +81,16 @@ Matrice_Dense::Matrice_Dense( const long nb_lines , const long nb_cols )
 void Matrice_Dense::read_from_file( const Nom& filename )
 {
   std::ifstream file(filename, ios::in);
-  long nb_lines, nb_cols;
+  int nb_lines, nb_cols;
 
   if( file )
     {
       file >> nb_lines ;
       file >> nb_cols  ;
       dimensionner( nb_lines , nb_cols );
-      for( long i=0; i<nb_lines; i++)
+      for( int i=0; i<nb_lines; i++)
         {
-          for(long j=0; j<nb_cols; j++)
+          for(int j=0; j<nb_cols; j++)
             {
               file >> Matrix_( i , j );
             }
@@ -113,14 +113,14 @@ void Matrice_Dense::read_from_file( const Nom& filename )
 //Warning : the user need to resize correctly the matrix before to call this function
 void Matrice_Dense::build_matrix_from_coefficients_line_by_line( const DoubleVect& coefficients )
 {
-  long nb_lines = nb_lignes( );
-  long nb_cols  = nb_colonnes( );
+  int nb_lines = nb_lignes( );
+  int nb_cols  = nb_colonnes( );
   assert( coefficients.size( ) == nb_lines * nb_cols );
   dimensionner( nb_lines , nb_cols );
-  long counter=0;
-  for( long i=0; i<nb_lines; i++)
+  int counter=0;
+  for( int i=0; i<nb_lines; i++)
     {
-      for(long j=0; j<nb_cols; j++)
+      for(int j=0; j<nb_cols; j++)
         {
           Matrix_( i , j ) = coefficients( counter );
           counter++;
@@ -130,14 +130,14 @@ void Matrice_Dense::build_matrix_from_coefficients_line_by_line( const DoubleVec
 
 void Matrice_Dense::build_matrix_from_coefficients_column_by_column( const DoubleVect& coefficients )
 {
-  long nb_lines = nb_lignes( );
-  long nb_cols  = nb_colonnes( );
+  int nb_lines = nb_lignes( );
+  int nb_cols  = nb_colonnes( );
   assert( coefficients.size( ) == nb_lines * nb_cols );
   dimensionner( nb_lines , nb_cols );
-  long counter=0;
-  for(long j=0; j<nb_cols; j++)
+  int counter=0;
+  for(int j=0; j<nb_cols; j++)
     {
-      for( long i=0; i<nb_lines; i++)
+      for( int i=0; i<nb_lines; i++)
         {
           Matrix_( i , j ) = coefficients( counter );
           counter++;
@@ -148,26 +148,26 @@ void Matrice_Dense::build_matrix_from_coefficients_column_by_column( const Doubl
 //this function fills the matrix morse_matrix
 void Matrice_Dense::convert_to_morse_matrix( Matrice_Morse& morse_matrix ) const
 {
-  long nb_lines = nb_lignes( );
-  long nb_cols  = nb_colonnes( ) ;
-  long nnz = nb_lines * nb_cols ;
+  int nb_lines = nb_lignes( );
+  int nb_cols  = nb_colonnes( ) ;
+  int nnz = nb_lines * nb_cols ;
 
   morse_matrix.dimensionner( nb_lines , nb_cols , nnz );
 
-  long size_tab1 = nb_lines + 1 ;
-  long size_tab2 = nnz ;
+  int size_tab1 = nb_lines + 1 ;
+  int size_tab2 = nnz ;
   morse_matrix.get_set_tab1().resize( size_tab1 );
   morse_matrix.get_set_tab2().resize( size_tab2 );
   morse_matrix.get_set_coeff().resize( nnz );
 
-  for(long i=0; i<size_tab1; i++)
+  for(int i=0; i<size_tab1; i++)
     {
       morse_matrix.get_set_tab1()( i ) =  /*already registred*/i*nb_cols + /*fortran index*/ 1 ;
     }
-  long count = 0;
-  for(long i=0 ; i<nb_lines ; i++)
+  int count = 0;
+  for(int i=0 ; i<nb_lines ; i++)
     {
-      for(long j=0; j<nb_cols; j++)
+      for(int j=0; j<nb_cols; j++)
         {
           morse_matrix.get_set_tab2()( count ) = j+1 ;
           morse_matrix.get_set_coeff()( count ) = Matrix_( i , j );
@@ -177,25 +177,25 @@ void Matrice_Dense::convert_to_morse_matrix( Matrice_Morse& morse_matrix ) const
 }
 
 
-void Matrice_Dense::dimensionner( const long nb_lines , const long nb_cols )
+void Matrice_Dense::dimensionner( const int nb_lines , const int nb_cols )
 {
   Matrix_.resize( nb_lines , nb_cols );
 }
 
-long Matrice_Dense::nb_lignes( ) const
+int Matrice_Dense::nb_lignes( ) const
 {
   return Matrix_.dimension( 0 );
 }
 
-long Matrice_Dense::nb_colonnes( ) const
+int Matrice_Dense::nb_colonnes( ) const
 {
   return Matrix_.dimension( 1 );
 }
 
-long Matrice_Dense::ordre( ) const
+int Matrice_Dense::ordre( ) const
 {
-  long nb_lines = nb_lignes( );
-  long nb_cols  = nb_colonnes( );
+  int nb_lines = nb_lignes( );
+  int nb_cols  = nb_colonnes( );
   if( nb_lines == nb_cols )
     {
       return nb_lines ;
@@ -213,8 +213,8 @@ long Matrice_Dense::ordre( ) const
  */
 DoubleVect& Matrice_Dense::ajouter_multvect_( const DoubleVect& x , DoubleVect& resu ) const
 {
-  const long nb_lines = nb_lignes( ) ;
-  const long nb_cols  = nb_colonnes( );
+  const int nb_lines = nb_lignes( ) ;
+  const int nb_cols  = nb_colonnes( );
   assert( x.size_array( ) == nb_cols );
   //the test is in this order because size( ) maybe invalid
   assert( resu.size_array( ) == nb_lines || resu.size( ) == nb_lines );
@@ -222,11 +222,11 @@ DoubleVect& Matrice_Dense::ajouter_multvect_( const DoubleVect& x , DoubleVect& 
   //for a given i such that 0 <= i <= nb_lines we have
   //resu( i ) = resu( i ) + Matrix_( i , j ) * x( j )
   //with 0 <= j <= nb_cols
-  for(long i=0; i<nb_lines; i++)
+  for(int i=0; i<nb_lines; i++)
     {
       double old_resu = resu( i );
       double prod_mat_vect = 0; // store the result of Matrix_( i , j ) * x( j ) with 0<= j <=nb_cols
-      for(long j=0; j<nb_cols; j++)
+      for(int j=0; j<nb_cols; j++)
         {
           prod_mat_vect += Matrix_( i , j ) * x( j );
         }
@@ -237,7 +237,7 @@ DoubleVect& Matrice_Dense::ajouter_multvect_( const DoubleVect& x , DoubleVect& 
 }
 
 //set the coefficient Matrix( i , j ) at value
-void Matrice_Dense::set_coefficient( const long i , const long j , const double value )
+void Matrice_Dense::set_coefficient( const int i , const int j , const double value )
 {
   assert( i < nb_lignes( ) );
   assert( j < nb_colonnes( ) );
@@ -246,12 +246,12 @@ void Matrice_Dense::set_coefficient( const long i , const long j , const double 
 
 void Matrice_Dense::build_the_transposed( Matrice_Dense& transposed ) const
 {
-  long nb_lines = nb_lignes( );
-  long nb_cols  = nb_colonnes( );
+  int nb_lines = nb_lignes( );
+  int nb_cols  = nb_colonnes( );
   transposed.dimensionner( nb_lines , nb_cols );
-  for(long j=0; j<nb_cols; j++)
+  for(int j=0; j<nb_cols; j++)
     {
-      for(long i=0; i<nb_lines; i++)
+      for(int i=0; i<nb_lines; i++)
         {
           double value = Matrix_( i , j );
           transposed.set_coefficient( j , i , value ) ;
@@ -265,8 +265,8 @@ void Matrice_Dense::build_the_transposed( Matrice_Dense& transposed ) const
 bool Matrice_Dense::is_the_same( const Matrice_Dense& other_matrix , const double tol ) const
 {
   bool same = true;
-  long nb_lines = nb_lignes( );
-  long nb_cols  = nb_colonnes( );
+  int nb_lines = nb_lignes( );
+  int nb_cols  = nb_colonnes( );
   //check if the other has same number of lines/columns
   if( other_matrix.nb_lignes( ) != nb_lines )
     {
@@ -277,9 +277,9 @@ bool Matrice_Dense::is_the_same( const Matrice_Dense& other_matrix , const doubl
       same = false;
     }
   //check each coefficient
-  for(long i=0; i<nb_lines; i++)
+  for(int i=0; i<nb_lines; i++)
     {
-      for(long j=0; j<nb_cols; j++)
+      for(int j=0; j<nb_cols; j++)
         {
           if( std::fabs( other_matrix( i , j ) - Matrix_( i , j )) >= tol  )
             {
@@ -298,8 +298,8 @@ bool Matrice_Dense::is_the_same( const Matrice_Dense& other_matrix , const doubl
 DoubleVect& Matrice_Dense::ajouter_multvectT_(const DoubleVect& x,DoubleVect& resu) const
 {
 
-  const long nb_lines = nb_lignes( ) ;
-  const long nb_cols  = nb_colonnes( );
+  const int nb_lines = nb_lignes( ) ;
+  const int nb_cols  = nb_colonnes( );
   assert( x.size_array( ) == nb_lines );
   //the test is in this order because size( ) maybe invalid
   assert( resu.size_array( ) == nb_cols || resu.size( ) == nb_cols );
@@ -307,11 +307,11 @@ DoubleVect& Matrice_Dense::ajouter_multvectT_(const DoubleVect& x,DoubleVect& re
   //for a given i such that 0 <= i <= nb_cols we have
   //resu( i ) = resu( i ) + Matrix_( j , i ) * x( j )
   //with 0 <= j <= nb_lines
-  for(long i=0; i<nb_cols; i++)
+  for(int i=0; i<nb_cols; i++)
     {
       double old_resu = resu( i );
       double prod_mat_vect = 0;
-      for(long j=0; j<nb_lines; j++)
+      for(int j=0; j<nb_lines; j++)
         {
           prod_mat_vect += Matrix_( j , i ) * x( j );
         }
@@ -323,11 +323,11 @@ DoubleVect& Matrice_Dense::ajouter_multvectT_(const DoubleVect& x,DoubleVect& re
 
 void Matrice_Dense::scale( const double x )
 {
-  const long nb_lines = nb_lignes( );
-  const long nb_cols  = nb_colonnes( );
-  for(long i=0; i<nb_lines; i++)
+  const int nb_lines = nb_lignes( );
+  const int nb_cols  = nb_colonnes( );
+  for(int i=0; i<nb_lines; i++)
     {
-      for(long j=0; j<nb_cols; j++)
+      for(int j=0; j<nb_cols; j++)
         {
           Matrix_( i , j ) *= x ;
         }
@@ -339,21 +339,21 @@ void Matrice_Dense::scale( const double x )
 void Matrice_Dense::get_stencil( IntTab& stencil ) const
 {
 
-  const long nb_lines = nb_lignes( );
-  const long nb_cols  = nb_colonnes( );
+  const int nb_lines = nb_lignes( );
+  const int nb_cols  = nb_colonnes( );
 
   stencil.resize( 0, 2 );
   stencil.set_smart_resize( 1 );
 
-  for(long i=0; i<nb_lines; i++)
+  for(int i=0; i<nb_lines; i++)
     {
-      for(long j=0; j<nb_cols; j++)
+      for(int j=0; j<nb_cols; j++)
         {
           stencil.append_line( i , j );
         }
     }
 
-  const long new_size = stencil.dimension( 0 );
+  const int new_size = stencil.dimension( 0 );
   stencil.set_smart_resize( 0 );
   stencil.resize( new_size, 2 );
 
@@ -374,9 +374,9 @@ void Matrice_Dense::inverse()
 {
   // This method compute the inverse of the matrix.
   // It uses the LAPACK library.
-  const long nbLines = nb_lignes();
-  const long nbCols = nb_colonnes();
-  long infoerr = 0;
+  const int nbLines = nb_lignes();
+  const int nbCols = nb_colonnes();
+  int infoerr = 0;
   ArrOfInt ipiv(nbLines);
   ArrOfDouble work(nbLines);
 
@@ -404,12 +404,12 @@ void Matrice_Dense::multiplyToRight(const Matrice_Dense& B, Matrice_Dense& RES) 
   assert(nb_lignes() == RES.nb_lignes());
   assert(B.nb_colonnes() == RES.nb_colonnes());
 
-  for (long i = 0; i < nb_lignes(); ++i)
+  for (int i = 0; i < nb_lignes(); ++i)
     {
-      for (long j = 0; j < B.nb_colonnes(); ++j)
+      for (int j = 0; j < B.nb_colonnes(); ++j)
         {
           RES.set_coefficient(i, j, 0.0);
-          for (long k = 0; k < nb_colonnes(); ++k)
+          for (int k = 0; k < nb_colonnes(); ++k)
             {
               RES.set_coefficient(i, j, RES(i, j) + Matrix_(i, k) * B(k, j));
             }
@@ -425,9 +425,9 @@ Matrice_Dense operator+(const Matrice_Dense& A, const Matrice_Dense& B)
   assert( A.nb_lignes() == B.nb_lignes() );
   assert( A.nb_colonnes() == B.nb_colonnes() );
   Matrice_Dense resu(A.nb_lignes(), A.nb_colonnes());
-  for (long i=0; i<A.nb_lignes(); i++)
+  for (int i=0; i<A.nb_lignes(); i++)
     {
-      for (long j=0; j<A.nb_colonnes(); j++)
+      for (int j=0; j<A.nb_colonnes(); j++)
         {
           resu.set_coefficient(i,j,A(i,j)+B(i,j));
         }
@@ -438,9 +438,9 @@ Matrice_Dense operator+(const Matrice_Dense& A, const Matrice_Dense& B)
 Matrice_Dense operator*(const double& a, const Matrice_Dense& B)
 {
   Matrice_Dense resu(B.nb_lignes(), B.nb_colonnes());
-  for (long i=0; i<B.nb_lignes(); i++)
+  for (int i=0; i<B.nb_lignes(); i++)
     {
-      for (long j=0; j<B.nb_colonnes(); j++)
+      for (int j=0; j<B.nb_colonnes(); j++)
         {
           resu.set_coefficient(i,j,a*B(i,j));
         }

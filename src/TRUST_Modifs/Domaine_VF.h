@@ -35,17 +35,17 @@ class Domaine_VF : public Domaine_dis_base
 {
   Declare_base(Domaine_VF);
 public :
-  virtual double face_normales(long face, long comp) const { return face_normales_(face,comp); }
+  virtual double face_normales(int face, int comp) const { return face_normales_(face,comp); }
   virtual DoubleTab& face_normales() { return face_normales_; }
   virtual const DoubleTab& face_normales() const { return face_normales_; }
   void calculer_face_surfaces(const DoubleVect& surfaces) { face_surfaces_ = surfaces; }
   virtual const DoubleVect& face_surfaces() const { return face_surfaces_; }
-  virtual inline double face_surfaces(long i) const { return face_surfaces_(i); }
-  virtual inline double surface(long i) const { return face_surfaces(i); }
+  virtual inline double face_surfaces(int i) const { return face_surfaces_(i); }
+  virtual inline double surface(int i) const { return face_surfaces(i); }
 
   void discretiser() override;
   void discretiser_no_face() override;
-  void typer_discretiser_ss_domaine(long i) override;
+  void typer_discretiser_ss_domaine(int i) override;
   void infobord();
   void info_elem_som();
   void marquer_faces_double_contrib(const Conds_lim&);
@@ -56,21 +56,21 @@ public :
   virtual Faces* creer_faces();
   virtual void reordonner(Faces&);
   void renumeroter(Faces&);
-  inline long nb_joints() const { return domaine().nb_joints(); }
-  inline long premiere_face_int() const;
-  inline long nb_faces() const;
-  inline long nb_faces_tot() const;
-  inline long nb_som_face() const;
-  inline long nb_faces_bord() const;
-  inline long nb_faces_bord_tot() const;
-  inline long premiere_face_bord() const;
-  inline long nb_faces_internes() const;
+  inline int nb_joints() const { return domaine().nb_joints(); }
+  inline int premiere_face_int() const;
+  inline int nb_faces() const;
+  inline int nb_faces_tot() const;
+  inline int nb_som_face() const;
+  inline int nb_faces_bord() const;
+  inline int nb_faces_bord_tot() const;
+  inline int premiere_face_bord() const;
+  inline int nb_faces_internes() const;
 
-  inline double xv(long num_face,long k) const { return xv_(num_face,k); }
-  inline double xp(long num_elem,long k) const { return xp_(num_elem,k); }
-  inline double xa(long num_arete,long k) const { return xa_(num_arete,k); }
+  inline double xv(int num_face,int k) const { return xv_(num_face,k); }
+  inline double xp(int num_elem,int k) const { return xp_(num_elem,k); }
+  inline double xa(int num_arete,int k) const { return xa_(num_arete,k); }
 
-  inline long face_numero_bord(long num_face) const;
+  inline int face_numero_bord(int num_face) const;
   inline IntTab& face_numero_bord() { return face_numero_bord_; }
   inline const IntTab& face_numero_bord() const { return face_numero_bord_; }
   void remplir_face_numero_bord();
@@ -79,10 +79,10 @@ public :
   inline const ArrOfInt& est_face_bord() const { return est_face_bord_; }
 
   inline virtual const IntVect& orientation() const;
-  inline virtual long orientation(long ) const;
-  inline virtual long orientation_si_definie(long) const;
+  inline virtual int orientation(int ) const;
+  inline virtual int orientation_si_definie(int) const;
 
-  DoubleTab normalized_boundaries_outward_vector(long global_face_number, double scale_factor) const;
+  DoubleTab normalized_boundaries_outward_vector(int global_face_number, double scale_factor) const;
   inline DoubleTab& xv() { return xv_;}
   inline const DoubleTab& xv() const { return xv_;}
   inline DoubleTab& xp() { return xp_; }
@@ -91,27 +91,27 @@ public :
   inline const DoubleTab& xa() const { return xa_; }
   inline DoubleVect& volumes_entrelaces() { return volumes_entrelaces_; }
   inline const DoubleVect& volumes_entrelaces() const { return volumes_entrelaces_; }
-  inline double volumes_entrelaces(long num_face) const { return volumes_entrelaces_[num_face]; }
+  inline double volumes_entrelaces(int num_face) const { return volumes_entrelaces_[num_face]; }
   inline const DoubleTab& volumes_entrelaces_dir() const { return volumes_entrelaces_dir_; }
   inline DoubleTab& volumes_entrelaces_dir() { return volumes_entrelaces_dir_; } // renvoie le tableau des volumes entrelaces par cote.
 
-  inline const Joint& joint(long i) const { return domaine().joint(i); }
-  inline Joint& joint(long i) { return domaine().joint(i); }
+  inline const Joint& joint(int i) const { return domaine().joint(i); }
+  inline Joint& joint(int i) { return domaine().joint(i); }
 
-  inline Frontiere_dis_base& frontiere_dis(long ) override;
-  inline const Frontiere_dis_base& frontiere_dis(long ) const override;
+  inline Frontiere_dis_base& frontiere_dis(int ) override;
+  inline const Frontiere_dis_base& frontiere_dis(int ) const override;
 
-  inline long nb_frontiere_dis() const { return les_bords_.size(); }
-  inline const Front_VF& front_VF(long i) const { return les_bords_[i]; } // renvoie la ieme frontiere_discrete.
-  inline double volumes(long i) const { return volumes_[i]; }
-  inline double inverse_volumes(long i) const { return inverse_volumes_[i]; }
-  inline long face_voisins(long num_face,long i) const;
-  inline long face_voisins_pour_interp(long num_face,long i) const; // EB
-  inline long elem_faces(long i,long j) const;
-  inline long face_sommets(long i,long j) const;
+  inline int nb_frontiere_dis() const { return les_bords_.size(); }
+  inline const Front_VF& front_VF(int i) const { return les_bords_[i]; } // renvoie la ieme frontiere_discrete.
+  inline double volumes(int i) const { return volumes_[i]; }
+  inline double inverse_volumes(int i) const { return inverse_volumes_[i]; }
+  inline int face_voisins(int num_face,int i) const;
+  inline int face_voisins_pour_interp(int num_face,int i) const; // EB
+  inline int elem_faces(int i,int j) const;
+  inline int face_sommets(int i,int j) const;
 
-  inline long elem_faces_pour_interp(long i,long j) const; // EB
-  ArrOfInt& chercher_faces(const DoubleTab& positions, ArrOfInt& faces, long reel) const;   // EB : on definit cette fonction ici et pas dans Zone.h car on a pas besoin de redefinir des Octree et que l'on a besoin de xv()
+  inline int elem_faces_pour_interp(int i,int j) const; // EB
+  ArrOfInt& chercher_faces(const DoubleTab& positions, ArrOfInt& faces, int reel) const;   // EB : on definit cette fonction ici et pas dans Zone.h car on a pas besoin de redefinir des Octree et que l'on a besoin de xv()
   inline DoubleVect& volumes() { return volumes_; }
   inline DoubleVect& inverse_volumes() { return inverse_volumes_; } // Tableau pour optimiser le code
   inline const DoubleVect& volumes() const { return volumes_; }
@@ -119,7 +119,7 @@ public :
   inline IntTab& face_voisins() override;
   inline const IntTab& face_voisins() const override;
   inline const IntTab& face_voisins_fictifs() const { return face_voisins_fictifs_; }
-  inline void face_voisins_reel_fictif(long face,long& el0,long& elf) const;
+  inline void face_voisins_reel_fictif(int face,int& el0,int& elf) const;
   inline IntTab& elem_faces();
   inline const IntTab& elem_faces() const;
   inline ArrOfInt& faces_doubles();
@@ -137,24 +137,24 @@ public :
   inline const IntTab& face_sommets() const override;
   void modifier_pour_Cl(const Conds_lim&) override;
 
-  long numero_face_local(long face, long elem) const;
-  inline long numero_sommet_local(long som, long elem) const;
+  int numero_face_local(int face, int elem) const;
+  inline int numero_sommet_local(int som, int elem) const;
 
   inline const IntTab& get_num_fac_loc() const { return num_fac_loc_; }
-  inline long get_num_fac_loc(long, long) const;
+  inline int get_num_fac_loc(int, int) const;
   void construire_num_fac_loc();
 
   inline const ArrOfInt& ind_faces_virt_bord() const { return domaine().ind_faces_virt_bord(); }
-  inline long est_une_face_virt_bord(long) const;
-  inline long fbord(long f) const //renvoie l'indice de face de bord de f si f est de bord, -1 sinon
+  inline int est_une_face_virt_bord(int) const;
+  inline int fbord(int f) const //renvoie l'indice de face de bord de f si f est de bord, -1 sinon
   {
     return f < premiere_face_int() ? f : f < nb_faces() ? -1 : ind_faces_virt_bord()[f - nb_faces()];
   }
 
   void construire_face_virt_pe_num();
   const IntTab& face_virt_pe_num() const;
-  IntTab set_arete_virt_pe_num(long na, long na_tot); // EB
-  void construire_arete_virt_pe_num(long na, long na_tot, IntTab& tmp); // EB
+  IntTab set_arete_virt_pe_num(int na, int na_tot); // EB
+  void construire_arete_virt_pe_num(int na, int na_tot, IntTab& tmp); // EB
   const IntTab& arete_virt_pe_num() const; // EB
 
   virtual void creer_tableau_faces(Array_base&, Array_base::Resize_Options opt = Array_base::COPY_INIT) const;
@@ -172,14 +172,14 @@ public :
   inline double dot (const double *a, const double *b, const double *ma = nullptr, const double *mb = nullptr) const;
 
   //produit vectoriel
-  inline std::array<double, 3> cross(long dima, long dimb, const double *a, const double *b, const double *ma = NULL, const double *mb = NULL) const;
+  inline std::array<double, 3> cross(int dima, int dimb, const double *a, const double *b, const double *ma = NULL, const double *mb = NULL) const;
 
-  inline virtual double dist_norm(long ) const { Cerr << __func__ << " method should be overrided in a derived class !! " << finl; throw; }
-  inline virtual double dist_norm_bord(long ) const { Cerr << __func__ << " method should be overrided in a derived class !! " << finl; throw; }
-  inline virtual double dist_face_elem0(long ,long ) const { Cerr << __func__ << " method should be overrided in a derived class !! " << finl; throw; }
-  inline virtual double dist_face_elem1(long ,long ) const { Cerr << __func__ << " method should be overrided in a derived class !! " << finl; throw; }
-  inline virtual double dist_face_elem0_period(long ,long ,double ) const { Cerr << __func__ << " method should be overrided in a derived class !! " << finl; throw; }
-  inline virtual double dist_face_elem1_period(long ,long ,double ) const { Cerr << __func__ << " method should be overrided in a derived class !! " << finl; throw; }
+  inline virtual double dist_norm(int ) const { Cerr << __func__ << " method should be overrided in a derived class !! " << finl; throw; }
+  inline virtual double dist_norm_bord(int ) const { Cerr << __func__ << " method should be overrided in a derived class !! " << finl; throw; }
+  inline virtual double dist_face_elem0(int ,int ) const { Cerr << __func__ << " method should be overrided in a derived class !! " << finl; throw; }
+  inline virtual double dist_face_elem1(int ,int ) const { Cerr << __func__ << " method should be overrided in a derived class !! " << finl; throw; }
+  inline virtual double dist_face_elem0_period(int ,int ,double ) const { Cerr << __func__ << " method should be overrided in a derived class !! " << finl; throw; }
+  inline virtual double dist_face_elem1_period(int ,int ,double ) const { Cerr << __func__ << " method should be overrided in a derived class !! " << finl; throw; }
 
 // Methodes pour le calcul et l'appel de la distance au bord solide le plus proche ; en entree on met le tableau des CL de la QDM
   void init_dist_paroi_globale(const Conds_lim& conds_lim) override;
@@ -246,8 +246,8 @@ protected:
   DoubleTab n_y_elem_ ; // vecteur normal entre le bord le plus proche et l'element
   DoubleTab n_y_faces_; // vecteur normal entre le bord le plus proche et la face
 
-  long nb_elem_std_=-10;                     // nombre d'elements standard
-  long nb_faces_std_=-10;                    // nombre de faces standard
+  int nb_elem_std_=-10;                     // nombre d'elements standard
+  int nb_faces_std_=-10;                    // nombre de faces standard
   IntVect rang_elem_non_std_;    // rang_elem_non_std_= -1 si l'element est standard
   // rang_elem_non_std_= rang de l'element dans les tableaux
   // relatifs aux elements non standards
@@ -255,17 +255,17 @@ protected:
 
 // Renvoie le numero local de face a partir d'un numero de face global et de elem local (0 ou 1)
 // Methode beaucoup plus rapide que Domaine_VF::numero_face_local(face,elem)
-inline long Domaine_VF::get_num_fac_loc(long face,long voisin) const
+inline int Domaine_VF::get_num_fac_loc(int face,int voisin) const
 {
   assert(voisin==0 || voisin==1);
   return num_fac_loc_(face,voisin);
 }
 
-inline long Domaine_VF::numero_sommet_local(long som, long elem) const
+inline int Domaine_VF::numero_sommet_local(int som, int elem) const
 {
-  long nse=domaine().nb_som_elem();
+  int nse=domaine().nb_som_elem();
   const IntTab& les_elems=domaine().les_elems();
-  for(long som_loc=0; som_loc<nse; som_loc++)
+  for(int som_loc=0; som_loc<nse; som_loc++)
     {
       if(les_elems(elem, som_loc)==som)
         return som_loc;
@@ -284,7 +284,7 @@ inline long Domaine_VF::numero_sommet_local(long som, long elem) const
  *  renvoie -1 si l'element n'existe pas (au bord).
  *
  */
-inline long Domaine_VF::face_voisins(long num_face,long i) const
+inline int Domaine_VF::face_voisins(int num_face,int i) const
 {
   return face_voisins_(num_face,i);
 }
@@ -298,7 +298,7 @@ inline long Domaine_VF::face_voisins(long num_face,long i) const
 //                |   0     |     1    |
 //                      numface
 // renvoie -1 si l'element n'existe pas (au bord).
-inline long Domaine_VF::face_voisins_pour_interp(long num_face,long i) const
+inline int Domaine_VF::face_voisins_pour_interp(int num_face,int i) const
 {
   if (num_face<0 || num_face>face_voisins_.dimension_tot(0))
     {
@@ -329,7 +329,7 @@ inline const IntTab& Domaine_VF::face_voisins() const
  *
  *
  */
-inline void  Domaine_VF::face_voisins_reel_fictif(long face,long& el0,long& elf) const
+inline void  Domaine_VF::face_voisins_reel_fictif(int face,int& el0,int& elf) const
 {
   assert(face<premiere_face_int());
   el0 = face_voisins(face,0);
@@ -348,7 +348,7 @@ inline void  Domaine_VF::face_voisins_reel_fictif(long face,long& el0,long& elf)
  * renvoie le numero de la premiere face interne.
  *
  */
-inline long Domaine_VF::premiere_face_int() const
+inline int Domaine_VF::premiere_face_int() const
 {
   return nb_faces_bord();
 }
@@ -356,7 +356,7 @@ inline long Domaine_VF::premiere_face_int() const
 /*! @brief renvoie le nombre global de faces.
  *
  */
-inline long Domaine_VF::nb_faces() const
+inline int Domaine_VF::nb_faces() const
 {
   return face_sommets_.dimension(0);
 }
@@ -366,7 +366,7 @@ inline long Domaine_VF::nb_faces() const
  * C'est-a-dire faces reelles + faces virtuelles
  *
  */
-inline long Domaine_VF::nb_faces_tot() const
+inline int Domaine_VF::nb_faces_tot() const
 {
   return face_sommets_.dimension_tot(0);
 }
@@ -379,7 +379,7 @@ inline long Domaine_VF::nb_faces_tot() const
  *  comme le prisme.
  *
  */
-inline long Domaine_VF::nb_som_face() const
+inline int Domaine_VF::nb_som_face() const
 {
   return face_sommets_.dimension(1);
 }
@@ -389,7 +389,7 @@ inline long Domaine_VF::nb_som_face() const
  *  bords, raccords, plaques.
  *
  */
-inline long Domaine_VF::nb_faces_bord() const
+inline int Domaine_VF::nb_faces_bord() const
 {
   return domaine().nb_faces_frontiere();
 }
@@ -399,7 +399,7 @@ inline long Domaine_VF::nb_faces_bord() const
  *  bords, raccords, plaques.
  *
  */
-inline long Domaine_VF::premiere_face_bord() const
+inline int Domaine_VF::premiere_face_bord() const
 {
   return 0;
 }
@@ -409,7 +409,7 @@ inline long Domaine_VF::premiere_face_bord() const
  * renvoie le nombre de faces internes.
  *
  */
-inline long Domaine_VF::nb_faces_internes() const
+inline int Domaine_VF::nb_faces_internes() const
 {
   return nb_faces()- nb_faces_bord();
 }
@@ -419,7 +419,7 @@ inline long Domaine_VF::nb_faces_internes() const
  *  laisse a la responsabilite des classes derivees
  *
  */
-inline long Domaine_VF::elem_faces(long num_elem, long i) const
+inline int Domaine_VF::elem_faces(int num_elem, int i) const
 {
   return elem_faces_(num_elem, i);
 }
@@ -430,7 +430,7 @@ inline long Domaine_VF::elem_faces(long num_elem, long i) const
 // laisse a la responsabilite des classes derivees
 // renvoie -1 si l'element n'est pas accessible
 // a ce jour utilisee uniquement pour l'interpolation de la pression 24/06/22
-inline long Domaine_VF::elem_faces_pour_interp(long num_elem, long i) const
+inline int Domaine_VF::elem_faces_pour_interp(int num_elem, int i) const
 {
   if (num_elem<0 || num_elem>elem_faces_.dimension_tot(0))
     {
@@ -523,7 +523,7 @@ inline const ArrOfInt& Domaine_VF::faces_doubles() const
 /*! @brief renvoie le numero du ieme sommet de la face num_face.
  *
  */
-inline long Domaine_VF::face_sommets(long num_face, long i) const
+inline int Domaine_VF::face_sommets(int num_face, int i) const
 {
   return face_sommets_(num_face, i);
 }
@@ -547,7 +547,7 @@ inline const IntTab& Domaine_VF::face_sommets() const
 /*! @brief renvoie la ieme frontiere_discrete.
  *
  */
-inline const Frontiere_dis_base& Domaine_VF::frontiere_dis(long i) const
+inline const Frontiere_dis_base& Domaine_VF::frontiere_dis(int i) const
 {
   return les_bords_[i];
 }
@@ -555,7 +555,7 @@ inline const Frontiere_dis_base& Domaine_VF::frontiere_dis(long i) const
 /*! @brief renvoie la ieme frontiere_discrete.
  *
  */
-inline Frontiere_dis_base& Domaine_VF::frontiere_dis(long i)
+inline Frontiere_dis_base& Domaine_VF::frontiere_dis(int i)
 {
   return les_bords_[i];
 }
@@ -569,9 +569,9 @@ inline const IntVect& Domaine_VF::orientation() const
   //return orientation();
 }
 
-inline long Domaine_VF::orientation_si_definie(long num_face) const
+inline int Domaine_VF::orientation_si_definie(int num_face) const
 {
-  for (long dir=0; dir<dimension; dir++)
+  for (int dir=0; dir<dimension; dir++)
     {
       if (est_egal(std::fabs(face_normales(num_face, dir)), face_surfaces(num_face)))
         return dir;
@@ -579,9 +579,9 @@ inline long Domaine_VF::orientation_si_definie(long num_face) const
   return -1;
 }
 
-inline long Domaine_VF::orientation(long num_face) const
+inline int Domaine_VF::orientation(int num_face) const
 {
-  for (long dir=0; dir<dimension; dir++)
+  for (int dir=0; dir<dimension; dir++)
     {
       if (est_egal(std::fabs(face_normales(num_face, dir)), face_surfaces(num_face)))
         return dir;
@@ -596,7 +596,7 @@ inline long Domaine_VF::orientation(long num_face) const
 /*! @brief renvoie 1 si face est une face virtuelle de bord, 0 sinon
  *
  */
-inline long Domaine_VF::est_une_face_virt_bord(long face) const
+inline int Domaine_VF::est_une_face_virt_bord(int face) const
 {
   if (face<nb_faces() || ind_faces_virt_bord()[face-nb_faces()]==-1)
     return 0;
@@ -604,7 +604,7 @@ inline long Domaine_VF::est_une_face_virt_bord(long face) const
     return 1;
 }
 
-inline long Domaine_VF::face_numero_bord(long num_face) const
+inline int Domaine_VF::face_numero_bord(int num_face) const
 {
   assert(num_face < nb_faces());
   return face_numero_bord_(num_face);
@@ -614,17 +614,17 @@ inline long Domaine_VF::face_numero_bord(long num_face) const
 inline double Domaine_VF::dot(const double *a, const double *b, const double *ma, const double *mb) const
 {
   double res = 0;
-  for (long i = 0; i < dimension; i++) res += (a[i] - (ma ? ma[i] : 0)) * (b[i] - (mb ? mb[i] : 0));
+  for (int i = 0; i < dimension; i++) res += (a[i] - (ma ? ma[i] : 0)) * (b[i] - (mb ? mb[i] : 0));
   return res;
 }
 
 /* produit vectoriel de deux vecteurs (toujours 3D, meme en 2D) */
-inline std::array<double, 3> Domaine_VF::cross(long dima, long dimb, const double *a, const double *b, const double *ma, const double *mb) const
+inline std::array<double, 3> Domaine_VF::cross(int dima, int dimb, const double *a, const double *b, const double *ma, const double *mb) const
 {
   std::array<double, 3> va = {{ 0, 0, 0 }}, vb = {{ 0, 0, 0 }}, res;
-  for (long i = 0; i < dima; i++) va[i] = a[i] - (ma ? ma[i] : 0);
-  for (long i = 0; i < dimb; i++) vb[i] = b[i] - (mb ? mb[i] : 0);
-  for (long i = 0; i < 3; i++) res[i] = va[(i + 1) % 3] * vb[(i + 2) % 3] - va[(i + 2) % 3] * vb[(i + 1) % 3];
+  for (int i = 0; i < dima; i++) va[i] = a[i] - (ma ? ma[i] : 0);
+  for (int i = 0; i < dimb; i++) vb[i] = b[i] - (mb ? mb[i] : 0);
+  for (int i = 0; i < 3; i++) res[i] = va[(i + 1) % 3] * vb[(i + 2) % 3] - va[(i + 2) % 3] * vb[(i + 1) % 3];
   return res;
 }
 

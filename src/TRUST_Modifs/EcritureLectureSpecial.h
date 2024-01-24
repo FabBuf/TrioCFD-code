@@ -42,16 +42,16 @@ public:
   static void lecture_special(Champ_base& ch, Entree& fich);
   static void lecture_special(const Domaine_VF& zvf, Entree& fich, DoubleTab& val);
   static void lecture_special_indic_arete(const Domaine_VF& dvf, Entree& fich, DoubleTab& val);
-  static long ecriture_special(const Champ_base& ch, Sortie& fich);
-  static long ecriture_special(const Domaine_VF& zvf, Sortie& fich, const DoubleTab& val);
-  static long ecriture_special_indic_aretes(const Domaine_VF& dvf, Sortie& fich, const DoubleTab& val);
+  static int ecriture_special(const Champ_base& ch, Sortie& fich);
+  static int ecriture_special(const Domaine_VF& zvf, Sortie& fich, const DoubleTab& val);
+  static int ecriture_special_indic_aretes(const Domaine_VF& dvf, Sortie& fich, const DoubleTab& val);
 
-  static long is_lecture_special();
-  static long is_ecriture_special(long& special,long& a_faire);
+  static int is_lecture_special();
+  static int is_ecriture_special(int& special,int& a_faire);
 
-  static long Active;
-  static long mode_ecr;
-  static long mode_lec;
+  static int Active;
+  static int mode_ecr;
+  static int mode_lec;
   static Nom Input;
   static Nom Output;
   static Nom& get_Output();

@@ -63,9 +63,9 @@ enum Type_modele { TURBULENCE };
  *
  *      Classe abstraite dont toutes les equations doivent deriver.
  *      Methodes abstraites:
- *        long nombre_d_operateurs() const
- *        const Operateur& operateur(long) const
- *        Operateur& operateur(long)
+ *        int nombre_d_operateurs() const
+ *        const Operateur& operateur(int) const
+ *        Operateur& operateur(int)
  *        const Champ_Inc& inconnue() const
  *        Champ_Inc& inconnue()
  *        void associer_milieu_base(const Milieu_base&)
@@ -85,28 +85,28 @@ public :
   // Methode surchargee de Objet_U:
   void nommer(const Nom& nom) override;
   // MODIF ELI LAUCOIN (22/11/2007) : je rajoute un avancer et un reculer
-  virtual void avancer(long i=1);
-  virtual void reculer(long i=1);
+  virtual void avancer(int i=1);
+  virtual void reculer(int i=1);
   // FIN MODIF ELI LAUCOIN (22/11/2007)
 
-  virtual long nombre_d_operateurs() const =0;
-  virtual long nombre_d_operateurs_tot() const;
-  virtual const Operateur& operateur(long) const =0;
-  virtual Operateur& operateur(long) =0;
-  virtual const Operateur& operateur_fonctionnel(long) const;
-  virtual Operateur& operateur_fonctionnel(long);
+  virtual int nombre_d_operateurs() const =0;
+  virtual int nombre_d_operateurs_tot() const;
+  virtual const Operateur& operateur(int) const =0;
+  virtual Operateur& operateur(int) =0;
+  virtual const Operateur& operateur_fonctionnel(int) const;
+  virtual Operateur& operateur_fonctionnel(int);
   virtual const Champ_Inc& inconnue() const =0;
   virtual Champ_Inc& inconnue() =0;
   virtual void associer_milieu_base(const Milieu_base&)=0;
   virtual const Milieu_base& milieu() const =0;
   virtual Milieu_base& milieu() =0;
-  long sauvegarder(Sortie&) const override;
-  long reprendre(Entree&) override;
-  long limpr() const;
-  long limpr_fpi() const; // EB
+  int sauvegarder(Sortie&) const override;
+  int reprendre(Entree&) override;
+  int limpr() const;
+  int limpr_fpi() const; // EB
   virtual void imprimer(Sortie& os) const;
-  virtual long impr(Sortie& os) const;
-  virtual long impr_fpi(Sortie& os) const; // EB
+  virtual int impr(Sortie& os) const;
+  virtual int impr_fpi(Sortie& os) const; // EB
   virtual void associer_milieu_equation();
 
   virtual DoubleTab& derivee_en_temps_inco(DoubleTab& );
@@ -119,7 +119,7 @@ public :
   virtual void mettre_a_jour(double temps);
   virtual void abortTimeStep();
   virtual void valider_iteration();
-  virtual long preparer_calcul();
+  virtual int preparer_calcul();
   virtual bool initTimeStep(double dt);
   virtual bool updateGivenFields();
   virtual void discretiser();
@@ -154,7 +154,7 @@ public :
   {
     return residu_initial_;
   };
-  void initialise_residu(long=0);
+  void initialise_residu(int=0);
   virtual void imprime_residu(SFichier&);
   virtual Nom expression_residu();
 
@@ -168,7 +168,7 @@ public :
   virtual void modifier_pour_Cl( Matrice_Morse& mat_morse,DoubleTab& secmem) const;
   // assemble, ajoute linertie,et modifie_pour_cl.
   virtual void assembler_avec_inertie( Matrice_Morse& mat_morse, const DoubleTab& present, DoubleTab& secmem) ;
-  virtual void dimensionner_termes_croises(Matrice_Morse& matrice, const Probleme_base& autre_pb, long nl, long nc);
+  virtual void dimensionner_termes_croises(Matrice_Morse& matrice, const Probleme_base& autre_pb, int nl, int nc);
   virtual void ajouter_termes_croises(const DoubleTab& inco, const Probleme_base& autre_pb, const DoubleTab& autre_inco, DoubleTab& resu) const;
   virtual void contribuer_termes_croises(const DoubleTab& inco, const Probleme_base& autre_pb, const DoubleTab& autre_inco, Matrice_Morse& matrice) const;
 
@@ -181,7 +181,7 @@ public :
                    - certaines variables (ensemble semi_impl) peuvent etre traitees en "semi-implicite"
                      (on utilise des valeurs predites, pas de derivees renseignees)
   */
-  virtual long  has_interface_blocs() const;
+  virtual int  has_interface_blocs() const;
   virtual double get_time_factor() const
   {
     return 1.;
@@ -198,7 +198,7 @@ public :
   {
     return champ_conserve_.valeur();
   }
-  long has_champ_conserve() const
+  int has_champ_conserve() const
   {
     return champ_conserve_.non_nul();
   }
@@ -216,7 +216,7 @@ public :
   {
     return champ_conserve_.valeur();
   }
-  virtual long has_champ_convecte() const
+  virtual int has_champ_convecte() const
   {
     return champ_conserve_.non_nul();
   }
@@ -226,7 +226,7 @@ public :
   };
   //mise a jour de champ_conserve / champ_convecte : appele par Probleme_base::mettre_a_jour() apres avoir mis a jour le milieu
   //si reset = 1, force le calcul de toutes les valeurs temporelles (et pas seulement de la valeur courante)
-  virtual void mettre_a_jour_champs_conserves(double temps, long reset = 0);
+  virtual void mettre_a_jour_champs_conserves(double temps, int reset = 0);
 
   //Methodes de l interface des champs postraitables
   /////////////////////////////////////////////////////
@@ -236,8 +236,8 @@ public :
   /////////////////////////////////////////////////////
 
   virtual const Motcle& domaine_application() const;
-  virtual void verifie_ch_init_nb_comp(const Champ_Inc_base& ch_ref, const long nb_comp) const;
-  virtual void verifie_ch_init_nb_comp_cl(const Champ_Inc_base& ch_ref, const long nb_comp, const Cond_lim_base& cl) const
+  virtual void verifie_ch_init_nb_comp(const Champ_Inc_base& ch_ref, const int nb_comp) const;
+  virtual void verifie_ch_init_nb_comp_cl(const Champ_Inc_base& ch_ref, const int nb_comp, const Cond_lim_base& cl) const
   {
     verifie_ch_init_nb_comp(ch_ref, nb_comp);
   }
@@ -260,8 +260,8 @@ public :
     return parametre_equation_ ;
   };
   virtual const RefObjU& get_modele(Type_modele type) const;
-  virtual long equation_non_resolue() const;
-  long disable_equation_residual() const { return disable_equation_residual_; };
+  virtual int equation_non_resolue() const;
+  int disable_equation_residual() const { return disable_equation_residual_; };
 
   //pour les schemas en temps a pas multiples
   inline virtual const Champ_Inc& derivee_en_temps() const
@@ -272,17 +272,17 @@ public :
   {
     return derivee_en_temps_;
   }
-  void set_calculate_time_derivative(long i)
+  void set_calculate_time_derivative(int i)
   {
     calculate_time_derivative_=i;
   };
-  long calculate_time_derivative() const
+  int calculate_time_derivative() const
   {
     return calculate_time_derivative_;
   };
 
   void set_residuals(const DoubleTab& residual);
-  virtual long positive_unkown() {return 0;};
+  virtual int positive_unkown() {return 0;};
 
 protected :
 
@@ -294,11 +294,11 @@ protected :
   Domaine_Cl_dis le_dom_Cl_dis;
   REF(Probleme_base) mon_probleme;
   virtual void set_param(Param& titi);
-  long lire_motcle_non_standard(const Motcle&, Entree&) override;
+  int lire_motcle_non_standard(const Motcle&, Entree&) override;
   virtual Entree& lire_sources(Entree&);
   virtual Entree& lire_cond_init(Entree&);
   virtual Entree& lire_cl(Entree&);
-  virtual long verif_Cl() const;
+  virtual int verif_Cl() const;
   mutable DoubleList dt_op_bak;
   //Methode lire avec signature specifique pour faire echouer
   //la compilation en cas de presence de l'ancienne methode lire
@@ -308,8 +308,8 @@ protected :
     exit();
   };
 
-  long sys_invariant_;
-  long implicite_;
+  int sys_invariant_;
+  int implicite_;
   bool has_time_factor_; // Parameter set to 1 if convection has a prefactor (eg rhoCp in energy)
   Parametre_equation parametre_equation_;
   Champ_Fonc volume_maille;
@@ -320,7 +320,7 @@ protected :
 
   //memoization of the matrix for PolyMAC_P0P1NC
   mutable Matrice_Morse matrice_stockee;
-  mutable long matrice_init;
+  mutable int matrice_init;
 
   //pour l'interface assembler_blocs
   mutable Champ_Inc champ_conserve_;
@@ -330,15 +330,15 @@ protected :
   // renvoie 1 pour un champ positif, 0 pour un champ negatif
 
 private :
-  void Gradient_conjugue_diff_impl(DoubleTrav& secmem, DoubleTab& solution, long size_terme_mul, const DoubleTab& term_mul);
+  void Gradient_conjugue_diff_impl(DoubleTrav& secmem, DoubleTab& solution, int size_terme_mul, const DoubleTab& term_mul);
 
   void ecrire_fichier_xyz() const;
   ArrOfDouble dt_ecrire_fic_xyz;
   Motcles nom_champ_xyz;
   LIST(Noms) noms_bord_xyz;
   IntVect nb_bords_post_xyz;
-  long nombre_champ_xyz;
-  long ecrit_champ_xyz_bin;
+  int nombre_champ_xyz;
+  int ecrit_champ_xyz_bin;
 
   //!SC: passage en protected (surcharge de get_champ dans Equation_Diphasique_base)
 //  Champs_Fonc list_champ_combi;
@@ -348,13 +348,13 @@ private :
   Champ_Fonc field_residu_;
 
   mutable DoubleTab NULL_;
-  long disable_equation_residual_ = 0;
+  int disable_equation_residual_ = 0;
   mutable Parser_U equation_non_resolue_;
   Value_Input_Int eq_non_resolue_input_;
 
   // For multistep methods, store previous dI/dt(n), dI/dt(n-1),...
   Champ_Inc derivee_en_temps_;
-  long calculate_time_derivative_;
+  int calculate_time_derivative_;
 
 };
 

@@ -56,7 +56,7 @@ void Discretisation_base::associer_domaine(const Domaine& dom)
 // (exemple pour la vitesse : 1 composante en VDF, 3 en VEF)
 // Si on met nb_comp = -1, la discretisation choisit le nombre
 // approprie, sinon elle utilise la valeur fournie.
-void Discretisation_base::discretiser_champ(const Motcle& directive, const Domaine_dis_base& z, const Nom& nom, const Nom& unite, long nb_comp, long nb_pas_dt, double temps, Champ_Inc& champ,
+void Discretisation_base::discretiser_champ(const Motcle& directive, const Domaine_dis_base& z, const Nom& nom, const Nom& unite, int nb_comp, int nb_pas_dt, double temps, Champ_Inc& champ,
                                             const Nom& sous_type) const
 {
   Noms noms;
@@ -67,7 +67,7 @@ void Discretisation_base::discretiser_champ(const Motcle& directive, const Domai
   discretiser_champ(directive, z, scalaire, noms, unites, nb_comp, nb_pas_dt, temps, champ, sous_type);
 }
 
-void Discretisation_base::discretiser_champ(const Motcle& directive, const Domaine_dis_base& z, const Nom& nom, const Nom& unite, long nb_comp, double temps, Champ_Fonc& champ) const
+void Discretisation_base::discretiser_champ(const Motcle& directive, const Domaine_dis_base& z, const Nom& nom, const Nom& unite, int nb_comp, double temps, Champ_Fonc& champ) const
 {
   Noms noms;
   Noms unites;
@@ -76,7 +76,7 @@ void Discretisation_base::discretiser_champ(const Motcle& directive, const Domai
 
   discretiser_champ(directive, z, scalaire, noms, unites, nb_comp, temps, champ);
 }
-void Discretisation_base::discretiser_champ(const Motcle& directive, const Domaine_dis_base& z, const Nom& nom, const Nom& unite, long nb_comp, double temps, Champ_Don& champ) const
+void Discretisation_base::discretiser_champ(const Motcle& directive, const Domaine_dis_base& z, const Nom& nom, const Nom& unite, int nb_comp, double temps, Champ_Don& champ) const
 {
   Noms noms;
   Noms unites;
@@ -115,7 +115,7 @@ void Discretisation_base::test_demande_description(const Motcle& directive, cons
  *  Voir par exemple VDF_discretisation.cpp et VEF...
  *
  */
-void Discretisation_base::discretiser_champ(const Motcle& directive, const Domaine_dis_base& z, Nature_du_champ nature, const Noms& noms, const Noms& unites, long nb_comp, long nb_pas_dt, double temps,
+void Discretisation_base::discretiser_champ(const Motcle& directive, const Domaine_dis_base& z, Nature_du_champ nature, const Noms& noms, const Noms& unites, int nb_comp, int nb_pas_dt, double temps,
                                             Champ_Inc& champ, const Nom& sous_type) const
 
 {
@@ -132,7 +132,7 @@ void Discretisation_base::discretiser_champ(const Motcle& directive, const Domai
 /*! @brief idem
  *
  */
-void Discretisation_base::discretiser_champ(const Motcle& directive, const Domaine_dis_base& z, Nature_du_champ nature, const Noms& noms, const Noms& unites, long nb_comp, double temps,
+void Discretisation_base::discretiser_champ(const Motcle& directive, const Domaine_dis_base& z, Nature_du_champ nature, const Noms& noms, const Noms& unites, int nb_comp, double temps,
                                             Champ_Fonc& champ) const
 
 {
@@ -149,7 +149,7 @@ void Discretisation_base::discretiser_champ(const Motcle& directive, const Domai
 /*! @brief idem
  *
  */
-void Discretisation_base::discretiser_champ(const Motcle& directive, const Domaine_dis_base& z, Nature_du_champ nature, const Noms& noms, const Noms& unites, long nb_comp, double temps,
+void Discretisation_base::discretiser_champ(const Motcle& directive, const Domaine_dis_base& z, Nature_du_champ nature, const Noms& noms, const Noms& unites, int nb_comp, double temps,
                                             Champ_Don& champ) const
 
 {
@@ -176,7 +176,7 @@ void Discretisation_base::discretiser_Domaine_Cl_dis(const Domaine_dis&, Domaine
 /*! @brief Fonction outil pour fixer les membres communs a tous les types de champs (utilisee dans creer_champ)
  *
  */
-void Discretisation_base::champ_fixer_membres_communs(Champ_base& ch, const Domaine_dis_base& z, const Nom& type, const Nom& nom, const Nom& unite, long nb_comp, long nb_ddl, double temps)
+void Discretisation_base::champ_fixer_membres_communs(Champ_base& ch, const Domaine_dis_base& z, const Nom& type, const Nom& nom, const Nom& unite, int nb_comp, int nb_ddl, double temps)
 {
   ch.associer_domaine_dis_base(z);
   ch.nommer(nom);
@@ -211,7 +211,7 @@ void Discretisation_base::champ_fixer_membres_communs(Champ_base& ch, const Doma
  *  utilises pour l'affichage uniquement et sont optionnels
  *
  */
-void Discretisation_base::creer_champ(Champ_Inc& ch, const Domaine_dis_base& z, const Nom& type, const Nom& nom, const Nom& unite, long nb_comp, long nb_ddl, long nb_pas_dt, double temps,
+void Discretisation_base::creer_champ(Champ_Inc& ch, const Domaine_dis_base& z, const Nom& type, const Nom& nom, const Nom& unite, int nb_comp, int nb_ddl, int nb_pas_dt, double temps,
                                       const Nom& directive, const Nom& nom_discretisation)
 {
   //Nom nomd = nom_discretisation; // Pour contourner le probleme du "static" dans type_info::nom()
@@ -227,7 +227,7 @@ void Discretisation_base::creer_champ(Champ_Inc& ch, const Domaine_dis_base& z, 
  *  utilises pour l'affichage uniquement et sont optionnels
  *
  */
-void Discretisation_base::creer_champ(Champ_Fonc& ch, const Domaine_dis_base& z, const Nom& type, const Nom& nom, const Nom& unite, long nb_comp, long nb_ddl, double temps, const Nom& directive,
+void Discretisation_base::creer_champ(Champ_Fonc& ch, const Domaine_dis_base& z, const Nom& type, const Nom& nom, const Nom& unite, int nb_comp, int nb_ddl, double temps, const Nom& directive,
                                       const Nom& nom_discretisation)
 {
   //Nom nomd = nom_discretisation; // Pour contourner le probleme du "static" dans type_info::nom()
@@ -242,7 +242,7 @@ void Discretisation_base::creer_champ(Champ_Fonc& ch, const Domaine_dis_base& z,
  *  utilises pour l'affichage uniquement et sont optionnels
  *
  */
-void Discretisation_base::creer_champ(Champ_Don& ch, const Domaine_dis_base& z, const Nom& type, const Nom& nom, const Nom& unite, long nb_comp, long nb_ddl, double temps, const Nom& directive,
+void Discretisation_base::creer_champ(Champ_Don& ch, const Domaine_dis_base& z, const Nom& type, const Nom& nom, const Nom& unite, int nb_comp, int nb_ddl, double temps, const Nom& directive,
                                       const Nom& nom_discretisation)
 {
   //Nom nomd = nom_discretisation; // Pour contourner le probleme du "static" dans type_info::nom()
@@ -292,7 +292,7 @@ void Discretisation_base::nommer_completer_champ_physique(const Domaine_dis_base
       Noms& noms_variables = ref_cast(Champ_Fonc_Tabule, le_champ).noms_champs_parametre();
       Noms& noms_pbs = ref_cast(Champ_Fonc_Tabule, le_champ).noms_problemes();
       VECT(REF(Champ_base)) les_ch_eq;
-      for (long i = 0; i < noms_variables.size(); i++)
+      for (int i = 0; i < noms_variables.size(); i++)
         {
           REF(Champ_base) champ;
           const Probleme_base& pb_ch = noms_pbs.size() == 0 ? pb : ref_cast(Probleme_base, Interprete::objet(noms_pbs[i]));
@@ -317,7 +317,7 @@ Nom Discretisation_base::get_name_of_type_for(const Nom& class_operateur, const 
       type = type_operateur;
       Nom disc = eqn.discretisation().que_suis_je();
       if (disc=="VDF+") disc="VDF"; // EB
-      long isQC = eqn.probleme().is_dilatable();
+      int isQC = eqn.probleme().is_dilatable();
 
       if (isQC && ((eqn.que_suis_je() != "Transport_K_Eps") && (eqn.que_suis_je() != "Transport_K_Eps_Bas_Reynolds") && (eqn.que_suis_je() != "Transport_K_Eps_Realisable") && (eqn.que_suis_je() != "Transport_K_Eps_V2")))
         type += "_QC";
@@ -508,7 +508,7 @@ Nom Discretisation_base::get_name_of_type_for(const Nom& class_operateur, const 
   return type;
 }
 
-long Discretisation_base::verifie_sous_type(Nom& type, const Nom& sous_type, const Motcle& directive) const
+int Discretisation_base::verifie_sous_type(Nom& type, const Nom& sous_type, const Motcle& directive) const
 {
   const Type_info *base_info = Type_info::type_info_from_name(sous_type);
 
