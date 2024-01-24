@@ -103,6 +103,8 @@ public:
   inline int nb_som_elem() const;
   inline int nb_faces_elem(int=0) const ;
   inline int sommet_elem(int , int ) const;
+  ArrOfInt& chercher_elements_FT(const DoubleTab& ,ArrOfInt& ,int reel=0) const; // EB cache reset a chaque iteration, sinon il explose en multi-particules (lits fluidises)
+  void reset_cache_elem_pos_FT() const; // EB
 
   ///
   /// Aretes
@@ -110,6 +112,7 @@ public:
   inline int nb_aretes() const;
   inline int nb_aretes_tot() const;
   void creer_aretes();
+  void creer_structure_parallelle_aretes(const int nb_aretes_reelles, IntTab& Aretes_som, IntTab& Elem_Aretes); // EB
 
   ///
   /// Faces
@@ -368,6 +371,7 @@ protected:
   // (voir Domaine::init_faces_virt_bord())
   ArrOfInt ind_faces_virt_bord_; // contient les indices des faces virtuelles de bord
 
+  Joints mes_aretes_joint; // EB
   // L'octree est mutable: on le construit a la volee lorsqu'il est utilise dans les methodes const
   mutable DERIV(OctreeRoot) deriv_octree_;
   ArrOfDouble cg_moments_;
@@ -401,7 +405,7 @@ protected:
   void duplique_bords_internes();
 
   //attributes necessary to perform surface extraction on a moving boundary (deformable domaine, like ALE)
-  IntTab les_elems_extrait_surf_reference_; // list of elements beinting to the extracted surface on a moving boundary defines at the initialization.
+  IntTab les_elems_extrait_surf_reference_; // list of elements belonging to the extracted surface on a moving boundary defines at the initialization.
   bool extrait_surf_dom_deformable_; // indicates whether the domain was defined by extraction on a moving boundary
 
 private:
@@ -411,6 +415,8 @@ private:
   // Cached infos to accelerate Domaine::chercher_elements():
   mutable DoubleTabs cached_positions_;
   mutable ArrsOfInt cached_elements_;
+  mutable DoubleTabs cached_positions_FT_; // EB
+  mutable ArrsOfInt cached_elements_FT_; // EB
 };
 
 /*! @brief Renvoie le nombre d'elements du domaine.

@@ -26,7 +26,7 @@
 #include <Schema_Comm.h>
 #include <MD_Vector_std.h>
 #include <MD_Vector_tools.h>
-
+// #include <Modele_Collision_FT.h> // EB
 #include <Interprete_bloc.h>
 #include <Extraire_surface.h>
 #include <Octree_Double.h>
@@ -470,6 +470,98 @@ ArrOfInt& Domaine::chercher_elements(const DoubleVect& positions, ArrOfInt& elem
     positions2(0, ii) = positions(ii);
   return chercher_elements(positions2, elements, reel);
 }
+// EB : copie de la fonction precedente mais le cache est reset a la fin de Transport_Interfaces_FT_Disc::mettre_a_jour()
+// Description:
+//    Recherche des elements contenant les points dont les
+//    coordonnees sont specifiees.
+// Precondition:
+// Parametre: DoubleTab& positions
+//    Signification: les coordonnees des points dont on veut
+//                   connaitre l'element correspondant
+//    Valeurs par defaut:
+//    Contraintes: reference constante
+//    Acces: entree
+// Parametre: ArrOfInt& elements
+//    Signification: le tableau des numeros des elements contenant
+//                   les points specifies
+//    Valeurs par defaut:
+//    Contraintes:
+//    Acces: sortie
+// Retour: ArrOfInt&
+//    Signification: le tableau des numeros des elements contenant
+//                   les points specifies
+//    Contraintes:
+// Exception:
+// Effets de bord:
+// Postcondition: la methode ne modifie pas l'objet
+static double cached_memory_FT=0;
+ArrOfInt& Domaine::chercher_elements_FT(const DoubleTab& positions,
+                                        ArrOfInt& elements,
+                                        int reel) const
+{
+  bool set_cache = false;
+  // PL: On devrait faire un appel a chercher_elements(x,y,z,elem) si positions.dimension(0)=1 ...
+  if (!deformable() && positions.dimension(0)>1)
+    {
+      set_cache = true;
+      if (!deriv_octree_.non_nul() || !deriv_octree_.valeur().construit())
+        {
+          // Vide le cache
+          cached_elements_FT_.reset();
+          cached_positions_FT_.reset();
+        }
+      else // Recherche dans le cache:
+        for (int i = 0; i < cached_positions_FT_.size(); i++)
+          if (sameDoubleTab(positions, cached_positions_FT_[i]))
+            {
+              elements.resize_tab(cached_positions_FT_[i].dimension(0), ArrOfInt::NOCOPY_NOINIT);
+              elements = cached_elements_FT_[i];
+              return elements;
+            }
+    }
+  const OctreeRoot& octree = construit_octree(reel);
+  int sz=positions.dimension(0);
+  const int dim = positions.dimension(1);
+  // resize_tab est virtuelle, si c'est un Vect ou un Tab elle appelle le
+  // resize de la classe derivee:
+  elements.resize_tab(sz, ArrOfInt::NOCOPY_NOINIT);
+  double x, y=0, z=0;
+  for (int i=0; i<sz; i++)
+    {
+      x = positions(i,0);
+      if (dim > 1) y = positions(i,1);
+      if (dim > 2) z = positions(i,2);
+      elements[i] = octree.rang_elem(x, y, z);
+    }
+  if (set_cache)
+    {
+      // Met en cache
+      cached_positions_FT_.add(positions);
+      cached_elements_FT_.add(elements);
+      cached_memory_FT += (double) (positions.size_array() * sizeof(double));
+      cached_memory_FT += (double) (elements.size_array() * sizeof(long));
+      if (cached_memory_FT>1e7)   // 10Mo
+        {
+          Cerr << 2 * cached_positions_.size() << " arrays cached in memory for Zone::chercher_elements(...): ";
+          if (cached_memory_FT < 1e6)
+            Cerr << long(cached_memory_FT / 1024) << " KBytes" << finl;
+          else if (cached_memory_FT < 1e9)
+            Cerr << long(cached_memory_FT / 1024 / 1024) << " MBytes" << finl;
+          else
+            Cerr << long(cached_memory_FT / 1024 / 1024 / 1024) << " GBytes" << finl;
+        }
+    }
+  return elements;
+}
+
+// debut EB
+void Domaine::reset_cache_elem_pos_FT() const  // EB
+{
+  cached_elements_FT_.reset();
+  cached_positions_FT_.reset();
+  cached_memory_FT=0;
+}
+// fin EB
 
 /*! @brief Renvoie le nombre de faces qui sont des bords.
  *
@@ -2121,15 +2213,38 @@ void Domaine::imprimer() const
   Cerr << "The extreme coordinates of the domain " << le_nom() << " are:" << finl;
   // Il n'existe pas de recherche du min et du max dans DoubleTab donc je code:
   DoubleTab BB = getBoundingBox();
+  double Ox=0,Oy=0,Oz=0;
+  double Lx=0,Ly=0,Lz=0;
+
   for (int j=0; j<dimension; j++)
     {
       double min_ = mp_min(BB(j,0));
       double max_ = mp_max(BB(j,1));
-      if (j==0) Cerr << "x ";
-      if (j==1) Cerr << "y ";
-      if (j==2) Cerr << "z ";
+      if (j==0)
+        {
+          Cerr << "x ";
+          Ox=min_;
+          Lx=max_-min_;
+        }
+      if (j==1)
+        {
+          Cerr << "y ";
+          Oy=min_;
+          Ly=max_-min_;
+        }
+      if (j==2)
+        {
+          Cerr << "z ";
+          Oz=min_;
+          Lz=max_-min_;
+        }
       Cerr << "is between " << min_ << " and " << max_ << finl;
     }
+  Cerr << "Ox Oy Oz " <<Ox << " " << Oy << " " << Oz << finl;
+  Cerr << "Lx Ly Lz " <<Lx << " " << Ly << " " << Lz << finl;
+  // Modele_Collision_FT::set_resize_parametres_geometriques();
+  // Modele_Collision_FT::set_origin(Ox,Oy,Oz);
+  // Modele_Collision_FT::set_longueur(Lx,Ly,Lz);
   Cerr << "==============================================" << finl;
   // We recompute volumes (cause stored in Domaine_VF and so not available from Domaine...):
   DoubleVect volumes;
