@@ -25,7 +25,7 @@
 #include <MD_Vector_base.h>
 #include <Analyse_Angle.h>
 #include <Linear_algebra_tools_impl.h>
-#include <Modele_Collision_FT.h> // EB
+// #include <Modele_Collision_FT.h> // EB
 #include <Device.h>
 #include <medcoupling++.h>
 #ifdef MEDCOUPLING_
