@@ -1117,7 +1117,7 @@ void Domaine_VF::init_dist_paroi_globale(const Conds_lim& conds_lim) // Methode 
       local_xs->setIJ(nf+e, d, local_xp(e, d));
 
   //indices des points de remote_xvs les plus proches de chaque point de local_xv
-  MCAuto<DataArrayInt64> glob_idx(DataArrayInt64::New());
+  MCAuto<DataArrayInt> glob_idx(DataArrayInt::New());
   glob_idx = remote_xvs->findClosestTupleId(local_xs);
 
   //pour chaque element et face de local_xs : remplissage des tableaux
