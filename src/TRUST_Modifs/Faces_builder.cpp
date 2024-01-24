@@ -287,17 +287,17 @@ void Faces_builder::check_erreur_faces(const char * message,
         {
           char *sptr = s;
           const int iface = liste_faces[i];
-          sptr += snprintf(sptr, 100, "%4ld ",(int) iface);
+          sptr += snprintf(sptr, 100, "%4ld ",(long) iface);
           for (int j = 0; j < nb_som_faces; j++)
             {
               const int isom = faces(iface,j);
-              sptr += snprintf(sptr, 100, "%5ld(", (int)isom);
+              sptr += snprintf(sptr, 100, "%5ld(", (long)isom);
               for (int k = 0; k < dim; k++)
                 if (isom!=-1)
                   sptr += snprintf(sptr, 100, "%10.6f", coord(isom, k));
               sptr += snprintf(sptr, 100, ")");
             }
-          sptr += snprintf(sptr, 100, "%4ld %4ld", (int)face_elem(iface,0),(int) face_elem(iface,1));
+          sptr += snprintf(sptr, 100, "%4ld %4ld", (long)face_elem(iface,0),(long) face_elem(iface,1));
           J << s << finl;
         }
       NettoieNoeuds::verifie_noeuds(ref_domaine_.valeur());
@@ -510,12 +510,12 @@ void Faces_builder::creer_faces_frontiere(const int nb_voisins_attendus,
   Nom msg;
   msg = "Boundary \"";
   msg += frontiere.le_nom();
-  msg += "\" contains faces which do not beint to any element.";
+  msg += "\" contains faces which do not belong to any element.";
   check_erreur_faces(msg, liste_faces_erreur0);
 
   msg = "Boundary \"";
   msg += frontiere.le_nom();
-  msg += "\" contains faces that beint to ";
+  msg += "\" contains faces that belong to ";
   msg += Nom(3-nb_voisins_attendus);
   msg += " elements.\n";
   switch(nb_voisins_attendus)
@@ -541,7 +541,7 @@ void Faces_builder::creer_faces_frontiere(const int nb_voisins_attendus,
 
   msg = "Boundary \"";
   msg += frontiere.le_nom();
-  msg += "\" contains faces that beint to more than 2 elements.\n";
+  msg += "\" contains faces that belong to more than 2 elements.\n";
   check_erreur_faces(msg, liste_faces_erreur2);
 
   msg = "Boundary \"";
@@ -727,9 +727,9 @@ void Faces_builder::creer_faces_internes(IntTab& faces_sommets,
 
   // Traitement des erreurs:
   {
-    const char * const msg1 = "We found faces which beint to one element/cell only and are not declared in any boundary ! You forgot to define at least one boundary in your mesh. Fix your mesh.\n";
+    const char * const msg1 = "We found faces which belong to one element/cell only and are not declared in any boundary ! You forgot to define at least one boundary in your mesh. Fix your mesh.\n";
     const char * const msg2 = "Joint faces are incomplete: internal error in the mesh splitter\n";
-    const char * const msg3 = "Connectivity error in the mesh elements. Possible errors:\n- one face of one element beints to more than 2 elements\n- two element have at least 3 common nodes but these nodes are not faces of these elements\n";
+    const char * const msg3 = "Connectivity error in the mesh elements. Possible errors:\n- one face of one element belongs to more than 2 elements\n- two element have at least 3 common nodes but these nodes are not faces of these elements\n";
     check_erreur_faces(msg1, liste_faces_frontiere_non_declarees);
     check_erreur_faces(msg2, liste_faces_joint_non_declarees);
     check_erreur_faces(msg3, liste_faces_erreurs_connectivite);
@@ -803,12 +803,12 @@ void Faces_builder::identification_groupe_faces(Groupe_Faces& groupe_faces,
   Nom msg;
   msg = "Group of Faces \"";
   msg += groupe_faces.le_nom();
-  msg += "\" contains faces which do not beint to any element or not virtual element.";
+  msg += "\" contains faces which do not belong to any element or not virtual element.";
   check_erreur_faces(msg, liste_faces_erreur0);
 
   msg = "Group of Faces \"";
   msg += groupe_faces.le_nom();
-  msg += "\" contains faces that beint to more than 2 elements.\n";
+  msg += "\" contains faces that belong to more than 2 elements.\n";
   check_erreur_faces(msg, liste_faces_erreur1);
 }
 
