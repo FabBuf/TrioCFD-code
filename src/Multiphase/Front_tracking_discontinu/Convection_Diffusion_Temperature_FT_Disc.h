@@ -45,21 +45,21 @@ public:
 
   Convection_Diffusion_Temperature_FT_Disc();
   void set_param(Param& titi) override;
-  long lire_motcle_non_standard(const Motcle&, Entree&) override;
+  int lire_motcle_non_standard(const Motcle&, Entree&) override;
   virtual void preparer_pas_de_temps(void);
   virtual void corriger_pas_de_temps(double dt);
   void compute_divergence_free_velocity_extension();
   DoubleTab&   derivee_en_temps_inco(DoubleTab&) override;
   void         mettre_a_jour(double temps) override;
-  long preparer_calcul() override;
-  double get_flux_to_face(const long num_face) const;
-  double get_Twall_at_face(const long num_face) const;
-  double get_Twall_at_elem(const long elem) const;
-  void get_flux_and_Twall(const long num_face,
+  int preparer_calcul() override;
+  double get_flux_to_face(const int num_face) const;
+  double get_Twall_at_face(const int num_face) const;
+  double get_Twall_at_elem(const int elem) const;
+  void get_flux_and_Twall(const int num_face,
                           double& flux, double& Twall) const;
-  double get_Twall(const long num_face) const;
+  double get_Twall(const int num_face) const;
   void		   calculer_correction_flux_thermique(DoubleTab& valeurs_champ, const Navier_Stokes_FT_Disc& eq_ns, Transport_Interfaces_FT_Disc& eq_transport, const Maillage_FT_Disc& maillage); // EB
-  virtual void suppression_interfaces(const IntVect& num_compo, const ArrOfInt& flags_compo_a_supprimer, long nouvelle_phase);
+  virtual void suppression_interfaces(const IntVect& num_compo, const ArrOfInt& flags_compo_a_supprimer, int nouvelle_phase);
   void                associer_milieu_base(const Milieu_base& milieu) override;
   Milieu_base&        milieu() override;
   const Milieu_base& milieu() const override;
@@ -68,7 +68,7 @@ public:
 
   void    discretiser(void) override;
 
-  long get_phase() const;
+  int get_phase() const;
   void discretiser_assembleur_pression();
   void completer() override;
 
@@ -105,17 +105,17 @@ public:
   DoubleVect& get_T_P2_moy();
   const DoubleVect& get_T_P2_moy() const;
   void init_champ_flux_conductif_interf();
-  virtual long impr_fpi(Sortie& os) const override;
-  //long reprendre(Entree&);
-  long get_discretization_correction();
+  virtual int impr_fpi(Sortie& os) const override;
+  //int reprendre(Entree&);
+  int get_discretization_correction();
   // fin EB
 protected:
   void correct_mpoint();
   // Quelle phase cette equation concerne-t-elle ? 0 ou 1
-  long phase_;
+  int phase_;
   //GB : Ajout de variables :
-  long stencil_width_;
-  long correction_courbure_ordre_;
+  int stencil_width_;
+  int correction_courbure_ordre_;
   Nom nom_sous_domaine_;
   double temp_moy_ini_;
   bool maintien_temperature_;
@@ -143,7 +143,7 @@ protected:
   Champ_Inc vitesse_convection_;
 
   // To make a divergence-free velocity extension :
-  long divergence_free_velocity_extension_;
+  int divergence_free_velocity_extension_;
   Assembleur assembleur_pression_;
   Champ_Inc la_pression; // Of course, it's a fake :D
   Champ_Inc gradient_pression_;
@@ -164,7 +164,7 @@ protected:
   DoubleTab flux_conductif_interf_;
   DoubleVect flux_conductif_tot_interf_;
   DoubleVect T_P2_moy_;
-  long flag_correction_flux_thermique_;
+  int flag_correction_flux_thermique_;
   double phi_ref_correction_flux_thermique_;
   double alpha_correction_flux_thermique_;
   double beta_correction_flux_thermique_;

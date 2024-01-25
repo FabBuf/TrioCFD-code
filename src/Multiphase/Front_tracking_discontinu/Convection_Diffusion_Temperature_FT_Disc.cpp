@@ -138,7 +138,7 @@ void Convection_Diffusion_Temperature_FT_Disc::set_param(Param& param)
   param.ajouter_non_std("correction_flux_thermique", (this)); // EB
 }
 
-long Convection_Diffusion_Temperature_FT_Disc::lire_motcle_non_standard(const Motcle& mot, Entree& is)
+int Convection_Diffusion_Temperature_FT_Disc::lire_motcle_non_standard(const Motcle& mot, Entree& is)
 {
   if (mot=="equation_interface")
     {
@@ -239,7 +239,7 @@ long Convection_Diffusion_Temperature_FT_Disc::lire_motcle_non_standard(const Mo
           is >> motbis;
           while (motbis != accfermee)
             {
-              long rang = mots.search(motbis);
+              int rang = mots.search(motbis);
               switch (rang)
                 {
                 case 0:
@@ -268,7 +268,7 @@ long Convection_Diffusion_Temperature_FT_Disc::lire_motcle_non_standard(const Mo
                     methodes_discr.add("P1_all"); // A PRIVILEGIER. On discretise la correction sur l'ensemble des elements ayant servis a l'interpolation de la temperature en P1. Cela permet d'avoir une coque fermee et plus lisse autour de la particule.
                     Motcle la_discr;
                     is >> la_discr;
-                    const long r = methodes_discr.search(la_discr);
+                    const int r = methodes_discr.search(la_discr);
                     switch(r)
                       {
                       case 0:
@@ -312,9 +312,9 @@ long Convection_Diffusion_Temperature_FT_Disc::lire_motcle_non_standard(const Mo
 }
 
 /* EB : cela est utile pour faire une reprise de calcul xyz depuis une simu sans thermique
-long Convection_Diffusion_Temperature_FT_Disc::reprendre(Entree& is)
+int Convection_Diffusion_Temperature_FT_Disc::reprendre(Entree& is)
 {
-  long special= EcritureLectureSpecial::is_lecture_special();
+  int special= EcritureLectureSpecial::is_lecture_special();
   if(special)
     {
       if (Process::je_suis_maitre())
@@ -346,7 +346,7 @@ void Convection_Diffusion_Temperature_FT_Disc::preparer_pas_de_temps(void)
 {
 }
 
-long Convection_Diffusion_Temperature_FT_Disc::get_phase() const
+int Convection_Diffusion_Temperature_FT_Disc::get_phase() const
 {
   return phase_;
 }
@@ -357,25 +357,25 @@ void Convection_Diffusion_Temperature_FT_Disc::corriger_pas_de_temps(double dt)
 
 static void extrapolate(const Domaine_VF&    domaine_vf,
                         const DoubleTab& interfacial_area,
-                        const long stencil_width,
+                        const int stencil_width,
                         const DoubleTab& distance,
                         DoubleTab&        field)
 {
   const double invalid_test = -1.e30;
   const IntTab& elem_faces = domaine_vf.elem_faces();
   const IntTab& faces_elem = domaine_vf.face_voisins();
-  const long nb_faces_elem = elem_faces.dimension(1);
-  const long nb_elem       = elem_faces.dimension(0);
+  const int nb_faces_elem = elem_faces.dimension(1);
+  const int nb_elem       = elem_faces.dimension(0);
   DoubleTab field_old;
   // n_iterations = stencil_width is the minimum to get a propagation of information from the interface to the border
   // of the extrapolation. But doing more will lead to smoother values... And it probably costs close to nothing
   const double n_iterations = 5*stencil_width;
-  for (long iteration = 0; iteration < n_iterations; iteration++)
+  for (int iteration = 0; iteration < n_iterations; iteration++)
     {
       // Copy the old field value as we do not want to use the current iteration values.
       field_old = field;
       // La valeur sur un element est la moyenne des valeurs sur les elements voisins
-      for (long i_elem = 0; i_elem < nb_elem; i_elem++)
+      for (int i_elem = 0; i_elem < nb_elem; i_elem++)
         {
           // Do not touch field in interfacial cells.
           // Iterate on other values.
@@ -384,10 +384,10 @@ static void extrapolate(const Domaine_VF&    domaine_vf,
             {
               double somme = 0.;
               double coeff = 0.;
-              for (long i_face = 0; i_face < nb_faces_elem; i_face++)
+              for (int i_face = 0; i_face < nb_faces_elem; i_face++)
                 {
-                  const long face = elem_faces(i_elem, i_face);
-                  const long voisin = faces_elem(face, 0) + faces_elem(face, 1) - i_elem;
+                  const int face = elem_faces(i_elem, i_face);
+                  const int voisin = faces_elem(face, 0) + faces_elem(face, 1) - i_elem;
                   if (voisin >= 0)
                     {
                       // Not a boundary...
@@ -422,27 +422,27 @@ static void extrapoler_dans_phase(DoubleTab&        gradient,
                                   const DoubleTab& indicatrice,
                                   const Domaine_VF&    domaine_vf,
                                   const double invalid_test,
-                                  const double indic_phase, const long nb_iter)
+                                  const double indic_phase, const int nb_iter)
 {
   DoubleTab gradient_old;
-  for (long iteration = 0; iteration < nb_iter; iteration++)
+  for (int iteration = 0; iteration < nb_iter; iteration++)
     {
       // Copie de la valeur du gradient: on ne veut pas utiliser les valeurs
       // calculees lors de l'iteration courante
       gradient_old = gradient;
       // La valeur sur un element est la moyenne des valeurs sur les elements voisins
-      for (long i_elem = 0; i_elem < domaine_vf.elem_faces().dimension(0); i_elem++)
+      for (int i_elem = 0; i_elem < domaine_vf.elem_faces().dimension(0); i_elem++)
         {
           if (indicatrice[i_elem] != indic_phase)
             {
               // Ne pas toucher au gradient de la phase "phase".
               // Iterer sur les autres valeurs.
               double somme = 0.;
-              long coeff = 0;
-              for (long i_face = 0; i_face < domaine_vf.elem_faces().dimension(1); i_face++)
+              int coeff = 0;
+              for (int i_face = 0; i_face < domaine_vf.elem_faces().dimension(1); i_face++)
                 {
-                  const long face = domaine_vf.elem_faces(i_elem, i_face);
-                  const long voisin = domaine_vf.face_voisins(face, 0) + domaine_vf.face_voisins(face, 1) - i_elem;
+                  const int face = domaine_vf.elem_faces(i_elem, i_face);
+                  const int voisin = domaine_vf.face_voisins(face, 0) + domaine_vf.face_voisins(face, 1) - i_elem;
                   if (voisin >= 0)
                     {
                       // Not a boundary...
@@ -470,17 +470,17 @@ static void extrapoler_champ_elem(const Domaine_VF&    domaine_vf,
                                   const DoubleTab& distance_interface,
                                   const DoubleTab& normale_interface,
                                   const DoubleTab& champ_div_n,
-                                  const long   phase,
-                                  const long   stencil_width,
+                                  const int   phase,
+                                  const int   stencil_width,
                                   const double   interfacial_value,
                                   DoubleTab&        champ,
                                   DoubleTab&        gradient,
-                                  const double temps, const long solid_particle)
+                                  const double temps, const int solid_particle)
 {
   const IntTab& elem_faces = domaine_vf.elem_faces();
   //const IntTab& faces_elem = domaine_vf.face_voisins();
-  const long nb_faces_elem = elem_faces.dimension(1);
-  const long nb_elem       = elem_faces.dimension(0);
+  const int nb_faces_elem = elem_faces.dimension(1);
+  const int nb_elem       = elem_faces.dimension(0);
 
   const DoubleTab& centre_gravite_elem = domaine_vf.xp();
   const DoubleTab& centre_gravite_face = domaine_vf.xv();
@@ -491,8 +491,8 @@ static void extrapoler_champ_elem(const Domaine_VF&    domaine_vf,
   assert(gradient.dimension(0) == distance_interface.dimension(0));
   gradient = invalid_value;
   const double indic_phase = (phase == 0) ? 0. : 1.;
-  long i_elem;
-  long err_count = 0;
+  int i_elem;
+  int err_count = 0;
   for (i_elem = 0; i_elem < nb_elem; i_elem++)
     {
       double d = distance_interface[i_elem];
@@ -513,11 +513,11 @@ static void extrapoler_champ_elem(const Domaine_VF&    domaine_vf,
           // Si c'est le cas, on remplace la distance par plus ou moins ce rayon
           // suivant la phase dans laquelle se situe l'element
           double dist_elem_face_min = 1e30;
-          for (long face_loc=0; face_loc<nb_faces_elem; face_loc++)
+          for (int face_loc=0; face_loc<nb_faces_elem; face_loc++)
             {
               double dist_elem_face = 0;
-              const long face_glob = elem_faces(i_elem,face_loc);
-              for (long i_dim=0; i_dim<Objet_U::dimension; i_dim++)
+              const int face_glob = elem_faces(i_elem,face_loc);
+              for (int i_dim=0; i_dim<Objet_U::dimension; i_dim++)
                 {
                   double centre_elem_i = centre_gravite_elem(i_elem,i_dim);
                   double centre_face_i = centre_gravite_face(face_glob,i_dim);
@@ -544,7 +544,7 @@ static void extrapoler_champ_elem(const Domaine_VF&    domaine_vf,
             {
               Cerr << "Time = " << temps << "; extrapoler_champ_elem: distance lower than dx/2" << finl;
               Cerr << "        Element position:" << finl;
-              for  (long i_dim=0; i_dim<Objet_U::dimension; i_dim++)
+              for  (int i_dim=0; i_dim<Objet_U::dimension; i_dim++)
                 {
                   Cerr << "          x(" << i_dim << ") = " << centre_gravite_elem(i_elem,i_dim) << finl;
                 }
@@ -611,8 +611,8 @@ void Convection_Diffusion_Temperature_FT_Disc::calculer_grad_t()
   const DoubleTab& distance_interface = eq_interface_.get_update_distance_interface().valeurs();
   const DoubleTab& normale_interface = eq_interface_.get_update_normale_interface().valeurs();
   //GB : Augmenter la constante de l'epaisseur
-  //GB : const long stencil_width = 8;
-  const long stencil_width = stencil_width_;
+  //GB : const int stencil_width = 8;
+  const int stencil_width = stencil_width_;
   const double interfacial_value = TSAT_CONSTANTE;
 
   const Domaine_VF& domaine_vf = ref_cast(Domaine_VF, domaine_dis().valeur());
@@ -626,7 +626,7 @@ void Convection_Diffusion_Temperature_FT_Disc::calculer_grad_t()
   Navier_Stokes_FT_Disc& eq_navier_stokes = ref_cast(Navier_Stokes_FT_Disc, ref_eq_ns_.valeur());
   const DoubleTab& div_n = eq_navier_stokes.calculer_div_normale_interface().valeurs();
 
-  static const long solid_particle=eq_interface_.is_solid_particle();
+  static const int solid_particle=eq_interface_.is_solid_particle();
   extrapoler_champ_elem(domaine_vf, indicatrice, distance_interface, normale_interface, div_n,
                         phase_, stencil_width, interfacial_value,
                         temperature,
@@ -642,11 +642,11 @@ void Convection_Diffusion_Temperature_FT_Disc::calculer_mpoint()
 // debut EB
 /*! @brief Supprime les doublons de la liste "liste" et enregistre les elements reels dans list_elem_unique et les elements virtuels dans list_elem_to_send
 */
-long remove_duplicate(const IntTab& list, ArrOfInt& list_elem_unique, ArrOfInt& list_num_compo_unique, const Domaine& domaine, const Schema_Comm_FT& comm)
+int remove_duplicate(const IntTab& list, ArrOfInt& list_elem_unique, ArrOfInt& list_num_compo_unique, const Domaine& domaine, const Schema_Comm_FT& comm)
 {
 
-  const long nb_elem=domaine.nb_elem();
-  const long nb_elem_init=list.dimension(0);
+  const int nb_elem=domaine.nb_elem();
+  const int nb_elem_init=list.dimension(0);
 
   // 1. ENVOI/RECEPTION des elements virtuels
   ArrOfInt list_elem_to_send(0);
@@ -661,25 +661,25 @@ long remove_duplicate(const IntTab& list, ArrOfInt& list_elem_unique, ArrOfInt& 
   list_elem_recv.set_smart_resize(1);
 
   const IntTab& elem_virt_pe_num=domaine.elem_virt_pe_num();
-  long nb_elem_to_send=0;
-  long nb_elem_recv=0;
+  int nb_elem_to_send=0;
+  int nb_elem_recv=0;
 
   ArrOfInt list_elem_reels(0);
   ArrOfInt list_num_compo_reels(0);
   list_elem_reels.set_smart_resize(1);
   list_num_compo_reels.set_smart_resize(1);
-  long nb_elems_reels=0;
+  int nb_elems_reels=0;
 
   // On identifie les elements virtuels a envoyer
-  for (long ind_elem=0; ind_elem<nb_elem_init; ind_elem++)
+  for (int ind_elem=0; ind_elem<nb_elem_init; ind_elem++)
     {
-      long elem=list(ind_elem,0);
+      int elem=list(ind_elem,0);
 
       if (elem>nb_elem)
         {
-          const long rang = elem - nb_elem;
-          const long num_pe=elem_virt_pe_num(rang,0);
-          const long num_elem_distant=elem_virt_pe_num(rang,1);
+          const int rang = elem - nb_elem;
+          const int num_pe=elem_virt_pe_num(rang,0);
+          const int num_elem_distant=elem_virt_pe_num(rang,1);
           list_elem_to_send.append_array(num_elem_distant);
           list_pe_send.append_array(num_pe);
           list_num_compo_to_send.append_array(list(ind_elem,1));
@@ -709,11 +709,11 @@ long remove_duplicate(const IntTab& list, ArrOfInt& list_elem_unique, ArrOfInt& 
 
   ArrOfInt recv_list;
   comm.begin_comm();
-  for(long i=0; i<nb_elem_to_send; i++)
+  for(int i=0; i<nb_elem_to_send; i++)
     {
-      const long PE_destinataire=list_pe_send(i);
-      const long element_arrive=list_elem_to_send(i);
-      const long num_compo=list_num_compo_to_send(i);
+      const int PE_destinataire=list_pe_send(i);
+      const int element_arrive=list_elem_to_send(i);
+      const int num_compo=list_num_compo_to_send(i);
       assert(PE_destinataire!=Process::me());
       comm.send_buffer(PE_destinataire) << element_arrive << num_compo;
     }
@@ -725,14 +725,14 @@ long remove_duplicate(const IntTab& list, ArrOfInt& list_elem_unique, ArrOfInt& 
 
 
   const ArrOfInt& recv_pe_list = comm.get_recv_pe_list();
-  const long nb_recv_pe = recv_pe_list.size_array();
-  for (long i=0; i<nb_recv_pe; i++)
+  const int nb_recv_pe = recv_pe_list.size_array();
+  for (int i=0; i<nb_recv_pe; i++)
     {
-      const long pe_source = recv_pe_list[i];
+      const int pe_source = recv_pe_list[i];
       Entree& buffer = comm.recv_buffer(pe_source);
       while(1)
         {
-          long elem_recv=-1,num_compo_recv=-1;
+          int elem_recv=-1,num_compo_recv=-1;
           buffer >> elem_recv >> num_compo_recv;
           if (buffer.eof())
             break;
@@ -768,12 +768,12 @@ long remove_duplicate(const IntTab& list, ArrOfInt& list_elem_unique, ArrOfInt& 
   list_elem_unique.set_smart_resize(1);
   list_num_compo_unique.set_smart_resize(1);
 
-  long nb_elem_unique=0;
-  long elem,num_compo;
+  int nb_elem_unique=0;
+  int elem,num_compo;
 
 
   // On supprime les doublons
-  for (long ind_elem=0; ind_elem<nb_elems_reels+nb_elem_recv; ind_elem++)
+  for (int ind_elem=0; ind_elem<nb_elems_reels+nb_elem_recv; ind_elem++)
     {
       if (ind_elem<nb_elems_reels)
         {
@@ -786,8 +786,8 @@ long remove_duplicate(const IntTab& list, ArrOfInt& list_elem_unique, ArrOfInt& 
           num_compo = list_num_compo_recv(ind_elem-nb_elems_reels);
         }
       if (elem<0) continue;
-      long elem_exist=0;
-      for (long ind=0; ind<list_elem_unique.size_array(); ind++)
+      int elem_exist=0;
+      for (int ind=0; ind<list_elem_unique.size_array(); ind++)
         if (elem==list_elem_unique(ind)) elem_exist=1;
 
       if (!elem_exist )
@@ -824,7 +824,7 @@ void Convection_Diffusion_Temperature_FT_Disc::calculer_correction_flux_thermiqu
 
   const DoubleVect& rayon_compo=eq_transport.get_rayons_compo();
 
-  const long nb_compo_tot = eq_transport.get_vitesses_compo().dimension(0);
+  const int nb_compo_tot = eq_transport.get_vitesses_compo().dimension(0);
   DoubleVect correction_flux_thermique(nb_compo_tot);
 
   const DoubleVect& longueurs = Modele_Collision_FT::get_longueurs();
@@ -835,7 +835,7 @@ void Convection_Diffusion_Temperature_FT_Disc::calculer_correction_flux_thermiqu
 
   // bloc non parallele car tous les procs connaissent toutes les particules (positions, vitesses...) mais pas toutes les fa7
   // meme probleme avec la correction de la trainee et le calcul des forces de collision
-  for (long compo=0; compo<nb_compo_tot; compo++)
+  for (int compo=0; compo<nb_compo_tot; compo++)
     {
       const double N=(nb_noeuds(0)-1)/(longueurs(0)/(2.*rayon_compo(compo)));
       correction_flux_thermique(compo)=Phi_ref_Nb_40*(alpha/pow(N,beta));
@@ -846,7 +846,7 @@ void Convection_Diffusion_Temperature_FT_Disc::calculer_correction_flux_thermiqu
   ArrOfInt list_elem_unique(0);
   ArrOfInt list_num_compo_unique(0);
 
-  long nb_elem_unique=0;
+  int nb_elem_unique=0;
 
   Transport_Interfaces_FT_Disc& eq_interface = ref_eq_interface_.valeur();
   const Maillage_FT_Disc& maillage_interface = eq_interface.maillage_interface();
@@ -870,18 +870,18 @@ void Convection_Diffusion_Temperature_FT_Disc::calculer_correction_flux_thermiqu
   // On discretise ensuite sur le volume forme les elements P1 ou les elements diphasiques. Ces elements forment une coque autour de la particule
   DoubleVect volume_coque(nb_compo_tot);
   volume_coque=0;
-  for (long ind_elem=0; ind_elem<nb_elem_unique; ind_elem++)
+  for (int ind_elem=0; ind_elem<nb_elem_unique; ind_elem++)
     {
-      long elem=list_elem_unique(ind_elem);
-      long num_compo=list_num_compo_unique(ind_elem);
+      int elem=list_elem_unique(ind_elem);
+      int num_compo=list_num_compo_unique(ind_elem);
       valeurs_champ(elem)=volume_elem(elem)*correction_flux_thermique(num_compo);
       volume_coque(num_compo)+=volume_elem(elem);
     }
   mp_sum_for_each_item(volume_coque);
-  for (long ind_elem=0; ind_elem<nb_elem_unique; ind_elem++)
+  for (int ind_elem=0; ind_elem<nb_elem_unique; ind_elem++)
     {
-      long elem=list_elem_unique(ind_elem);
-      long num_compo=list_num_compo_unique(ind_elem);
+      int elem=list_elem_unique(ind_elem);
+      int num_compo=list_num_compo_unique(ind_elem);
       valeurs_champ(elem)/=volume_coque(num_compo);
     }
 
@@ -904,8 +904,8 @@ void Convection_Diffusion_Temperature_FT_Disc::calculer_mpoint(Champ_base& mpoin
   mpoint.valeurs() = grad_t_.valeur().valeurs();
 
   DoubleTab& val = mpoint.valeurs();
-  const long n = val.size();
-  for (long i = 0; i < n; i++)
+  const int n = val.size();
+  for (int i = 0; i < n; i++)
     if (val[i] < invalid_test)
       val[i] = 0;
 
@@ -923,7 +923,7 @@ void Convection_Diffusion_Temperature_FT_Disc::calculer_mpoint(Champ_base& mpoin
 
   // Pour deverminage : on impose une variation de mpoint lineaire en z
   //const Domaine_VF & domaine_vf = ref_cast(Domaine_VF, domaine_dis().valeur());
-  //for (long i = 0; i < n ; i++)
+  //for (int i = 0; i < n ; i++)
   //  mpoint.valeurs()[i] = 500./8957.*(1.+0.1*(domaine_vf.xp()(i,3)-0.0005)/0.001);
 
 #if TCL_MODEL
@@ -940,18 +940,18 @@ void Convection_Diffusion_Temperature_FT_Disc::calculer_mpoint(Champ_base& mpoin
 // We reduce the list to unique occurences of elements.
 static void collect_into_unique_occurence(ArrOfInt& mixed_elems, ArrOfDouble& lost_fluxes)
 {
-  const long nb_elem_with_duplicates = mixed_elems.size_array();
-  long nb_elem = 0;
+  const int nb_elem_with_duplicates = mixed_elems.size_array();
+  int nb_elem = 0;
   // Cerr << "Algo may be optimized? It is in NxN = " << nb_elem_with_duplicates << " x "
   //     << nb_elem_with_duplicates << " = " << nb_elem_with_duplicates*nb_elem_with_duplicates <<finl;
-  for (long i=0; i<nb_elem_with_duplicates; i++)
+  for (int i=0; i<nb_elem_with_duplicates; i++)
     {
-      const long elemi =  mixed_elems[i];
+      const int elemi =  mixed_elems[i];
       // Have we seen this element already?
-      long j=0;
+      int j=0;
       for(j=0; j<i; j++)
         {
-          const long elemj = mixed_elems[j];
+          const int elemj = mixed_elems[j];
           if (elemi == elemj)
             {
               // yes, then we hit the "continue" in the next if and the loop continues with the next element
@@ -965,7 +965,7 @@ static void collect_into_unique_occurence(ArrOfInt& mixed_elems, ArrOfDouble& lo
       lost_fluxes[nb_elem] = lost_fluxes[i]; // We store the first lost_flux for this elem
       for (j=i+1; j<nb_elem_with_duplicates; j++)
         {
-          const long elemj = mixed_elems[j];
+          const int elemj = mixed_elems[j];
           if (elemi == elemj)
             {
               lost_fluxes[nb_elem] += lost_fluxes[j]; // and pile-up others...
@@ -1000,14 +1000,14 @@ void Convection_Diffusion_Temperature_FT_Disc::correct_mpoint()
   const double rhocp = fluide_dipha_.valeur().fluide_phase(phase_).masse_volumique()(0,0)
                        * fluide_dipha_.valeur().fluide_phase(phase_).capacite_calorifique()(0,0);
 
-  const long nb_elem = mixed_elems_.size_array();
+  const int nb_elem = mixed_elems_.size_array();
   //assert(mixed_elems_diffu_.size_array()==nb_elem);
   //assert(mixed_elems_conv_.size_array()==nb_elem); // all lists should now have the same size. Or maybe not due to BC?
   //                                                    But still, mixed_elems_ should be the longest and the other should be included
   derivee_energy_.resize_array(nb_elem);
-  for(long i=0; i<nb_elem; i++)
+  for(int i=0; i<nb_elem; i++)
     {
-      const long elemi =  mixed_elems_[i];
+      const int elemi =  mixed_elems_[i];
       derivee_energy_[i] = (temperature[elemi] * indicatrice[elemi] - temperature_passe[elemi] * indicatrice_passe[elemi])* rhocp;
     }
 
@@ -1023,9 +1023,9 @@ void Convection_Diffusion_Temperature_FT_Disc::correct_mpoint()
     double mpai_tot = 0.;
     double mp_sum_before = 0.;
     double int_ai_before = 0.;
-    for (long nd=0 ; nd<nb_elem ; nd++)
+    for (int nd=0 ; nd<nb_elem ; nd++)
       {
-        const long elembe = mixed_elems_[nd];
+        const int elembe = mixed_elems_[nd];
         int_ai_before += ai[elembe];
         //  Cerr << " elembe= " << elembe << finl;
         //   total_flux_lost -= lost_fluxes_(nd)*rhocp; // multiplied by rhocp (vp)  // "-" because depends on convention (GB)
@@ -1050,17 +1050,17 @@ void Convection_Diffusion_Temperature_FT_Disc::correct_mpoint()
   }
 
   // Energy balance correction. Loop on mixed elems only :
-  const long option=-1; // To disable that
+  const int option=-1; // To disable that
   {
-    const long account_for_diff = correction_mpoint_diff_conv_energy_[0];
-    const long account_for_conv = correction_mpoint_diff_conv_energy_[1];
-    const long account_for_mixed_cell_energy = correction_mpoint_diff_conv_energy_[2];
+    const int account_for_diff = correction_mpoint_diff_conv_energy_[0];
+    const int account_for_conv = correction_mpoint_diff_conv_energy_[1];
+    const int account_for_mixed_cell_energy = correction_mpoint_diff_conv_energy_[2];
     double int_dmp_ai = 0.; // The integral over the interface of delta_mp
     double int_ai = 0.; // The interface area
     double int_mp_ai = 0.;
-    for(long i=0; i<nb_elem; i++)
+    for(int i=0; i<nb_elem; i++)
       {
-        const long elem = mixed_elems_[i];
+        const int elem = mixed_elems_[i];
         // The convention is that phi_lost is viewed from the liquid side point-of-view.
         // (negative for evap as it's leaving the pure liquid)
         // So when we consider mixed cells, the incoming flux is "-phi_lost"
@@ -1080,7 +1080,7 @@ void Convection_Diffusion_Temperature_FT_Disc::correct_mpoint()
         if (i>=mixed_elems_conv_.size_array() || mixed_elems_conv_[i] != elem)
           {
             phi_conv_lost_by_mixed_cell =0.;
-            long j=0;
+            int j=0;
             for (j=0; j<mixed_elems_conv_.size_array(); j++)
               {
                 if (mixed_elems_conv_[j] == elem)
@@ -1224,17 +1224,17 @@ void Convection_Diffusion_Temperature_FT_Disc::correct_mpoint()
         Cerr << "correction of mp at time "<< temps << " mean_mp= " << mean_mp << " relative= " << rel <<  "%." <<finl;
         /*  Bad correction:
          *
-         for(long i=0; i<nb_elem; i++)
+         for(int i=0; i<nb_elem; i++)
             {
-               const long elem = mixed_elems_[i];
+               const int elem = mixed_elems_[i];
                mp[elem] +=mean_dmp;
                Cerr << " newmp= " << mp[elem] << finl;
              }*/
         // New correction truely based on AI:
         // (to be in perfect agreement with the condition (on untouched variables) used later for the extrapolation:
-        /* for(long i=0; i<nb_elem; i++)
+        /* for(int i=0; i<nb_elem; i++)
           {
-            const long elem = mixed_elems_[i];
+            const int elem = mixed_elems_[i];
             if ((ai[elem]>DMINFLOAT) and (temps>DMINFLOAT))
                 mp[elem] +=mean_dmp;
           } */
@@ -1247,11 +1247,11 @@ void Convection_Diffusion_Temperature_FT_Disc::correct_mpoint()
     double total_derivee_energy = 0.;
     double mpai_tot = 0.;
 //   double mp_tot = 0.;
-    for (long nd=0 ; nd<nb_elem ; nd++)
+    for (int nd=0 ; nd<nb_elem ; nd++)
       {
         total_flux_lost -= lost_fluxes_(nd)*rhocp; // multiplied by rhocp (vp) // "-" because depends on convention (GB)
         total_derivee_energy += derivee_energy_(nd)*volume[nd];
-        const long elem = mixed_elems_[nd];
+        const int elem = mixed_elems_[nd];
         mpai_tot += mp[elem]*ai[elem]*Lvap; // multiplied by Lvap (vp)
         //  mp_tot += mp[elem];
       }
@@ -1275,8 +1275,8 @@ void Convection_Diffusion_Temperature_FT_Disc::correct_mpoint()
   if ((option==0) or (option==3) or (option==2))
     {
       double mmax = 0.;
-      const long n = ai.size_array();
-      for(long i=0; i<n; i++)
+      const int n = ai.size_array();
+      for(int i=0; i<n; i++)
         {
           if ((ai[i]>DMINFLOAT) && (fabs(mp[i])>mmax))
             {
@@ -1358,16 +1358,16 @@ void Convection_Diffusion_Temperature_FT_Disc::compute_divergence_free_velocity_
       const Domaine_VF& domaine_vf = ref_cast(Domaine_VF, domaine_dis().valeur());
       const IntTab& face_voisins = domaine_vf.face_voisins();
       const IntTab& elem_faces = domaine_vf.elem_faces();
-      const long nb_elem = secmem.size_array();
-      const long   nb_faces_elem = elem_faces.dimension(1);
+      const int nb_elem = secmem.size_array();
+      const int   nb_faces_elem = elem_faces.dimension(1);
       const Transport_Interfaces_FT_Disc& eq_transport = ref_eq_interface_.valeur();
       // Distance a l'interface discretisee aux elements:
       const DoubleTab& distance = eq_transport.get_update_distance_interface().valeurs();
-      //     const long nb_elem = secmem2.dimension(0);
-      for (long elem = 0; elem < nb_elem; elem++)
+      //     const int nb_elem = secmem2.dimension(0);
+      for (int elem = 0; elem < nb_elem; elem++)
         {
           const double dist = distance(elem);
-          long i_face = -1;
+          int i_face = -1;
           if (dist < -1e20)
             {
               // Distance invalide: on est loin de l'interface
@@ -1379,8 +1379,8 @@ void Convection_Diffusion_Temperature_FT_Disc::compute_divergence_free_velocity_
               // Y a-t-il un voisin pour lequel la distance est invalide
               for (i_face = 0; i_face < nb_faces_elem; i_face++)
                 {
-                  const long face = elem_faces(elem, i_face);
-                  const long voisin = face_voisins(face, 0) + face_voisins(face, 1) - elem;
+                  const int face = elem_faces(elem, i_face);
+                  const int voisin = face_voisins(face, 0) + face_voisins(face, 1) - elem;
                   if (voisin >= 0)
                     {
                       const double d = distance(voisin);
@@ -1424,9 +1424,9 @@ void Convection_Diffusion_Temperature_FT_Disc::compute_divergence_free_velocity_
 
   // Correction of vitesse : "+=" seems the good sign, though I don't understand why...
   {
-    long i, j;
+    int i, j;
     DoubleTab& vc = vitesse_convection_.valeurs();
-    const long n = vc.dimension(0);
+    const int n = vc.dimension(0);
     if (vc.nb_dim() == 1)
       {
         // VDF
@@ -1436,7 +1436,7 @@ void Convection_Diffusion_Temperature_FT_Disc::compute_divergence_free_velocity_
     else
       {
         //VEF
-        const long m = vc.dimension(1);
+        const int m = vc.dimension(1);
         for (i = 0; i < n; i++)
           for (j = 0; j < m; j++)
             vc(i,j) += gradP(i,j);
@@ -1496,7 +1496,7 @@ DoubleTab& Convection_Diffusion_Temperature_FT_Disc::derivee_en_temps_inco(Doubl
   const Maillage_FT_Disc& maillage_interface = eq_interface.maillage_interface();
   DoubleTab& terme_correction_flux_thermique =  terme_correction_flux_thermique_.valeur().valeurs();
   const Navier_Stokes_FT_Disc& ns_const = ref_cast(Navier_Stokes_FT_Disc, ref_eq_ns_.valeur());
-  const long flag_correction_thermique = flag_correction_flux_thermique_;
+  const int flag_correction_thermique = flag_correction_flux_thermique_;
   if (flag_correction_thermique) calculer_correction_flux_thermique(terme_correction_flux_thermique, ns_const, eq_interface, maillage_interface); // EB
 
   derivee = 0.;
@@ -1521,13 +1521,13 @@ DoubleTab& Convection_Diffusion_Temperature_FT_Disc::derivee_en_temps_inco(Doubl
     }
   //  statistiques().end_count(count2);
   if (flag_correction_thermique) derivee += terme_correction_flux_thermique; // EB on ajoute la correction a l'equation de l'energie
-  const long nb_diffu=mixed_elems_.size_array();
+  const int nb_diffu=mixed_elems_.size_array();
   // const double temps = schema_temps().temps_courant();
   lost_fluxes_diffu_.resize_array(nb_diffu);
   mixed_elems_diffu_.resize_array(nb_diffu);
   {
     double total_flux_lost = 0.;
-    for (long nd=0 ; nd<nb_diffu ; nd++)
+    for (int nd=0 ; nd<nb_diffu ; nd++)
       {
         total_flux_lost += lost_fluxes_(nd);
         lost_fluxes_diffu_(nd) = lost_fluxes_(nd);
@@ -1549,13 +1549,13 @@ DoubleTab& Convection_Diffusion_Temperature_FT_Disc::derivee_en_temps_inco(Doubl
     derivee_tmp *= rhoCp;
     derivee += derivee_tmp;
 #if TCL_MODEL
-    const long nb_conv=mixed_elems_.size_array()-nb_diffu;
+    const int nb_conv=mixed_elems_.size_array()-nb_diffu;
     lost_fluxes_conv_.resize_array(nb_conv);
     mixed_elems_conv_.resize_array(nb_conv);
     double total_flux_conv_lost = 0.;
-    for (long nd=0 ; nd<nb_conv ; nd++)
+    for (int nd=0 ; nd<nb_conv ; nd++)
       {
-        const long elem = mixed_elems_(nb_diffu+nd);
+        const int elem = mixed_elems_(nb_diffu+nd);
         const double flux = lost_fluxes_(nb_diffu+nd)*rhoCp[elem];
         total_flux_conv_lost += flux;
         lost_fluxes_conv_(nd) = flux;
@@ -1588,9 +1588,9 @@ DoubleTab& Convection_Diffusion_Temperature_FT_Disc::derivee_en_temps_inco(Doubl
   collect_into_unique_occurence(mixed_elems_conv_, lost_fluxes_conv_);
 
   {
-    const long nb=mixed_elems_.size_array();
+    const int nb=mixed_elems_.size_array();
     double total_flux_lost = 0.;
-    for (long nd=0 ; nd<nb ; nd++)
+    for (int nd=0 ; nd<nb ; nd++)
       total_flux_lost += lost_fluxes_(nd);
 
     total_flux_lost = mp_sum(total_flux_lost);
@@ -1606,12 +1606,12 @@ DoubleTab& Convection_Diffusion_Temperature_FT_Disc::derivee_en_temps_inco(Doubl
     DoubleTab& mp = mpoint_.valeur().valeurs();
     const DoubleTab& ai = ns.get_interfacial_area();
     const double temps = schema_temps().temps_courant();
-    const long nb_elemi = mixed_elems_.size_array();
+    const int nb_elemi = mixed_elems_.size_array();
     double mp_sum_before_corr = 0.;
     double int_ai_before = 0.;
-    for (long nd=0 ; nd<nb_elemi ; nd++)
+    for (int nd=0 ; nd<nb_elemi ; nd++)
       {
-        const long elembi = mixed_elems_[nd];
+        const int elembi = mixed_elems_[nd];
         int_ai_before += ai[elembi];
         //     total_flux_lost -= lost_fluxes_(nd)*rhocp; // multiplied by rhocp (vp)  // "-" because depends on convention (GB)
         //     total_derivee_energy += derivee_energy_(nd)*volume[nd];
@@ -1686,14 +1686,14 @@ void Convection_Diffusion_Temperature_FT_Disc::mettre_a_jour (double temps)
       const DoubleTab& indicatrice = eq_interface_.get_update_indicatrice().valeurs();
       DoubleTab& temperature = inconnue().valeur().valeurs();
       const DoubleVect& volume = ref_cast(Domaine_VF, domaine_dis().valeur()).volumes();
-      const long nb_elem = domaine_vf.domaine().nb_elem();
+      const int nb_elem = domaine_vf.domaine().nb_elem();
 
       // Calcul de la moyenne sous domaine, et du facteur : fac = temp_moy_ini/temp_moy_ss_domaine
       double temp_moy_ss_domaine = 0.;
       double vol_liq = 0.;
-      for(long i=0; i<ss_domaine.nb_elem_tot() /*methode d'acces au nombre d'elements*/; i++)
+      for(int i=0; i<ss_domaine.nb_elem_tot() /*methode d'acces au nombre d'elements*/; i++)
         {
-          long index = ss_domaine[i];
+          int index = ss_domaine[i];
           // assert(index < domaine_vf.domaine().nb_elem());
           if (index < nb_elem)
             {
@@ -1727,7 +1727,7 @@ void Convection_Diffusion_Temperature_FT_Disc::discretiser()
   const double temps = schema_temps().temps_courant();
   const Domaine_dis_base& un_domaine_dis = domaine_dis().valeur();
   LIST(REF(Champ_base)) & champs_compris = liste_champs_compris_;
-  const long nb_valeurs_temps = schema_temps().nb_valeurs_temporelles();
+  const int nb_valeurs_temps = schema_temps().nb_valeurs_temporelles();
 
   Nom nom;
 
@@ -1797,7 +1797,7 @@ void Convection_Diffusion_Temperature_FT_Disc::discretiser()
   for (; curseur; ++curseur)
     {
       const Joint& joint = curseur.valeur();
-      const long pe_voisin = joint.PEvoisin();
+      const int pe_voisin = joint.PEvoisin();
       pe_list.append_array(pe_voisin);
     }
   */
@@ -1819,7 +1819,7 @@ void Convection_Diffusion_Temperature_FT_Disc::completer()
 {
   Convection_Diffusion_Temperature::completer();
   const Transport_Interfaces_FT_Disc& ft = ref_eq_interface_.valeur();
-  const long ndist = ft.get_n_iterations_distance();
+  const int ndist = ft.get_n_iterations_distance();
   if (stencil_width_ <= ndist)
     {
       Cerr << "The value of the stencil to compute mpoint should at least be strictly larger than "
@@ -1845,10 +1845,10 @@ void Convection_Diffusion_Temperature_FT_Disc::completer()
       SChaine instructions;
       instructions << "{" << finl;
       const Domaine& ladomaine=ns.domaine_dis()->domaine();
-      long nfront = ladomaine.nb_front_Cl();
+      int nfront = ladomaine.nb_front_Cl();
       // The idea is to open the pressure on boundaries in contact with the other phase ie "(1-phase_)"
-      // The goal is to let some fictitious pressure out (to accomodate for an (\long div(u_conv) dv !=0)
-      for (long ifront=0; ifront<nfront; ifront++)
+      // The goal is to let some fictitious pressure out (to accomodate for an (\int div(u_conv) dv !=0)
+      for (int ifront=0; ifront<nfront; ifront++)
         {
           const Nom& nom_front = ladomaine.frontiere(ifront).le_nom();
           if (name_bc_opening_pressure_.contient_(nom_front))
@@ -1932,25 +1932,25 @@ void Convection_Diffusion_Temperature_FT_Disc::associer_milieu_base(const Milieu
  */
 void Convection_Diffusion_Temperature_FT_Disc::suppression_interfaces(const IntVect& num_compo,
                                                                       const ArrOfInt& flags_compo_a_supprimer,
-                                                                      long nouvelle_phase)
+                                                                      int nouvelle_phase)
 {
   // Si la nouvelle phase n'est pas la phase resolue, ne rien faire
   if (nouvelle_phase != phase_)
     return;
 
-  const long n = domaine_dis().domaine().nb_elem();
+  const int n = domaine_dis().domaine().nb_elem();
   assert(num_compo.size() == n);
-  const long nb_valeurs_temporelles = inconnue().nb_valeurs_temporelles();
+  const int nb_valeurs_temporelles = inconnue().nb_valeurs_temporelles();
   // Il faut traiter toutes les cases temporelles:
   //  selon l'ordre des equations dans le probleme, la roue a deja ete tournee ou pas...
   // Note B.M. est ce que c'est compatible avec la spec de ICOCO ? (modif
   //  du temps n autorisee ???)
-  for (long t = 0; t < nb_valeurs_temporelles; t++)
+  for (int t = 0; t < nb_valeurs_temporelles; t++)
     {
       DoubleTab& temp = inconnue().futur(t);
-      for (long i = 0; i < n; i++)
+      for (int i = 0; i < n; i++)
         {
-          const long c = num_compo[i];
+          const int c = num_compo[i];
           if (c >= 0 && flags_compo_a_supprimer[c])
             temp[i] = TSAT_CONSTANTE;
         }
@@ -1958,13 +1958,13 @@ void Convection_Diffusion_Temperature_FT_Disc::suppression_interfaces(const IntV
     }
 }
 
-long Convection_Diffusion_Temperature_FT_Disc::preparer_calcul()
+int Convection_Diffusion_Temperature_FT_Disc::preparer_calcul()
 {
   return Equation_base::preparer_calcul();
 }
 
 // A few methods for TCL only:
-double Convection_Diffusion_Temperature_FT_Disc::get_flux_to_face(const long num_face) const
+double Convection_Diffusion_Temperature_FT_Disc::get_flux_to_face(const int num_face) const
 {
   double interfacial_flux = 0.;
   const Domaine_Cl_dis_base& zcldis = domaine_Cl_dis().valeur();
@@ -1977,7 +1977,7 @@ double Convection_Diffusion_Temperature_FT_Disc::get_flux_to_face(const long num
   const Cond_lim& la_cl = zclvdf.la_cl_de_la_face(num_face);
   const Front_VF& le_bord = ref_cast(Front_VF,la_cl.frontiere_dis());
   const Nom& bc_name = la_cl.frontiere_dis().le_nom();
-  const long ndeb = le_bord.num_premiere_face();
+  const int ndeb = le_bord.num_premiere_face();
 //  Cerr <<  " BC: " << la_cl.valeur() << " name: " << bc_name << finl;
 //  Cerr << "Dealing with face " << num_face <<  " belonging to BC " << la_cl.valeur();
   if ( sub_type(Neumann_paroi_adiabatique,la_cl.valeur()) )
@@ -2027,7 +2027,7 @@ double Convection_Diffusion_Temperature_FT_Disc::get_flux_to_face(const long num
   return interfacial_flux;
 }
 
-double Convection_Diffusion_Temperature_FT_Disc::get_Twall_at_face(const long num_face) const
+double Convection_Diffusion_Temperature_FT_Disc::get_Twall_at_face(const int num_face) const
 {
   double flux=0., Twall=0.;
   get_flux_and_Twall(num_face,
@@ -2035,23 +2035,23 @@ double Convection_Diffusion_Temperature_FT_Disc::get_Twall_at_face(const long nu
   return Twall;
 }
 
-double Convection_Diffusion_Temperature_FT_Disc::get_Twall_at_elem(const long elem) const
+double Convection_Diffusion_Temperature_FT_Disc::get_Twall_at_elem(const int elem) const
 {
   //ArrOfInt num_faces;
   // num_faces.set_smart_resize(1);
   const Domaine_VF& domaine_vf = ref_cast(Domaine_VF, domaine_dis().valeur());
   const IntTab& elem_faces = domaine_vf.elem_faces();
   const IntTab& faces_elem = domaine_vf.face_voisins();
-  const long nb_faces_voisins = elem_faces.dimension(1);
+  const int nb_faces_voisins = elem_faces.dimension(1);
   // Struggle to get the boundary face
-  long num_face=-1;
-  long i;
+  int num_face=-1;
+  int i;
   for (i=0; i<nb_faces_voisins; i++)
     {
       num_face = elem_faces(elem,i);
       // If it's a boundary face, one of the neighbours doesnot exist so it has "-1".
       // We detect a boundary that way:
-      const long elemb = faces_elem(num_face, 0) + faces_elem(num_face, 1) +1;
+      const int elemb = faces_elem(num_face, 0) + faces_elem(num_face, 1) +1;
       if (elem == elemb)
         {
           //num_faces[idx] = num_face;
@@ -2069,7 +2069,7 @@ double Convection_Diffusion_Temperature_FT_Disc::get_Twall_at_elem(const long el
   return Twall;
 }
 
-void Convection_Diffusion_Temperature_FT_Disc::get_flux_and_Twall(const long num_face,
+void Convection_Diffusion_Temperature_FT_Disc::get_flux_and_Twall(const int num_face,
                                                                   double& flux, double& Twall) const
 {
   flux = 0.;
@@ -2083,7 +2083,7 @@ void Convection_Diffusion_Temperature_FT_Disc::get_flux_and_Twall(const long num
   const Cond_lim& la_cl = zclvdf.la_cl_de_la_face(num_face);
   const Front_VF& le_bord = ref_cast(Front_VF,la_cl.frontiere_dis());
   const Nom& bc_name = la_cl.frontiere_dis().le_nom();
-  const long ndeb = le_bord.num_premiere_face();
+  const int ndeb = le_bord.num_premiere_face();
 // Cerr <<  " BC: " << la_cl.valeur() << " name: " << bc_name << finl;
 // Cerr << "Dealing with face " << num_face <<  " belonging to BC " << la_cl.valeur();
   if ( sub_type(Neumann_paroi_adiabatique,la_cl.valeur()) )
@@ -2161,12 +2161,12 @@ void Convection_Diffusion_Temperature_FT_Disc::get_flux_and_Twall(const long num
 }
 
 
-double Convection_Diffusion_Temperature_FT_Disc::get_Twall(const long num_face) const
+double Convection_Diffusion_Temperature_FT_Disc::get_Twall(const int num_face) const
 {
   const Domaine_VF& domaine_vf = ref_cast(Domaine_VF, domaine_dis().valeur());
   const IntTab& faces_elem = domaine_vf.face_voisins();
   // On of the neighbours doesnot exist so it has "-1". We get the other elem by:
-  const long elem = faces_elem(num_face, 0) + faces_elem(num_face, 1) +1;
+  const int elem = faces_elem(num_face, 0) + faces_elem(num_face, 1) +1;
   const DoubleTab& temperature = inconnue().valeur().valeurs();
 
   double P[3] = {0.,0.,0.}, xyz_face[3] = {0.,0.,0.};
@@ -2181,7 +2181,7 @@ double Convection_Diffusion_Temperature_FT_Disc::get_Twall(const long num_face) 
     }
 
   double d=0;
-  for (long i=0; i<3; i++)
+  for (int i=0; i<3; i++)
     d += (xyz_face[i] - P[i])*(xyz_face[i] - P[i]);
   d= sqrt(d);
   const double flux = get_flux_to_face(num_face);
@@ -2219,18 +2219,18 @@ void Convection_Diffusion_Temperature_FT_Disc::calcul_flux_interface()
 
   // grandeurs interface
   const Maillage_FT_Disc& maillage = eq_transport.maillage_interface_pour_post();
-  const long nb_fa7 = maillage.nb_facettes();
-  long nb_fa7_reelle=0;
-  for (long i=0; i<nb_fa7; i++)
+  const int nb_fa7 = maillage.nb_facettes();
+  int nb_fa7_reelle=0;
+  for (int i=0; i<nb_fa7; i++)
     if (!maillage.facette_virtuelle(i)) nb_fa7_reelle++;
 
   IntVect compo_connexes_fa7(nb_fa7); // Init a zero
-  long n = search_connex_components_local_FT(maillage, compo_connexes_fa7);
-  long nb_compo_tot=compute_global_connex_components_FT(maillage, compo_connexes_fa7, n);
+  int n = search_connex_components_local_FT(maillage, compo_connexes_fa7);
+  int nb_compo_tot=compute_global_connex_components_FT(maillage, compo_connexes_fa7, n);
 
 
   // init tableau flux conductif tot
-  static long iter=0;
+  static int iter=0;
   DoubleVect& flux_tot_conductif=flux_conductif_tot_interf_;
   DoubleTab& flux_cond_interf=flux_conductif_interf_;
   if (iter==0)
@@ -2273,31 +2273,31 @@ void Convection_Diffusion_Temperature_FT_Disc::calcul_flux_interface()
 
 
       // calcul des coordonnees d'interpolation
-      for (long fa7 =0 ; fa7<nb_fa7 ; fa7++)
+      for (int fa7 =0 ; fa7<nb_fa7 ; fa7++)
         {
           if (!maillage.facette_virtuelle(fa7))
             {
               DoubleVect normale_fa7(dimension);
-              long elem_diph=domaine.chercher_elements(les_cg_fa7(fa7,0), les_cg_fa7(fa7,1),les_cg_fa7(fa7,2));
+              int elem_diph=domaine.chercher_elements(les_cg_fa7(fa7,0), les_cg_fa7(fa7,1),les_cg_fa7(fa7,2));
               DoubleVect delta_i(dimension);
               // On calcule les epaisseurs des mailles euleriennes  dans lesquelles se trouvent les facettes
               // Si on y a acces, on prend l'epaisseur a l'exterieur de la particule
               // Sinon, on prend l'epaisseur dans la particule
               // Cela revient simplement a choisir la maille juxtaposee a la maille diphasique
-              for (long dim=0; dim<dimension; dim++)
+              for (int dim=0; dim<dimension; dim++)
                 {
-                  long elem_haut=domaine_vdf.face_voisins_pour_interp(domaine_vdf.elem_faces_pour_interp(elem_diph, dim+dimension),1);
-                  long elem_bas=domaine_vdf.face_voisins_pour_interp(domaine_vdf.elem_faces_pour_interp(elem_diph, dim),0);
+                  int elem_haut=domaine_vdf.face_voisins_pour_interp(domaine_vdf.elem_faces_pour_interp(elem_diph, dim+dimension),1);
+                  int elem_bas=domaine_vdf.face_voisins_pour_interp(domaine_vdf.elem_faces_pour_interp(elem_diph, dim),0);
                   if (les_normales_fa7(fa7,dim)>0) delta_i(dim) =  (elem_haut>=0) ? fabs(domaine_vdf.dist_elem(elem_diph,elem_haut, dim)) : fabs(domaine_vdf.dist_elem(elem_diph,elem_bas, dim));
                   else delta_i(dim) =  (elem_bas>=0) ? fabs(domaine_vdf.dist_elem(elem_diph,elem_bas, dim)) : fabs(domaine_vdf.dist_elem(elem_diph,elem_haut, dim));
                 }
 
               double epsilon=0;
-              for (long dim=0; dim<dimension; dim++)
+              for (int dim=0; dim<dimension; dim++)
                 {
                   epsilon+= fabs(delta_i(dim)*fabs(les_normales_fa7(fa7,dim))); // la distance d'interpolation varie en fonction du raffinement du maillage
                 }
-              for (long dim=0; dim<dimension; dim++)
+              for (int dim=0; dim<dimension; dim++)
                 {
                   //Cerr <<"marqueur x" << finl;
                   normale_fa7(dim)=les_normales_fa7(fa7,dim);
@@ -2313,14 +2313,14 @@ void Convection_Diffusion_Temperature_FT_Disc::calcul_flux_interface()
       DoubleTab temp_P1(nb_fa7);
       DoubleTab temp_P2(nb_fa7);
 
-      long interp_T_P1_ok=eq_ns.trilinear_interpolation_elem(indicatrice,temperature, coord_voisin_fluide_fa7_T_1,temp_P1);
-      long interp_T_P2_ok=eq_ns.trilinear_interpolation_elem(indicatrice, temperature, coord_voisin_fluide_fa7_T_2,temp_P2);
+      int interp_T_P1_ok=eq_ns.trilinear_interpolation_elem(indicatrice,temperature, coord_voisin_fluide_fa7_T_1,temp_P1);
+      int interp_T_P2_ok=eq_ns.trilinear_interpolation_elem(indicatrice, temperature, coord_voisin_fluide_fa7_T_2,temp_P2);
 
       if (interp_T_P1_ok &&  interp_T_P2_ok)
         {
-          for (long fa7=0; fa7<nb_fa7; fa7++)
+          for (int fa7=0; fa7<nb_fa7; fa7++)
             {
-              long compo=compo_connexes_fa7(fa7);
+              int compo=compo_connexes_fa7(fa7);
               if (!maillage.facette_virtuelle(fa7))
                 {
                   if (temp_P2(fa7)>-1e10)
@@ -2330,14 +2330,14 @@ void Convection_Diffusion_Temperature_FT_Disc::calcul_flux_interface()
                     }
 
                   // On recalcule delta --> epsilon
-                  long elem_diph=domaine.chercher_elements(les_cg_fa7(fa7,0), les_cg_fa7(fa7,1),les_cg_fa7(fa7,2));
+                  int elem_diph=domaine.chercher_elements(les_cg_fa7(fa7,0), les_cg_fa7(fa7,1),les_cg_fa7(fa7,2));
                   DoubleVect delta_i(dimension);
                   delta_i(0) = fabs(domaine_vdf.dist_elem(elem_diph, domaine_vdf.face_voisins(domaine_vdf.elem_faces(elem_diph, 0+dimension),1), 0));
                   delta_i(1) = fabs(domaine_vdf.dist_elem(elem_diph, domaine_vdf.face_voisins(domaine_vdf.elem_faces(elem_diph, 1+dimension),1), 1));
                   if (les_normales_fa7(fa7,2)>0) delta_i(2) = fabs(domaine_vdf.dist_elem(elem_diph, domaine_vdf.face_voisins(domaine_vdf.elem_faces(elem_diph, 2+dimension),1), 2));
                   else delta_i(2) = fabs(domaine_vdf.dist_elem(elem_diph, domaine_vdf.face_voisins(domaine_vdf.elem_faces(elem_diph, 2),0), 2));
                   double epsilon=0;
-                  for (long dim=0; dim<dimension; dim++) epsilon+= fabs(delta_i(dim)*fabs(les_normales_fa7(fa7,dim))); // la distance d'interpolation varie en fonction du raffinement du maillage
+                  for (int dim=0; dim<dimension; dim++) epsilon+= fabs(delta_i(dim)*fabs(les_normales_fa7(fa7,dim))); // la distance d'interpolation varie en fonction du raffinement du maillage
                   flux_cond_interf(fa7)=lambda_f*(-temp_P2(fa7)+4.*temp_P1(fa7)-3.*TSAT_CONSTANTE)/(2.*epsilon)*les_surfaces_fa7(fa7); // schema decentre avant d'ordre 2
                   flux_tot_conductif(compo)+=flux_cond_interf(fa7);
                 }
@@ -2345,7 +2345,7 @@ void Convection_Diffusion_Temperature_FT_Disc::calcul_flux_interface()
         }
       else
         {
-          for (long compo=0; compo<nb_compo_tot; compo++) flux_tot_conductif(compo)+=0;
+          for (int compo=0; compo<nb_compo_tot; compo++) flux_tot_conductif(compo)+=0;
         }
     }
 
@@ -2353,7 +2353,7 @@ void Convection_Diffusion_Temperature_FT_Disc::calcul_flux_interface()
   mp_sum_for_each_item(Nb_fa7_ok_prop);
   mp_sum_for_each_item(T_P2_moy);
 
-  for (long compo=0; compo<nb_compo_tot; compo++)
+  for (int compo=0; compo<nb_compo_tot; compo++)
     {
       T_P2_moy(compo)/=Nb_fa7_ok_prop(compo);
     }
@@ -2378,7 +2378,7 @@ void Convection_Diffusion_Temperature_FT_Disc::init_champ_flux_conductif_interf(
   REF(Transport_Interfaces_FT_Disc) &refeq_transport = ref_eq_interface_;
   const Transport_Interfaces_FT_Disc& eq_transport = refeq_transport.valeur();
   const Maillage_FT_Disc& maillage = eq_transport.maillage_interface();
-  const long nb_fa7 = maillage.nb_facettes();
+  const int nb_fa7 = maillage.nb_facettes();
   if (eq_transport.postraitement_forces_interf().calcul_flux_)
     {
       flux_conductif_interf_.resize(nb_fa7);
@@ -2387,7 +2387,7 @@ void Convection_Diffusion_Temperature_FT_Disc::init_champ_flux_conductif_interf(
 
 }
 // EB
-void ouvrir_fichier(SFichier& os,const Nom& type, const long& flag, const Convection_Diffusion_Temperature_FT_Disc& equation)
+void ouvrir_fichier(SFichier& os,const Nom& type, const int& flag, const Convection_Diffusion_Temperature_FT_Disc& equation)
 {
   // flag nul on n'ouvre pas le fichier
   if (flag==0)
@@ -2401,7 +2401,7 @@ void ouvrir_fichier(SFichier& os,const Nom& type, const long& flag, const Convec
   fichier+=equation.le_nom();
   fichier+=".out";
   const Schema_Temps_base& sch=equation.probleme().schema_temps();
-  const long& precision=sch.precision_impr();
+  const int& precision=sch.precision_impr();
   // On cree le fichier a la premiere impression avec l'en tete ou si le fichier n'existe pas
 
   struct stat f;
@@ -2448,13 +2448,13 @@ void ouvrir_fichier(SFichier& os,const Nom& type, const long& flag, const Convec
 /*: @brief imprime le flux thermique recu par chaque particule.
  * Si il y a plus de 5 particules dans le domaine, imprime egalement la temperature en P2.
  */
-long Convection_Diffusion_Temperature_FT_Disc::impr_fpi(Sortie& os) const
+int Convection_Diffusion_Temperature_FT_Disc::impr_fpi(Sortie& os) const
 {
   const REF(Transport_Interfaces_FT_Disc) & refeq_transport = ref_eq_interface_;
   const Transport_Interfaces_FT_Disc& eq_transport = refeq_transport.valeur();
   if (eq_transport.is_solid_particle())
     {
-      const long nb_compo = eq_transport.get_vitesses_compo().dimension(0);
+      const int nb_compo = eq_transport.get_vitesses_compo().dimension(0);
       const Postraitement_Forces_Interfaces_FT& les_post_interf=eq_transport.postraitement_forces_interf();
       if (les_post_interf.postraiter_flux())
         {
@@ -2462,7 +2462,7 @@ long Convection_Diffusion_Temperature_FT_Disc::impr_fpi(Sortie& os) const
             {
               const DoubleVect& flux_cond_tot=get_flux_conductif_tot_interf();
 
-              long dim_max_impr=5; // on imprime pas les valeurs si il y a plus de 5 particules dans le domaine
+              int dim_max_impr=5; // on imprime pas les valeurs si il y a plus de 5 particules dans le domaine
 
 
               Cerr << "Convection_Diffusion_Temperature_FT_Disc::impr_fpi nb_compo " << nb_compo << finl;
@@ -2472,7 +2472,7 @@ long Convection_Diffusion_Temperature_FT_Disc::impr_fpi(Sortie& os) const
                   SFichier Flux_cond_tot_interf;
                   ouvrir_fichier(Flux_cond_tot_interf,"_Flux_conductif_tot_sur_",1,*this);
                   schema_temps().imprimer_temps_courant(Flux_cond_tot_interf);
-                  for (long compo=0; compo<nb_compo; compo++)
+                  for (int compo=0; compo<nb_compo; compo++)
                     {
                       Flux_cond_tot_interf << espace;
                       Flux_cond_tot_interf << espace << flux_cond_tot(compo);
@@ -2487,7 +2487,7 @@ long Convection_Diffusion_Temperature_FT_Disc::impr_fpi(Sortie& os) const
                   schema_temps().imprimer_temps_courant(Flux_cond_tot_interf);
                   const DoubleVect& T_P2_moy=get_T_P2_moy();
 
-                  for (long compo=0; compo<nb_compo; compo++)
+                  for (int compo=0; compo<nb_compo; compo++)
                     {
                       Flux_cond_tot_interf << espace;
                       Flux_cond_tot_interf << espace << flux_cond_tot(compo) << espace << T_P2_moy(compo);
@@ -2506,7 +2506,7 @@ long Convection_Diffusion_Temperature_FT_Disc::impr_fpi(Sortie& os) const
  *  1 : ELEM_DIPH
  *  2 : P1_ALL
  */
-long Convection_Diffusion_Temperature_FT_Disc::get_discretization_correction()
+int Convection_Diffusion_Temperature_FT_Disc::get_discretization_correction()
 {
   switch(discretization_correction_)
     {

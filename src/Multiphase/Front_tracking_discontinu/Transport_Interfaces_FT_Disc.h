@@ -67,12 +67,12 @@ public:
   Transport_Interfaces_FT_Disc();
   //
   void set_param(Param& titi) override;
-  long lire_motcle_non_standard(const Motcle&, Entree&) override;
+  int lire_motcle_non_standard(const Motcle&, Entree&) override;
   // Methodes virtuelles pures de Equation_base
   //
-  long            nombre_d_operateurs(void) const override; // Zero, y'en a pas.
-  const Operateur& operateur(long i) const override;    // Erreur
-  Operateur&        operateur(long i) override;         // Erreur
+  int            nombre_d_operateurs(void) const override; // Zero, y'en a pas.
+  const Operateur& operateur(int i) const override;    // Erreur
+  Operateur&        operateur(int i) override;         // Erreur
   const Champ_Inc& inconnue(void) const override;         // C'est l'indicatrice
   Champ_Inc&        inconnue(void) override;
   Champ_Inc&        inconnue_face(void); // EB
@@ -88,23 +88,23 @@ public:
   void    associer_pb_base(const Probleme_base& probleme) override;
   void    discretiser(void) override;
   Entree& lire_cond_init(Entree& is) override;
-  long  verif_Cl() const override;
+  int  verif_Cl() const override;
   double  calculer_pas_de_temps(void) const override;
   DoubleTab& derivee_en_temps_inco(DoubleTab& derivee) override;
   void assembler( Matrice_Morse& mat_morse, const DoubleTab& present, DoubleTab& secmem) override ;
 
   void    mettre_a_jour(double temps) override;
-  long  sauvegarder(Sortie& ) const override;
-  long  reprendre(Entree&) override;
-  long impr(Sortie& os) const override;
-  virtual long impr_fpi(Sortie& os) const override; // EB
+  int  sauvegarder(Sortie& ) const override;
+  int  reprendre(Entree&) override;
+  int impr(Sortie& os) const override;
+  virtual int impr_fpi(Sortie& os) const override; // EB
   void update_critere_statio();
 
   //
   // Nouvelles methodes
   //
   virtual void                            lire_maillage_ft_cao(Entree& is);
-  long                          preparer_calcul() override;
+  int                          preparer_calcul() override;
   virtual void                            preparer_pas_de_temps();
   const Maillage_FT_Disc&                 maillage_interface() const;
   const Champ_base&               get_update_indicatrice() override;
@@ -145,7 +145,7 @@ public:
   virtual void calculer_vitesse_transport_interpolee(const Champ_base& champ_vitesse,
                                                      const Maillage_FT_Disc& m,
                                                      DoubleTab& vitesse_noeuds,
-                                                     long nv_calc) const
+                                                     int nv_calc) const
   {
     calculer_vitesse_transport_interpolee(champ_vitesse, m, vitesse_noeuds, nv_calc, 1);
   };
@@ -153,21 +153,21 @@ public:
   virtual void calculer_vitesse_transport_interpolee(const Champ_base& champ_vitesse,
                                                      const Maillage_FT_Disc&,
                                                      DoubleTab& vitesse_noeuds,
-                                                     long nv_calc,
-                                                     long standard) const;
+                                                     int nv_calc,
+                                                     int standard) const;
   void calculer_scalaire_interpole(const Champ_base& ch_scal,
                                    const Maillage_FT_Disc&,
                                    DoubleTab& ch_scal_noeuds,
-                                   long nv_calc) const;
+                                   int nv_calc) const;
 
   virtual void remailler_interface();
 
   //methodes utilisees pour le post-traitement
-  virtual long get_champ_post_FT(const Motcle& champ, Postraitement_base::Localisation loc, DoubleTab *dtab = 0) const;
-  virtual long get_champ_post_FT(const Motcle& champ, Postraitement_base::Localisation loc, IntTab    *itab = 0) const;
+  virtual int get_champ_post_FT(const Motcle& champ, Postraitement_base::Localisation loc, DoubleTab *dtab = 0) const;
+  virtual int get_champ_post_FT(const Motcle& champ, Postraitement_base::Localisation loc, IntTab    *itab = 0) const;
   virtual const Maillage_FT_Disc& maillage_interface_pour_post() const;
-  virtual const long& get_n_iterations_distance() const;
-  long get_mesh_tag() const override
+  virtual const int& get_n_iterations_distance() const;
+  int get_mesh_tag() const override
   {
     return maillage_interface_pour_post().get_mesh_tag();
   };
@@ -179,7 +179,7 @@ public:
   void modifier_vpoint_pour_imposer_vit(const DoubleTab& inco_val,DoubleTab& vpoint0,
                                         DoubleTab& vpoint,const DoubleTab& rho_faces,
                                         DoubleTab& terme_source,const double temps, const double dt,
-                                        const long is_explicite,const double eta) override;
+                                        const int is_explicite,const double eta) override;
 
   //Methode outil utilisee par modifier_vpoint_pour_imposer_vit(...)
   void calcul_source(const DoubleTab& inco_val,
@@ -188,16 +188,16 @@ public:
                      DoubleTab& source_val,
                      const DoubleTab& vit_imposee,
                      const DoubleTab& indicatrice_faces,
-                     const long is_QC,
+                     const int is_QC,
                      const double dt,
-                     const long is_explicite,
+                     const int is_explicite,
                      const double eta);
   void modifie_source(DoubleTab& so_modif,const DoubleTab& so_val,const DoubleTab& rho_faces,
-                      const long n,const long m, const long is_QC,
+                      const int n,const int m, const int is_QC,
                       const DoubleVect& vol_entrelaces,const Solveur_Masse& solv_masse);
 
   void calcul_effort_fluide_interface(const DoubleTab& vpoint,const DoubleTab& rho_faces,
-                                      DoubleTab& source_val,const long is_explicite,const double eta);
+                                      DoubleTab& source_val,const int is_explicite,const double eta);
 
   void impr_effort_fluide_interface( DoubleTab& source_val, DoubleTab& pressure_part, DoubleTab& friction_part ) ;
 
@@ -211,23 +211,23 @@ public:
   void integrer_ensemble_lagrange(const double temps) override;
 
   virtual void interpoler_vitesse_face(const DoubleTab& distance_interface,
-                                       const long phase, const long stencil_width,
+                                       const int phase, const int stencil_width,
                                        DoubleTab& champ, DoubleTab& gradient,
                                        const double t, const double dt ) ;
 
   void interpoler_simple_vitesse_face(const DoubleTab& distance_interface,
-                                      const long phase, const long stencil_width,
+                                      const int phase, const int stencil_width,
                                       DoubleTab& champ, DoubleTab& gradient,
                                       const double t, const double dt ) ;
 
   virtual void calcul_nb_traverse(  const DoubleTab& xe, const double dx,
-                                    const long dim, const long ori,
-                                    Maillage_FT_Disc& maillage, long elem,
-                                    long& traverse ) ;
+                                    const int dim, const int ori,
+                                    Maillage_FT_Disc& maillage, int elem,
+                                    int& traverse ) ;
   virtual void calcul_OutElemFa7( Maillage_FT_Disc& maillage,
                                   const DoubleTab& indicatrice,
-                                  const long nb_elem,
-                                  long& nb_fa7_accepted,
+                                  const int nb_elem,
+                                  int& nb_fa7_accepted,
                                   IntList& OutElem, IntList& OutFa7 ) ;
   virtual void PPP_face_interface( Maillage_FT_Disc& maillage, const DoubleTab& indicatrice,
                                    const DoubleTab& indicatrice_face, DoubleTab& Vertex ) ;
@@ -237,51 +237,51 @@ public:
   virtual void PPP_face_voisin( const DoubleTab& indicatrice, const DoubleTab& indicatrice_face, DoubleTab& PPP ) ;
 
   virtual void calcul_maxfa7( Maillage_FT_Disc& maillage, const DoubleTab& indicatrice,
-                              const long nb_elem, long& max_fa7, const long exec_planfa7existan ) ;
+                              const int nb_elem, int& max_fa7, const int exec_planfa7existan ) ;
   virtual void RenumFa7( DoubleTab& Barycentre, DoubleTab& Tab110,DoubleTab& Tab111,
                          DoubleTab& Tab112, IntTab& Tab12, IntTab& CptFacette,
-                         const long nb_facettes, const long nb_facettes_dim ) ;
+                         const int nb_facettes, const int nb_facettes_dim ) ;
   virtual void StockageFa7( Maillage_FT_Disc& maillage, IntTab& CptFacette, DoubleTab& Tab100,
                             DoubleTab& Tab101,DoubleTab& Tab102, DoubleTab& Tab103,
                             DoubleTab& Tab110,DoubleTab& Tab111,DoubleTab& Tab112,
                             IntTab& Tab12, DoubleTab& Barycentre, const DoubleTab& indicatrice,
-                            IntList& OutElem, ArrOfBit& fa7, const long exec_planfa7existant) ;
+                            IntList& OutElem, ArrOfBit& fa7, const int exec_planfa7existant) ;
   virtual void StockageFa7( Maillage_FT_Disc& maillage, DoubleTab& Tab100, DoubleTab& Tab101,
                             DoubleTab& Tab102, DoubleTab& Tab103, DoubleTab& Tab110,
                             DoubleTab& Tab111, DoubleTab& Tab112, IntTab& Tab12,
                             DoubleTab& Barycentre, IntList& OutElem, IntTab& TabOutFa7, ArrOfBit& fa7 ) ;
-  virtual void BaryFa7( Maillage_FT_Disc& maillage, const long i_facette, DoubleTab& Barycentre ) ;
+  virtual void BaryFa7( Maillage_FT_Disc& maillage, const int i_facette, DoubleTab& Barycentre ) ;
   virtual void plan_facette_existant( Maillage_FT_Disc& maillage,
                                       DoubleList A, DoubleList B, DoubleList C,
-                                      DoubleList D, const long i_facette,
-                                      long& test_liste ) ;
-  virtual void calcul_eq_plan_facette(Maillage_FT_Disc& maillage, const long i_facette,
+                                      DoubleList D, const int i_facette,
+                                      int& test_liste ) ;
+  virtual void calcul_eq_plan_facette(Maillage_FT_Disc& maillage, const int i_facette,
                                       double& a, double& b, double& c, double& d);
-  virtual void calcul_eq_plan_facette(const long i_facette,
+  virtual void calcul_eq_plan_facette(const int i_facette,
                                       double& a, double& b, double& c, double& d);
 
-  virtual void calcul_tolerance_projete_monophasique( const long i_face, const long ori, const long voisin0,
-                                                      const long voisin1, const DoubleTab& indicatrice_face,
+  virtual void calcul_tolerance_projete_monophasique( const int i_face, const int ori, const int voisin0,
+                                                      const int voisin1, const DoubleTab& indicatrice_face,
                                                       const DoubleTab& indicatrice, double& tol ) ;
 
-  virtual void calcul_tolerance_projete_diphasique( const long i_face, const long ori, const long voisin0,
-                                                    const long voisin1, const DoubleTab& indicatrice, double& tol ) ;
+  virtual void calcul_tolerance_projete_diphasique( const int i_face, const int ori, const int voisin0,
+                                                    const int voisin1, const DoubleTab& indicatrice, double& tol ) ;
 
-  void verifprojete(const long monophasique,const double Lref, double d, const DoubleTab& x,
-                    const DoubleTab& V, DoubleTab& coord_projete, long& cpt ) ;
+  void verifprojete(const int monophasique,const double Lref, double d, const DoubleTab& x,
+                    const DoubleTab& V, DoubleTab& coord_projete, int& cpt ) ;
 
 
   virtual void uzawa(const double d,const DoubleTab& matrice, const DoubleTab& x,
                      const DoubleTab& secmem, DoubleTab& solution) const ;
 
-  virtual void projete_point_face_fluide( long& nb_proj_modif, const long dim_fa7,
+  virtual void projete_point_face_fluide( int& nb_proj_modif, const int dim_fa7,
                                           const DoubleTab& indicatrice_face, const DoubleTab& indicatrice,
                                           const DoubleTab& dist_face, const double t, const double dt,
                                           DoubleTab& Tab100, DoubleTab& Tab101,DoubleTab& Tab102,
                                           DoubleTab& Tab103, IntTab& Tab12, IntTab& CptFacette,
                                           DoubleTab& v_imp, DoubleTab& Vertex,
                                           Parser& parser_x, Parser& parser_y,Parser& parser_z );
-  virtual void projete_point_face_interface(   long& nb_proj_modif,const long dim_fa7,
+  virtual void projete_point_face_interface(   int& nb_proj_modif,const int dim_fa7,
                                                const DoubleTab& indicatrice_face,
                                                const DoubleTab& indicatrice,
                                                const DoubleTab& dist_face, const double t,
@@ -294,10 +294,10 @@ public:
   virtual void transporter_sans_changement_topologie(DoubleTab& vitesse,
                                                      const double coeff,const double temps);
 
-  virtual long calculer_composantes_connexes_pour_suppression(IntVect& num_compo);
+  virtual int calculer_composantes_connexes_pour_suppression(IntVect& num_compo);
   virtual double suppression_interfaces(const IntVect& num_compo, const ArrOfInt& flags_compo_a_supprimer);
 
-  const long& get_vimp_regul() const;
+  const int& get_vimp_regul() const;
 
   virtual const Champ_base& get_update_distance_interface() const;
   virtual const Champ_base& get_update_distance_interface_faces() const;
@@ -315,7 +315,7 @@ public:
   };
   virtual void calculer_vmoy_composantes_connexes(const Maillage_FT_Disc& maillage,
                                                   const ArrOfInt& compo_connexes_facettes,
-                                                  const long nb_compo_tot,
+                                                  const int nb_compo_tot,
                                                   const DoubleTab& vitesse_sommets,
                                                   DoubleTab& vitesses,
                                                   DoubleTab& positions) const;
@@ -336,12 +336,12 @@ public:
   const  DoubleTab& get_moy_vitesses_compo() const; // EB
   const  DoubleTab& get_moy_vitesses_carre_compo() const; // EB
 
-  const long& calcul_precis_indic_faces() const;
-  const long& calcul_precis_indic_aretes() const;
-  const long& postraiter_indicatrice_aretes() const; // EB
+  const int& calcul_precis_indic_faces() const;
+  const int& calcul_precis_indic_aretes() const;
+  const int& postraiter_indicatrice_aretes() const; // EB
 
-  long is_solid_particle(); // EB
-  long is_solid_particle() const; // EB
+  int is_solid_particle(); // EB
+  int is_solid_particle() const; // EB
 protected:
 
   void ajouter_contribution_saut_vitesse(DoubleTab& deplacement) const;
@@ -350,7 +350,7 @@ protected:
   virtual void calculer_distance_interface(const Maillage_FT_Disc& maillage,
                                            DoubleTab& distance_elements,
                                            DoubleTab& normale_elements,
-                                           const long n_iter) const;
+                                           const int n_iter) const;
 
   virtual void calculer_distance_interface_sommets(const DoubleTab& dist_elem,
                                                    const DoubleTab& normale_elem,
@@ -410,18 +410,18 @@ protected:
   Nom suppression_interfaces_sous_domaine_;
 
   Champ_Fonc vitesse_imp_interp_;
-  long calcul_precis_indicatrice_face_; // EB
-  long calcul_precis_indicatrice_arete_; // EB
-  long postraiter_indicatrice_arete_; // EB
-  long get_radius_; // EB
+  int calcul_precis_indicatrice_face_; // EB
+  int calcul_precis_indicatrice_arete_; // EB
+  int postraiter_indicatrice_arete_; // EB
+  int get_radius_; // EB
 
-  long get_nb_compo_tot ();
+  int get_nb_compo_tot ();
 
 
 private:
 
   void init_positions_vitesses_FT();
-  void set_nb_compo_tot(const long nb_compo);
+  void set_nb_compo_tot(const int nb_compo);
   // Variables internes a la methode de transport
   Transport_Interfaces_FT_Disc_interne *variables_internes_;
 
@@ -430,8 +430,8 @@ private:
 
   REF(Milieu_base) ref_milieu_;
   REF(Joint) joint_; // EB
-  long interpolation_repere_local_;
-  long transport_vitesse_cg_HMS_;
+  int interpolation_repere_local_;
+  int transport_vitesse_cg_HMS_;
   ArrOfDouble force_;
   ArrOfDouble moment_;
 };
@@ -493,16 +493,16 @@ private:
   }; // Interdit
 
 public:
-  long sauvegarder(Sortie& os) const override;
-  long reprendre(Entree& is) override;
+  int sauvegarder(Sortie& os) const override;
+  int reprendre(Entree& is) override;
 
   // Les membres suivantes sont sauvegardes et repris:
   Champ_Inc        indicatrice_cache;     // L'indicatrice calculee par get_update_indicatrice
-  long           indicatrice_cache_tag; // Le tag du maillage correspondant
+  int           indicatrice_cache_tag; // Le tag du maillage correspondant
   Champ_Inc        indicatrice_face_cache; // EB
-  long 			indicatrice_face_cache_tag; // EB
+  int 			indicatrice_face_cache_tag; // EB
   DoubleTab        indicatrice_arete_cache; // EB
-  long 			indicatrice_arete_cache_tag; // EB
+  int 			indicatrice_arete_cache_tag; // EB
   Maillage_FT_Disc maillage_interface;          // Objet qui peut se reduire a un ensemble de sommets
   // quand il represente les positions de particules
   Remaillage_FT    remaillage_interface_;
@@ -510,7 +510,7 @@ public:
 
   Proprietes_part_vol proprietes_particules_; //Proprietes physiques de particules
   Nom fichier_reprise_collision_FT_; // EB
-  long is_solid_particle_; // EB
+  int is_solid_particle_; // EB
   Modele_Collision_FT collision_interface_particule_; // EB
 
   Postraitement_Forces_Interfaces_FT postraitement_forces_interf_; // EB
@@ -524,10 +524,10 @@ public:
   // Si iterations_correction_volume > 0, on calcule une correction de volume aux
   // sommets de l'interface et on l'etale par autant d'iterations d'un lisseur
   // Voir Transport_Interfaces_FT_Disc::mettre_a_jour
-  long iterations_correction_volume;
+  int iterations_correction_volume;
 
   // NEW Keywords/parameters for volume preserving correction in agreement with phase change :
-  long VOFlike_correction_volume;
+  int VOFlike_correction_volume;
   // Si VOFlike_correction_volume == 0, le maillage est transporte par le fluide
   // a l'aide du champ de vitesse L2 interpole (pas de conservation du volume).
   // Si VOFlike_correction_volume > 0, on calcule une correction de volume aux
@@ -535,11 +535,11 @@ public:
   // Voir Transport_Interfaces_FT_Disc::mettre_a_jour
   // pour eviter l'apparition de pic aux interfaces (ie, on lisse legement la correction de volume
   // (uniquement s'il y en a une))
-  long nb_lissage_correction_volume;
+  int nb_lissage_correction_volume;
   // La correction est iterative car on ne corrige pas exactement du volume demande en deplacant les
   // noeuds sequentiellement. On fait nb_iterations_correction_volume ou jusqu'a ce que l'erreur
   // soit inferieure au seuil de correction de volume de Remaillage_FT
-  long nb_iterations_correction_volume;
+  int nb_iterations_correction_volume;
 
   // ADDITIONAL GLOBAL mass conservation with-out phase change:
   // Rustine introduite pour corriger les pertes de masse:
@@ -567,12 +567,12 @@ public:
   Champ_Fonc nelem_par_direction; // CI : nombre d'elements par direction
   // Note de B.M. : zut, y'a pas de champ aux sommets en VDF... donc DoubleTab et
   // du coup on ne peut pas postraiter facilement. C'est trop con...
-  long     n_iterations_distance;
-  long     n_iterations_interpolation_ibc;
-  long     distance_normale_cache_tag;
-  long     distance_sommets_cache_tag;
-  long     distance_faces_cache_tag;
-  long     distance_aretes_cache_tag; // EB
+  int     n_iterations_distance;
+  int     n_iterations_interpolation_ibc;
+  int     distance_normale_cache_tag;
+  int     distance_sommets_cache_tag;
+  int     distance_faces_cache_tag;
+  int     distance_aretes_cache_tag; // EB
   // Le maillage postraite n'est pas forcement le maillage
   Maillage_FT_Disc maillage_pour_post;
   DoubleTabFT   deplacement_sommets;
@@ -585,8 +585,8 @@ public:
   Methode_interpolation_v methode_interpolation_v;
 
   double d_to_interf_interp_v_; // EB : distance a l'interface pour l'interpolation de la vitesse DANS la particule, en nombre de rayon de la particule  0 on calcul, 1 on ne calcule pas
-  long statut_calcul_forces_; // EB : indique si il faut recalculer les forces hydrodynamiques sur les facettes du maillage lagrangien : 0 on calcul, 1 on ne calcule pas
-  long statut_calcul_flux_thermique_; // EB idem pour le flux
+  int statut_calcul_forces_; // EB : indique si il faut recalculer les forces hydrodynamiques sur les facettes du maillage lagrangien : 0 on calcul, 1 on ne calcule pas
+  int statut_calcul_flux_thermique_; // EB idem pour le flux
 
   // Injecteur d'interfaces au cours du temps
   ArrOfDouble injection_interfaces_temps_;
@@ -598,11 +598,11 @@ public:
   enum Interpolation_champ_face { BASE, LINEAIRE };
   Interpolation_champ_face interpolation_champ_face;
 
-  long vf_explicite, is_extra_diphasique_solide, is_extra_solide, is_distance_projete_face;
-  long nomb_fa7_accepted ;
+  int vf_explicite, is_extra_diphasique_solide, is_extra_solide, is_distance_projete_face;
+  int nomb_fa7_accepted ;
   double seuil_uzawa ;
-  long nb_iter_uzawa ;
-  long vimp_regul ;
+  int nb_iter_uzawa ;
+  int vimp_regul ;
 
   enum Type_indic_faces { STANDARD, MODIFIEE, AI_BASED };
   Type_indic_faces type_indic_faces_;
@@ -641,8 +641,8 @@ public:
 
 
 // EB
-  long precision_impr_;
-  long nb_compo_tot_;
+  int precision_impr_;
+  int nb_compo_tot_;
   DoubleTab rms_vitesse_compo_;
   DoubleTab moy_vitesse_compo_;
   DoubleTab moy_vitesse_solide_carre_;

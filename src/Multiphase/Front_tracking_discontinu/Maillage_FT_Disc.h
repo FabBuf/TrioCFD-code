@@ -52,14 +52,14 @@ public:
   //
   // Methodes reimplementees de Objet_U
   //
-  long reprendre(Entree&) override;
-  long sauvegarder(Sortie&) const override;
+  int reprendre(Entree&) override;
+  int sauvegarder(Sortie&) const override;
   //
   // Nouvelles methodes
   //
   Maillage_FT_Disc();
   virtual Entree& lire_param_maillage(Entree& is);
-  virtual void ajouter_maillage(const Maillage_FT_Disc& maillage_tmp,long skip_facettes=0);
+  virtual void ajouter_maillage(const Maillage_FT_Disc& maillage_tmp,int skip_facettes=0);
   virtual void recopie(const Maillage_FT_Disc& maillage_source, Statut_Maillage niveau_copie);
   const Equation_base& equation_associee() const override;
 
@@ -68,14 +68,14 @@ public:
   double changer_temps(double t);
 
   // Acces au tag :
-  long get_mesh_tag() const;
+  int get_mesh_tag() const;
 
   // Acces aux elements du maillage
   const DoubleTab& sommets() const;
-  long              nb_sommets() const;  // Egal a sommets().dimension(0)
+  int              nb_sommets() const;  // Egal a sommets().dimension(0)
   const DoubleTab& cg_fa7() const; // EB
   const IntTab&     facettes() const;
-  long              nb_facettes() const; // Egal a facettes().dimension(0)
+  int              nb_facettes() const; // Egal a facettes().dimension(0)
   const ArrOfInt& drapeaux_sommets() const;  // pour postraitement uniquement
   const ArrOfInt& sommet_PE_owner() const;   // pour postraitement uniquement
   const ArrOfInt& sommet_num_owner() const;   // pour postraitement uniquement
@@ -91,22 +91,22 @@ public:
 
   const ArrOfInt& som_init_util() const;
   // Ces fonctions renvoient 1 si le test est vrai, 0 sinon
-  inline long sommet_virtuel(long i) const;
-  inline long sommet_virtuel_face(long i) const; // EB
-  inline long sommet_ligne_contact(long i) const;
-  inline long sommet_face_bord(long i) const;
-  inline long facette_virtuelle(long i) const;
-  inline long facette_virtuelle_face(long i) const; // EB
-  long        facettes_voisines(long fa70, long fa71, long& iarete0, long& iarete1) const;
+  inline int sommet_virtuel(int i) const;
+  inline int sommet_virtuel_face(int i) const; // EB
+  inline int sommet_ligne_contact(int i) const;
+  inline int sommet_face_bord(int i) const;
+  inline int facette_virtuelle(int i) const;
+  inline int facette_virtuelle_face(int i) const; // EB
+  int        facettes_voisines(int fa70, int fa71, int& iarete0, int& iarete1) const;
 
-  long calculer_voisinage_facettes(IntTab& fa7Voisines,
-                                   const Intersections_Elem_Facettes* ief=NULL) const;
+  int calculer_voisinage_facettes(IntTab& fa7Voisines,
+                                  const Intersections_Elem_Facettes* ief=NULL) const;
 
   void associer_equation_transport(const Equation_base& equation) override;
   void associer_domaine_dis_parcours(const Domaine_dis& domaine_dis, const Parcours_interface& parcours);
   Transport_Interfaces_FT_Disc& equation_transport();
   const Transport_Interfaces_FT_Disc& equation_transport() const;
-  long type_statut() const;
+  int type_statut() const;
 
   // Vide le maillage
   void reset();
@@ -127,56 +127,56 @@ public:
   void transporter_simple(const DoubleTab& deplacement);
   //Nettoyage des sommets virtuels et des sommets sur frontiere ouverte
   void nettoyer_noeuds_virtuels_et_frontieres();
-  void nettoyer_phase(const Nom& nom_eq, const long phase);
+  void nettoyer_phase(const Nom& nom_eq, const int phase);
 
   void nettoyer_elements_virtuels();
   virtual void nettoyer_maillage();
   void supprimer_facettes(const ArrOfInt& liste_facettes);
 
   //ecrit le maillage de facon a etre relu sous gnuplot
-  void ecrire_plot(const Nom& nom,double temps, long niveau_requete) const;
+  void ecrire_plot(const Nom& nom,double temps, int niveau_requete) const;
   //fonctions d'affichage standard des facettes et sommets
-  Sortie& printFa7(long fa7,long affsom, Sortie& os) const;
-  Sortie& printSom(long som,Sortie& os) const;
+  Sortie& printFa7(int fa7,int affsom, Sortie& os) const;
+  Sortie& printSom(int som,Sortie& os) const;
 
   enum AjoutPhase { AJOUTE_TOUTES_PHASES = -1, AJOUTE_PHASE0 = 0 ,AJOUTE_PHASE1  = 1 };
 
   // Acces aux grandeurs calculees a partir du maillage:
   virtual const ArrOfDouble& get_update_surface_facettes() const;
   virtual const DoubleTab& get_update_normale_facettes() const;
-  virtual double compute_normale_element(const long elem, const bool normalize, ArrOfDouble&  normale) const;
-  virtual double compute_surface_and_normale_element(const long elem, const bool normalize, double surface, double normal[3]) const;
+  virtual double compute_normale_element(const int elem, const bool normalize, ArrOfDouble&  normale) const;
+  virtual double compute_surface_and_normale_element(const int elem, const bool normalize, double surface, double normal[3]) const;
   virtual const ArrOfDouble& get_update_courbure_sommets() const;
 
   virtual const ArrOfDouble& get_surface_facettes() const;
   virtual const DoubleTab& get_normale_facettes() const;
 
-  inline long set_niveau_plot(long niv);
+  inline int set_niveau_plot(int niv);
 
 
   //fonctions statiques (pour ne pas utiliser des membres propres au maillage
-  static long deplacer_un_point(double& x, double& y, double& z,
+  static int deplacer_un_point(double& x, double& y, double& z,
+                               double x1, double y1, double z1,
+                               int& element_suivant,
+                               int& face_suivante,
+                               const Parcours_interface& parcours,
+                               const Domaine_VF& domaine_vf,
+                               const IntTab& face_voisins,
+                               int skip_facettes=0);
+
+  static int deplacer_un_sommet(double& x, double& y, double& z,
                                 double x1, double y1, double z1,
-                                long& element_suivant,
-                                long& face_suivante,
+                                int& element,
+                                int& face_bord,
+                                const int num_sommet,
                                 const Parcours_interface& parcours,
                                 const Domaine_VF& domaine_vf,
                                 const IntTab& face_voisins,
-                                long skip_facettes=0);
-
-  static long deplacer_un_sommet(double& x, double& y, double& z,
-                                 double x1, double y1, double z1,
-                                 long& element,
-                                 long& face_bord,
-                                 const long num_sommet,
-                                 const Parcours_interface& parcours,
-                                 const Domaine_VF& domaine_vf,
-                                 const IntTab& face_voisins,
-                                 ArrOfInt& sommets_envoyes,
-                                 ArrOfInt& element_virtuel_arrivee,
-                                 ArrOfInt& face_virtuelle_arrivee,
-                                 DoubleTab& deplacement_restant,
-                                 long skip_facettes=0);
+                                ArrOfInt& sommets_envoyes,
+                                ArrOfInt& element_virtuel_arrivee,
+                                ArrOfInt& face_virtuelle_arrivee,
+                                DoubleTab& deplacement_restant,
+                                int skip_facettes=0);
 
   void update_sommet_face(); // EB
   void update_sommet_arete(); // EB
@@ -188,11 +188,11 @@ public:
                                         const Desc_Structure_FT& descripteur) const;
   void preparer_tableau_avant_transport(DoubleTab& tableau,
                                         const Desc_Structure_FT& descripteur) const;
-  void update_tableau_apres_transport(ArrOfDouble& tableau, long nb_elements,
+  void update_tableau_apres_transport(ArrOfDouble& tableau, int nb_elements,
                                       const Desc_Structure_FT& descripteur) const;
-  void update_tableau_apres_transport(ArrOfInt& tableau, long nb_elements,
+  void update_tableau_apres_transport(ArrOfInt& tableau, int nb_elements,
                                       const Desc_Structure_FT& descripteur) const;
-  void update_tableau_apres_transport(DoubleTab& tableau, long nb_elements,
+  void update_tableau_apres_transport(DoubleTab& tableau, int nb_elements,
                                       const Desc_Structure_FT& descripteur) const;
 
   static double angle_bidim_axi();
@@ -203,18 +203,18 @@ public:
 
   void creer_tableau_sommets(Array_base&, Array_base::Resize_Options opt = Array_base::COPY_INIT) const;
   void creer_tableau_elements(Array_base&, Array_base::Resize_Options opt = Array_base::COPY_INIT) const;
-  double calcul_normale_3D(long num_facette, double norme[3]) const;
+  double calcul_normale_3D(int num_facette, double norme[3]) const;
   void calcul_cg_fa7(); //EB
   virtual void   calculer_costheta_minmax(DoubleTab& costheta) const;
   Schema_Comm_FT get_schema_comm_FT() const;
-  void set_is_solid_particle(long is_solid_particle); // EB
+  void set_is_solid_particle(int is_solid_particle); // EB
 
 protected:
-  void pre_lissage_courbure(ArrOfDouble& store_courbure_sommets, const long niter) const;
-  void correction_costheta(const double c, const long s0, const long facette,
+  void pre_lissage_courbure(ArrOfDouble& store_courbure_sommets, const int niter) const;
+  void correction_costheta(const double c, const int s0, const int facette,
                            /* const ArrOfDouble& s0s1, const ArrOfDouble& s0s2, */
                            double ps) const;
-  double calculer_costheta_objectif(const long som, const long facette, const long call, const double c,
+  double calculer_costheta_objectif(const int som, const int facette, const int call, const double c,
                                     const DoubleTabFT& tab_cos_theta, ArrOfBit& drapeau_angle_in_range) const;
 
   const Maillage_FT_Disc& operator=(const Maillage_FT_Disc&);   // Interdit !
@@ -226,17 +226,17 @@ protected:
   void calculer_voisins();
 
   void calcul_surface_normale(ArrOfDouble& surface, DoubleTab& normale) const;
-  void calcul_courbure_sommets(ArrOfDouble& courbure, const long call_number) const;
+  void calcul_courbure_sommets(ArrOfDouble& courbure, const int call_number) const;
 
   //fonction qui cree un nouveau sommet par copie d'une existant
   //utilise dans Remailleur_Collision_FT_Collision_Seq
-  long copier_sommet(long som);
+  int copier_sommet(int som);
   //idem, mais rend le sommet interne (sommet_face_bord_=-1)
-  long copier_sommet_interne(long som);
+  int copier_sommet_interne(int som);
 
   //renvoie les coefficients du plan passant par l'arete iarete de la facette fa7 et normal a la facette
-  long calcule_equation_plan_areteFa7(
-    long fa7, long iarete,
+  int calcule_equation_plan_areteFa7(
+    int fa7, int iarete,
     double& a, double& b, double& c, double& d) const;
 
   void creer_sommets_virtuels(const ArrOfInt& liste_sommets,
@@ -251,7 +251,7 @@ protected:
                            const ArrOfInt& liste_face_virtuelle_arrivee,
                            const DoubleTab& deplacement,
                            ArrOfInt& liste_nouveaux_sommets,
-                           DoubleTab& deplacement_restant,long skip_facettes=0);
+                           DoubleTab& deplacement_restant,int skip_facettes=0);
 
   void corriger_proprietaires_facettes();
 
@@ -260,9 +260,9 @@ protected:
                                          const ArrOfInt& facettes_send_pe_list,
                                          const ArrOfInt& facettes_recv_pe_list);
 
-  void buffer_envoyer_facette_PE(long num_facette,
-                                 long PE,
-                                 long num_element_sur_PE);
+  void buffer_envoyer_facette_PE(int num_facette,
+                                 int PE,
+                                 int num_element_sur_PE);
 
   void echanger_facettes(const ArrOfInt& liste_facettes,
                          const ArrOfInt& liste_elem_arrivee,
@@ -306,17 +306,17 @@ protected:
                                       ArrOfInt& numeros_locaux) const;
   void convertir_numero_distant_local(const Desc_Structure_FT& descripteur,
                                       const ArrOfInt& element_num_owner,
-                                      const long numero_distant,
-                                      const long pe_distant,
-                                      long& numero_local) const;
+                                      const int numero_distant,
+                                      const int pe_distant,
+                                      int& numero_local) const;
 
   virtual void deplacer_sommets(const ArrOfInt& liste_sommets_initiale,
                                 const DoubleTab& deplacement_initial,
                                 ArrOfInt& liste_sommets_sortis,
-                                ArrOfInt& numero_face_sortie, long skip_facettes=0);
+                                ArrOfInt& numero_face_sortie, int skip_facettes=0);
 
-  virtual long check_sommets(long error_is_fatal = 1) const;
-  virtual long check_mesh(long error_is_fatal = 1, long skip_facette_owner = 0, long skip_facettes = 0) const;
+  virtual int check_sommets(int error_is_fatal = 1) const;
+  virtual int check_mesh(int error_is_fatal = 1, int skip_facette_owner = 0, int skip_facettes = 0) const;
 
   void construire_noeuds(IntTab& def_noeud,const DoubleTab& soms);
   void calculer_coord_noeuds(const IntTab& def_noeud,const DoubleTab& soms,IntTab& renum);
@@ -371,7 +371,7 @@ protected:
   // (soit les noeuds sont deplaces, soit le nombre de noeuds change, etc...)
   // Cela permet de verifier qu'un tableau de valeurs calculees a partir du maillage
   // est bien a jour (exemple: courbure, ...)
-  long mesh_state_tag_;
+  int mesh_state_tag_;
 
   // Le temps physique associe a cette interface
   double temps_physique_;
@@ -448,7 +448,7 @@ protected:
   // Avec IntTab, echange espace virtuel est plus facile.
   ArrOfIntFT drapeaux_sommets_;
   // Drapeaux attributs des sommets
-  static const long EFFACE = 1;
+  static const int EFFACE = 1;
   //                                                                              //
   // FIN DES MEMBRES DEFINISSANT L'ETAT MINIMAL                                   //
   //////////////////////////////////////////////////////////////////////////////////
@@ -459,7 +459,7 @@ protected:
   // Intersection entre les facettes du maillage lagrangien et les elements
   // euleriens (ce champ est rempli lors du parcours de l'interface)
   //
-  long is_solid_particle_;
+  int is_solid_particle_;
   Intersections_Elem_Facettes intersections_elem_facettes_;
   Intersections_Face_Facettes intersections_face_facettes_x_; // EB
   Intersections_Face_Facettes intersections_face_facettes_y_; // EB
@@ -500,12 +500,12 @@ protected:
   //parametre de gestion des sorties au format gnuplot
   //-1 : aucunes sorties au format gnuplot
   // 1 : 1 sortie par pas de temps (dans mettre_a_jour)
-  long niveau_plot_;
+  int niveau_plot_;
   double correction_contact_courbure_coeff_;
-  long calcul_courbure_iterations_;
-  long niter_pre_lissage_;
+  int calcul_courbure_iterations_;
+  int niter_pre_lissage_;
   enum enum_methode_calcul_courbure_contact_line_ { STANDARD=0, MIRROR=1, IMPROVED=2, none=3, WEIGHTED=4, HYSTERESIS=5 };
-  long methode_calcul_courbure_contact_line_;
+  int methode_calcul_courbure_contact_line_;
   double weight_CL_; // Le poids de la CL
 
 
@@ -516,7 +516,7 @@ protected:
 //  Si le sommet i m'appartient, alors il se trouve a l'interieur de l'element
 //  sommet_elem_[i]. On garantit qu'un sommet est reel sur exactement un
 //  processeur et virtuel sur tous les autres.
-inline long Maillage_FT_Disc::sommet_virtuel(long i) const
+inline int Maillage_FT_Disc::sommet_virtuel(int i) const
 {
   return (sommet_elem_[i] < 0) ? 1 : 0;
 }
@@ -526,21 +526,21 @@ inline long Maillage_FT_Disc::sommet_virtuel(long i) const
 //  Si le sommet i m'appartient, alors il se trouve a l'interieur de la face
 //  sommet_face_[i]. On garantit qu'un sommet est reel sur exactement un
 //  processeur et virtuel sur tous les autres.
-inline long Maillage_FT_Disc::sommet_virtuel_face(long i) const { return (sommet_face_[i] < 0) ? 1 : 0 ; }
+inline int Maillage_FT_Disc::sommet_virtuel_face(int i) const { return (sommet_face_[i] < 0) ? 1 : 0 ; }
 // fin EB
 
 // Description :
 //  Renvoie 1 si le sommet se trouve sur un bord du domaine, 0 sinon.
 //  Si le sommet est virtuel mais qu'il se trouve sur un bord du domaine
 //  du proceseur voisin, on renvoie 1 aussi.
-inline long Maillage_FT_Disc::sommet_ligne_contact(long i) const
+inline int Maillage_FT_Disc::sommet_ligne_contact(int i) const
 {
   return (sommet_face_bord_[i] >= 0) ? 1 : 0;
 }
 
 // Description :
 //  Renvoie le numero de la face de bord.
-inline long Maillage_FT_Disc::sommet_face_bord(long i) const
+inline int Maillage_FT_Disc::sommet_face_bord(int i) const
 {
   return sommet_face_bord_[i];
 }
@@ -552,22 +552,22 @@ inline long Maillage_FT_Disc::sommet_face_bord(long i) const
  * (le test est "le premier sommet de la facette m'appartient-t-il ?")
  *
  */
-inline long Maillage_FT_Disc::facette_virtuelle(long i) const
+inline int Maillage_FT_Disc::facette_virtuelle(int i) const
 {
-  const long sommet = facettes_(i, 0);
+  const int sommet = facettes_(i, 0);
   return (sommet_elem_[sommet] < 0) ? 1 : 0;
 }
 // debut EB
 // Description:
 //  Renvoie 0 si la facette m'appartient, 1 sinon.
 //  (le test est "le premier sommet de la facette m'appartient-t-il ?")
-inline long Maillage_FT_Disc::facette_virtuelle_face(long i) const
+inline int Maillage_FT_Disc::facette_virtuelle_face(int i) const
 {
-  const long sommet = facettes_(i, 0);
+  const int sommet = facettes_(i, 0);
   return (sommet_face_[sommet] < 0) ? 1 : 0;
 }
 // fin EB
-inline long Maillage_FT_Disc::set_niveau_plot(long niv)
+inline int Maillage_FT_Disc::set_niveau_plot(int niv)
 {
   niveau_plot_ = niv;
   return niveau_plot_;
@@ -580,11 +580,11 @@ class Maillage_FT_Disc_Data_Cache : public Objet_U
 public:
   void clear();
 
-  long        tag_surface_;
+  int        tag_surface_;
   ArrOfDoubleFT surface_facettes_;
-  long        tag_normale_;
+  int        tag_normale_;
   DoubleTabFT   normale_facettes_;
-  long        tag_courbure_;
+  int        tag_courbure_;
   ArrOfDoubleFT courbure_sommets_;
 };
 #endif

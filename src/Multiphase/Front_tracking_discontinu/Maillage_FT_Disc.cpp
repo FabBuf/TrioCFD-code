@@ -109,17 +109,17 @@ void Maillage_FT_Disc::calculer_costheta_minmax(DoubleTab& costheta) const
   const Domaine_Cl_dis_base& domaine_cl = eq.domaine_Cl_dis().valeur();
   const Domaine_VF& domaine_vf = ref_cast(Domaine_VF,eq.domaine_dis().valeur());
 
-  const long nb_som = nb_sommets();
+  const int nb_som = nb_sommets();
   costheta.resize(nb_som, 2);
   costheta=0;
   const double deg_to_rad = M_PI / 180.;
 
   DoubleVect tmp;
 
-  for (long i = 0; i < nb_som; i++)
+  for (int i = 0; i < nb_som; i++)
     {
       // Indice de la face de bord dans le domaine_VF
-      const long num_face = sommet_face_bord_[i];
+      const int num_face = sommet_face_bord_[i];
       if ((num_face < 0) || (num_face>=domaine_vf.nb_faces_bord()))
         continue;
       const Cond_lim& cl =
@@ -133,8 +133,8 @@ void Maillage_FT_Disc::calculer_costheta_minmax(DoubleTab& costheta) const
             ref_cast(Paroi_FT_disc, cl_base);
           // Indice de la face sur la frontiere
           const Frontiere& front         = cl_ft.frontiere_dis().frontiere();
-          const long num_premiere_face  = front.num_premiere_face();
-          const long num_face_frontiere = num_face - num_premiere_face;
+          const int num_premiere_face  = front.num_premiere_face();
+          const int num_face_frontiere = num_face - num_premiere_face;
           // Valeur d'angle imposee sur la face
           const Paroi_FT_disc::Type_modele type_cl = cl_ft.get_type_modele();
           switch(type_cl)
@@ -295,7 +295,7 @@ Entree& Maillage_FT_Disc::readOn(Entree& is)
 
   while (motlu != accolade_fermee)
     {
-      long rang=les_mots.search(motlu);
+      int rang=les_mots.search(motlu);
       switch(rang)
         {
         case 0 :
@@ -317,14 +317,14 @@ Entree& Maillage_FT_Disc::readOn(Entree& is)
         case 1 :
         case 2 :
           {
-            long nb_sz;
+            int nb_sz;
             is>>nb_sz;
             nom_sz.dimensionner(nb_sz);
             nb_marqs_sz.resize(nb_sz);
-            long dim = Objet_U::dimension;
+            int dim = Objet_U::dimension;
             nb_marqs_par_dir.resize(nb_sz,dim);
 
-            for (long i=0; i<nb_sz; i++)
+            for (int i=0; i<nb_sz; i++)
               {
                 is>>nom_sz[i];
                 is>>motlu;
@@ -333,7 +333,7 @@ Entree& Maillage_FT_Disc::readOn(Entree& is)
                 else if (motlu=="uniforme")
                   {
                     nb_marqs_sz(i) = 1;
-                    for (long k=0; k<dim; k++)
+                    for (int k=0; k<dim; k++)
                       {
                         is >> nb_marqs_par_dir(i,k);
                         if (nb_marqs_par_dir(i,k)<=0)
@@ -362,7 +362,7 @@ Entree& Maillage_FT_Disc::readOn(Entree& is)
               {
                 Cerr << "On ne comprend pas le mot : " << motlu << " dans " << que_suis_je() << finl;
                 Cerr << "Les mots compris sont : " << finl;
-                for (long i=0; i<les_mots.size(); i++)
+                for (int i=0; i<les_mots.size(); i++)
                   Cerr<<les_mots[i]<<finl;
               }
             exit();
@@ -382,11 +382,11 @@ Sortie& Maillage_FT_Disc::printOn(Sortie& os) const
 }
 
 
-Sortie& Maillage_FT_Disc::printFa7(long fa7,long affsom, Sortie& os) const
+Sortie& Maillage_FT_Disc::printFa7(int fa7,int affsom, Sortie& os) const
 {
   const ArrOfDouble& surface_facette_ = get_update_surface_facettes();
   const DoubleTab& normale_facette_ = get_update_normale_facettes();
-  long isom,som,nbsom = facettes_.dimension(1);
+  int isom,som,nbsom = facettes_.dimension(1);
   os<<"#fa7="<<fa7<<"  soms= ";
   for (isom=0 ; isom<nbsom ; isom++)
     {
@@ -416,7 +416,7 @@ Sortie& Maillage_FT_Disc::printFa7(long fa7,long affsom, Sortie& os) const
 
   return os;
 }
-Sortie& Maillage_FT_Disc::printSom(long som,Sortie& os) const
+Sortie& Maillage_FT_Disc::printSom(int som,Sortie& os) const
 {
   os<<"sommet "<<som;
   if (som>=0)
@@ -433,12 +433,12 @@ Sortie& Maillage_FT_Disc::printSom(long som,Sortie& os) const
   return os;
 }
 
-void Maillage_FT_Disc::ecrire_plot(const Nom& nom,double un_temps, long niveau_requete) const
+void Maillage_FT_Disc::ecrire_plot(const Nom& nom,double un_temps, int niveau_requete) const
 {
   if (niveau_requete>niveau_plot_)
     return;
 
-  static long compteur_plot = 0;
+  static int compteur_plot = 0;
   Nom nom_fic=Objet_U::nom_du_cas();
   nom_fic += "_";
   char str[14];
@@ -487,9 +487,9 @@ void Maillage_FT_Disc::ecrire_plot(const Nom& nom,double un_temps, long niveau_r
   Process::Journal() << "ecriture de " << nom_fic << " au temps " << un_temps << finl;
 
   //balyage des facettes
-  long fa7,isom,som, k;
-  const long nbfacettes = facettes_.dimension(0);
-  const long nb_som_par_facette = facettes_.dimension(1);
+  int fa7,isom,som, k;
+  const int nbfacettes = facettes_.dimension(0);
+  const int nb_som_par_facette = facettes_.dimension(1);
   FTd_vecteur3 cdg;
   const double coeff = 0.1;
   for (fa7=0 ; fa7<nbfacettes ; fa7++)
@@ -571,12 +571,12 @@ Entree& Maillage_FT_Disc::lire_param_maillage(Entree& is)
   param.ajouter("niter_pre_lissage",&niter_pre_lissage_);
   param.ajouter("calcul_courbure_iterations",&calcul_courbure_iterations_);
   param.ajouter("methode_calcul_courbure_contact_line", &methode_calcul_courbure_contact_line_);
-  param.dictionnaire("standard", (long)STANDARD);
-  param.dictionnaire("mirror", (long)MIRROR);
-  param.dictionnaire("improved", (long)IMPROVED);
-  param.dictionnaire("none", (long)NONE);
-  param.dictionnaire("weighted", (long)WEIGHTED);
-  param.dictionnaire("hysteresis", (long)HYSTERESIS);
+  param.dictionnaire("standard", (int)STANDARD);
+  param.dictionnaire("mirror", (int)MIRROR);
+  param.dictionnaire("improved", (int)IMPROVED);
+  param.dictionnaire("none", (int)NONE);
+  param.dictionnaire("weighted", (int)WEIGHTED);
+  param.dictionnaire("hysteresis", (int)HYSTERESIS);
   param.ajouter("weight_CL",&weight_CL_);
   param.lire_avec_accolades(is);
 
@@ -607,7 +607,7 @@ void Maillage_FT_Disc::associer_domaine_dis_parcours(const Domaine_dis& domaine_
   for (const auto& itr : domaine_dis.domaine().faces_joint())
     {
       const Joint& joint = itr;
-      const long pe_voisin = joint.PEvoisin();
+      const int pe_voisin = joint.PEvoisin();
       pe_list.append_array(pe_voisin);
     }
   // La liste des processeurs avec qui on communique dans ce schema sont tous
@@ -685,14 +685,14 @@ void Maillage_FT_Disc::recopie(const Maillage_FT_Disc& source, Statut_Maillage n
 //Cette methode ajoute le maillage de l'interface passe en parametre
 //Amene l'etat du maillage a MINIMAL
 //skip_facettes = 1 dans le cas d une injection de particules
-void Maillage_FT_Disc::ajouter_maillage(const Maillage_FT_Disc& maillage_tmp,long skip_facettes)
+void Maillage_FT_Disc::ajouter_maillage(const Maillage_FT_Disc& maillage_tmp,int skip_facettes)
 {
   assert(maillage_tmp.statut_ >= MINIMAL);
   assert(&maillage_tmp != this);
   maillage_tmp.check_mesh(1,0,skip_facettes);
 
-  const long nb_sommets_tmp = maillage_tmp.nb_sommets();
-  const long nb_facettes_tmp = maillage_tmp.nb_facettes();
+  const int nb_sommets_tmp = maillage_tmp.nb_sommets();
+  const int nb_facettes_tmp = maillage_tmp.nb_facettes();
   const DoubleTab& sommets_tmp = maillage_tmp.sommets();
   const IntTab& facettes_tmp = maillage_tmp.facettes();
   const ArrOfInt& sommet_elem_tmp = maillage_tmp.sommet_elem_;
@@ -702,11 +702,11 @@ void Maillage_FT_Disc::ajouter_maillage(const Maillage_FT_Disc& maillage_tmp,lon
   //const ArrOfInt & sommet_num_owner_tmp = maillage_tmp.sommet_num_owner();
   const ArrOfInt& drapeaux_sommets_tmp = maillage_tmp.drapeaux_sommets_;
 
-  const long nb_sommets_ = nb_sommets();
-  const long nb_facettes_ = nb_facettes();
-  const long nb_sommets_tot = nb_sommets_ + nb_sommets_tmp;
-  const long nb_facettes_tot = nb_facettes_ + nb_facettes_tmp;
-  const long nb_som_par_facette = facettes_tmp.dimension(1);
+  const int nb_sommets_ = nb_sommets();
+  const int nb_facettes_ = nb_facettes();
+  const int nb_sommets_tot = nb_sommets_ + nb_sommets_tmp;
+  const int nb_facettes_tot = nb_facettes_ + nb_facettes_tmp;
+  const int nb_som_par_facette = facettes_tmp.dimension(1);
 
   //on redimensionne les tableaux
   sommets_.resize(nb_sommets_tot,dimension);
@@ -720,7 +720,7 @@ void Maillage_FT_Disc::ajouter_maillage(const Maillage_FT_Disc& maillage_tmp,lon
   facette_num_owner_.resize_array(nb_facettes_tot);
 
   //on ajoute les facettes au maillage
-  long fa7, fa7_tmp, isom,som,som_tmp, k;
+  int fa7, fa7_tmp, isom,som,som_tmp, k;
   for (fa7_tmp=0 ; fa7_tmp<nb_facettes_tmp ; fa7_tmp++)
     {
       fa7 = fa7_tmp + nb_facettes_;
@@ -740,7 +740,7 @@ void Maillage_FT_Disc::ajouter_maillage(const Maillage_FT_Disc& maillage_tmp,lon
           sommets_(som,k) = sommets_tmp(som_tmp,k);
         }
       sommet_elem_[som]      = sommet_elem_tmp[som_tmp];
-      for (long dim=0; dim<dimension; dim++) sommet_face_(som,dim)      = sommet_face_tmp(som_tmp,dim); // EB
+      for (int dim=0; dim<dimension; dim++) sommet_face_(som,dim)      = sommet_face_tmp(som_tmp,dim); // EB
       sommet_face_bord_[som] = sommet_face_bord_tmp[som_tmp];
       sommet_PE_owner_[som]  = sommet_PE_owner_tmp[som_tmp];
       sommet_num_owner_[som] = som; // Puis echange esp.virt. a la fin
@@ -757,7 +757,7 @@ void Maillage_FT_Disc::ajouter_maillage(const Maillage_FT_Disc& maillage_tmp,lon
     const Descripteur_FT& espace_tmp = desc_sommets_tmp.espace_distant();
     Descripteur_FT& espace_ = desc_sommets_.espace_distant();
     const ArrOfInt& pe_voisins_tmp = espace_tmp.pe_voisins();
-    long ipe_tmp, pe_tmp, nb_pe_tmp = pe_voisins_tmp.size_array();
+    int ipe_tmp, pe_tmp, nb_pe_tmp = pe_voisins_tmp.size_array();
     for (ipe_tmp=0 ; ipe_tmp<nb_pe_tmp ; ipe_tmp++)
       {
         pe_tmp = pe_voisins_tmp[ipe_tmp];
@@ -773,7 +773,7 @@ void Maillage_FT_Disc::ajouter_maillage(const Maillage_FT_Disc& maillage_tmp,lon
     const Descripteur_FT& espace_tmp = desc_sommets_tmp.espace_virtuel();
     Descripteur_FT& espace_ = desc_sommets_.espace_virtuel();
     const ArrOfInt& pe_voisins_tmp = espace_tmp.pe_voisins();
-    long ipe_tmp,pe_tmp, nb_pe_tmp = pe_voisins_tmp.size_array();
+    int ipe_tmp,pe_tmp, nb_pe_tmp = pe_voisins_tmp.size_array();
     for (ipe_tmp=0 ; ipe_tmp<nb_pe_tmp ; ipe_tmp++)
       {
         pe_tmp = pe_voisins_tmp[ipe_tmp];
@@ -789,7 +789,7 @@ void Maillage_FT_Disc::ajouter_maillage(const Maillage_FT_Disc& maillage_tmp,lon
     const Descripteur_FT& espace_tmp = desc_facettes_tmp.espace_distant();
     Descripteur_FT& espace_ = desc_facettes_.espace_distant();
     const ArrOfInt& pe_voisins_tmp = espace_tmp.pe_voisins();
-    long ipe_tmp,pe_tmp, nb_pe_tmp = pe_voisins_tmp.size_array();
+    int ipe_tmp,pe_tmp, nb_pe_tmp = pe_voisins_tmp.size_array();
     for (ipe_tmp=0 ; ipe_tmp<nb_pe_tmp ; ipe_tmp++)
       {
         pe_tmp = pe_voisins_tmp[ipe_tmp];
@@ -805,7 +805,7 @@ void Maillage_FT_Disc::ajouter_maillage(const Maillage_FT_Disc& maillage_tmp,lon
     const Descripteur_FT& espace_tmp = desc_facettes_tmp.espace_virtuel();
     Descripteur_FT& espace_ = desc_facettes_.espace_virtuel();
     const ArrOfInt& pe_voisins_tmp = espace_tmp.pe_voisins();
-    long ipe_tmp,pe_tmp, nb_pe_tmp = pe_voisins_tmp.size_array();
+    int ipe_tmp,pe_tmp, nb_pe_tmp = pe_voisins_tmp.size_array();
     for (ipe_tmp=0 ; ipe_tmp<nb_pe_tmp ; ipe_tmp++)
       {
         pe_tmp = pe_voisins_tmp[ipe_tmp];
@@ -907,8 +907,8 @@ void Maillage_FT_Disc::calcul_indicatrice(DoubleVect& indicatrice,
   const Domaine_dis& domaine_dis = refdomaine_dis_.valeur();
   const Domaine& ladomaine = domaine_dis.domaine();
   const Domaine_VF& domaine_vf = ref_cast(Domaine_VF, domaine_dis.valeur());
-  const long nb_elem = ladomaine.nb_elem();
-  const long nb_elem_tot = ladomaine.nb_elem_tot();
+  const int nb_elem = ladomaine.nb_elem();
+  const int nb_elem_tot = ladomaine.nb_elem_tot();
   const IntTab& elem_faces = domaine_vf.elem_faces();
   const IntTab& face_voisins = domaine_vf.face_voisins();
 
@@ -923,20 +923,20 @@ void Maillage_FT_Disc::calcul_indicatrice(DoubleVect& indicatrice,
   // Mettre a zero les elements traverses, les elements voisins et les elements dont
   // l'indicatrice n'est ni a zero ni a un.
   {
-    const long nb_elem_voisins = elem_faces.dimension(1);
+    const int nb_elem_voisins = elem_faces.dimension(1);
 
     // Boucle sur les elements
     const ArrOfInt& index_elem = intersections_elem_facettes_.index_elem();
     assert(indicatrice.size() == nb_elem);
-    long i;
+    int i;
     DoubleVect check(indicatrice);
     for (i = 0; i < nb_elem_tot; i++)
       {
         const double x = indicatrice_precedente[i];
-        long check_voisins = ((x != 0.) && (x != 1.));
+        int check_voisins = ((x != 0.) && (x != 1.));
         if (i < nb_elem)
           {
-            long index = index_elem[i];
+            int index = index_elem[i];
             check_voisins |= (index >= 0);
             check(i) = check_voisins;
           }
@@ -949,11 +949,11 @@ void Maillage_FT_Disc::calcul_indicatrice(DoubleVect& indicatrice,
           {
             elements_calcules.clearbit(i);
             // Boucle sur les voisins
-            long j;
+            int j;
             for (j = 0; j < nb_elem_voisins; j++)
               {
-                const long face = elem_faces(i, j);
-                const long elem = face_voisins(face, 0) + face_voisins(face, 1) - i;
+                const int face = elem_faces(i, j);
+                const int elem = face_voisins(face, 0) + face_voisins(face, 1) - i;
                 if (elem >= 0 && elem < nb_elem_tot)
                   elements_calcules.clearbit(elem); // Voisin d'une interf => considere comme non calcule.
               }
@@ -969,10 +969,10 @@ void Maillage_FT_Disc::calcul_indicatrice(DoubleVect& indicatrice,
     assert(indicatrice.size() == nb_elem);
 
     // Boucle sur les elements
-    for (long i = 0; i < nb_elem; i++)
+    for (int i = 0; i < nb_elem; i++)
       {
 
-        long index = index_elem[i];
+        int index = index_elem[i];
         double somme_contrib = 0.;
         // Boucle sur les facettes qui traversent cet element
         while (index >= 0)
@@ -999,8 +999,8 @@ void Maillage_FT_Disc::calcul_indicatrice(DoubleVect& indicatrice,
   /*
   {
     const DoubleTab& distance = equation_transport().get_update_distance_interface().valeurs();
-    long i;
-    long error_count = 0;
+    int i;
+    int error_count = 0;
 
     for (i = 0; i < nb_elem; i++)
       {
@@ -1042,20 +1042,20 @@ void Maillage_FT_Disc::calcul_indicatrice(DoubleVect& indicatrice,
     // Liste des elements a mettre a changer (colonne 0) et valeur a mettre (colonne 1)
     IntTab elems_to_change(0,2);
     elems_to_change.set_smart_resize(1);
-    const long nb_faces_elem = elem_faces.line_size();
+    const int nb_faces_elem = elem_faces.line_size();
     const ArrOfInt& index_elem = intersections_elem_facettes_.index_elem();
-    for (long elem = 0; elem < nb_elem; elem++)
+    for (int elem = 0; elem < nb_elem; elem++)
       {
         // element non traverse par une interface ?
         if (index_elem[elem] >= 0)
           continue;
 
         double somme = 0.; //somme des indicatrices des elements monophasiques voisins
-        long count = 0; //nombre d'elements monophasiques voisins
-        for (long ivoisin = 0; ivoisin < nb_faces_elem; ivoisin++)
+        int count = 0; //nombre d'elements monophasiques voisins
+        for (int ivoisin = 0; ivoisin < nb_faces_elem; ivoisin++)
           {
-            const long face = elem_faces(elem, ivoisin);
-            const long elem_voisin = face_voisins(face, 0) + face_voisins(face, 1) - elem;
+            const int face = elem_faces(elem, ivoisin);
+            const int elem_voisin = face_voisins(face, 0) + face_voisins(face, 1) - elem;
             // element au bord du domaine ?
             if (elem_voisin < 0)
               continue;
@@ -1075,18 +1075,18 @@ void Maillage_FT_Disc::calcul_indicatrice(DoubleVect& indicatrice,
             // Elem est une maille diphasique.
             // Pourquoi lui met-on la valeur de somme qui vaut ici indicatrice[elem_voisin]
             // qui est pure (indicatrice[elem_voisin] vaut 0 ou 1)
-            elems_to_change.append_line(elem, (long)std::lrint(somme));
+            elems_to_change.append_line(elem, (int)std::lrint(somme));
           }
         if (count > 1)
           {
-            long indic;
+            int indic;
             if (indicatrice[elem] == 1.)
               indic = 1;
             else if (indicatrice[elem] == 0.)
               indic = 0;
             else
               indic = -1;
-            long new_indic = ((somme * 2) > count) ? 1 : 0;
+            int new_indic = ((somme * 2) > count) ? 1 : 0;
             // on compare somme/count avec l'indicatrice
             if (indic != new_indic)
               {
@@ -1096,10 +1096,10 @@ void Maillage_FT_Disc::calcul_indicatrice(DoubleVect& indicatrice,
           }
       }
     // Correction du tableau
-    const long n = elems_to_change.dimension(0);
-    for (long i = 0; i < n; i++)
+    const int n = elems_to_change.dimension(0);
+    for (int i = 0; i < n; i++)
       {
-        const long elem = elems_to_change(i, 0);
+        const int elem = elems_to_change(i, 0);
         indicatrice[elem] = elems_to_change(i, 1);
       }
     if (n > 0)
@@ -1138,8 +1138,8 @@ void Maillage_FT_Disc::calcul_indicatrice(DoubleVect& indicatrice,
   statistiques().begin_count(stat_counter);
   const Domaine_dis& domaine_dis = refdomaine_dis_.valeur();
   const Domaine_VF& domaine_vf = ref_cast(Domaine_VF, domaine_dis.valeur());
-  const long nb_face = domaine_vf.nb_faces();
-  const long nb_face_tot = domaine_vf.nb_faces_tot();
+  const int nb_face = domaine_vf.nb_faces();
+  const int nb_face_tot = domaine_vf.nb_faces_tot();
   const IntTab& elem_faces = domaine_vf.elem_faces();
   static ArrOfBit faces_calculees;
   faces_calculees.resize_array(nb_face_tot);
@@ -1156,23 +1156,23 @@ void Maillage_FT_Disc::calcul_indicatrice(DoubleVect& indicatrice,
   // Mettre a zero les faces traverses, les faces voisines et les faces dont
   // l'indicatrice n'est ni a zero ni a un.
   {
-    const long nb_faces_voisines = elem_faces.dimension(1); // idem que pour les elements
+    const int nb_faces_voisines = elem_faces.dimension(1); // idem que pour les elements
     // Boucle sur les faces
     // Si l'indicatrice precedente est differente de 0 ou 1 ou que la face est traversee --> alors on recalcule
     const ArrOfInt& index_face_x = intersections_face_facettes_x_.index_face();
     const ArrOfInt& index_face_y = intersections_face_facettes_y_.index_face();
     const ArrOfInt& index_face_z = intersections_face_facettes_z_.index_face();
     assert(indicatrice_face.size() == nb_face);
-    long i;
+    int i;
     DoubleVect check(indicatrice_face);
     for (i = 0; i < nb_face_tot; i++)
       {
         const double x = indicatrice_face_precedente[i];
-        long check_voisins = ( ((x != 0.) && (x != 1.)));
+        int check_voisins = ( ((x != 0.) && (x != 1.)));
         if (i < nb_face)
           {
-            long orientation=domaine_vf.orientation(i);
-            long index;
+            int orientation=domaine_vf.orientation(i);
+            int index;
             if (orientation==0) index=index_face_x[i];
             else if (orientation==1) index=index_face_y[i];
             else if (orientation==2) index=index_face_z[i];
@@ -1195,17 +1195,17 @@ void Maillage_FT_Disc::calcul_indicatrice(DoubleVect& indicatrice,
         if (check(i))
           {
             faces_calculees.clearbit(i);
-            const long elem0=domaine_vf.face_voisins(i,0);
-            const long elem1=domaine_vf.face_voisins(i,1);
-            const long ori=domaine_vf.orientation(i);
+            const int elem0=domaine_vf.face_voisins(i,0);
+            const int elem1=domaine_vf.face_voisins(i,1);
+            const int ori=domaine_vf.orientation(i);
             // Boucle sur les voisins
-            long j;
+            int j;
             for (j = 0; j < nb_faces_voisines; j++)
               {
                 // On cherche l'element voisin
-                const long direction = (j>=dimension);
-                long num_elem;
-                long face_voisine;
+                const int direction = (j>=dimension);
+                int num_elem;
+                int face_voisine;
                 if (j%dimension==ori)
                   {
                     num_elem = (direction==0) ? elem0 : elem1;
@@ -1213,8 +1213,8 @@ void Maillage_FT_Disc::calcul_indicatrice(DoubleVect& indicatrice,
                   }
                 else
                   {
-                    const long elem_2 = (elem0>0) ? domaine_vf.face_voisins(domaine_vf.elem_faces(elem0,j),direction) : -1;
-                    const long elem_3 = (elem1>0) ? domaine_vf.face_voisins(domaine_vf.elem_faces(elem1,j),direction) : -1;
+                    const int elem_2 = (elem0>0) ? domaine_vf.face_voisins(domaine_vf.elem_faces(elem0,j),direction) : -1;
+                    const int elem_3 = (elem1>0) ? domaine_vf.face_voisins(domaine_vf.elem_faces(elem1,j),direction) : -1;
                     num_elem = std::max(elem_2,elem_3);
                     // S'il n'y a pas de voisin, on est au bord du domaine
                     if (num_elem >= 0)
@@ -1242,10 +1242,10 @@ void Maillage_FT_Disc::calcul_indicatrice(DoubleVect& indicatrice,
 
     assert(indicatrice_face.size() == nb_face);
     // Boucle sur les faces
-    for (long i = 0; i < nb_face; i++)
+    for (int i = 0; i < nb_face; i++)
       {
-        long orientation=domaine_vf.orientation(i);
-        long index;
+        int orientation=domaine_vf.orientation(i);
+        int index;
         if (orientation==0)
           {
             // Faces de normale x
@@ -1323,8 +1323,8 @@ void Maillage_FT_Disc::calcul_indicatrice(DoubleVect& indicatrice,
 
   {
     const DoubleTab& distance = equation_transport().get_update_distance_interface_faces().valeurs();
-    long i;
-    long error_count = 0;
+    int i;
+    int error_count = 0;
 
     for (i = 0; i < nb_face; i++)
       {
@@ -1356,10 +1356,10 @@ void Maillage_FT_Disc::calcul_indicatrice(DoubleVect& indicatrice,
 
 
   //indicatrice_face.echange_espace_virtuel();
-  long n_proc=Process::nproc();
+  int n_proc=Process::nproc();
   if (n_proc>1)
     {
-      for (long face=0; face<domaine_vf.nb_faces_tot(); face++)
+      for (int face=0; face<domaine_vf.nb_faces_tot(); face++)
         {
           //double face_monophasique = (indicatrice_face(face) !=0 || indicatrice_face(face)!=1) ? 0.5:1;
 
@@ -1372,7 +1372,7 @@ void Maillage_FT_Disc::calcul_indicatrice(DoubleVect& indicatrice,
         }
       MD_Vector_tools::echange_espace_virtuel(indicatrice_face,MD_Vector_tools::EV_SOMME_ECHANGE);
 
-      for (long face=0; face<nb_face; face++)
+      for (int face=0; face<nb_face; face++)
         {
           if (faces_doubles(face))
             {
@@ -1393,14 +1393,14 @@ void Maillage_FT_Disc::calcul_indicatrice(DoubleVect& indicatrice,
     // Liste des faces a mettre a changer (colonne 0) et valeur a mettre (colonne 1)
     IntTab faces_to_change(0,2);
     faces_to_change.set_smart_resize(1);
-    const long nb_faces_face = elem_faces.line_size();
+    const int nb_faces_face = elem_faces.line_size();
     const ArrOfInt& index_face_x = intersections_face_facettes_x_.index_face();
     const ArrOfInt& index_face_y = intersections_face_facettes_y_.index_face();
     const ArrOfInt& index_face_z = intersections_face_facettes_z_.index_face();
-    for (long face = 0; face < nb_face; face++)
+    for (int face = 0; face < nb_face; face++)
       {
         // face non traversee par une interface ?
-        long orientation = domaine_vf.orientation(face);
+        int orientation = domaine_vf.orientation(face);
         if (orientation==0)
           {
             if (index_face_x[face] >= 0)
@@ -1420,17 +1420,17 @@ void Maillage_FT_Disc::calcul_indicatrice(DoubleVect& indicatrice,
           exit();
 
         double somme = 0.; //somme des indicatrices des faces monophasiques voisins
-        long count = 0; //nombre de faces monophasiques voisines
-        const long elem0=domaine_vf.face_voisins(face,0);
-        const long elem1=domaine_vf.face_voisins(face,1);
-        const long ori=domaine_vf.orientation(face);
+        int count = 0; //nombre de faces monophasiques voisines
+        const int elem0=domaine_vf.face_voisins(face,0);
+        const int elem1=domaine_vf.face_voisins(face,1);
+        const int ori=domaine_vf.orientation(face);
 
-        for (long ivoisin = 0; ivoisin < nb_faces_face; ivoisin++)
+        for (int ivoisin = 0; ivoisin < nb_faces_face; ivoisin++)
           {
             // On cherche l'element voisin
-            const long direction = (ivoisin>=dimension);
-            long num_elem;
-            long face_voisine;
+            const int direction = (ivoisin>=dimension);
+            int num_elem;
+            int face_voisine;
 
             if (ivoisin%dimension==ori)
               {
@@ -1439,8 +1439,8 @@ void Maillage_FT_Disc::calcul_indicatrice(DoubleVect& indicatrice,
               }
             else
               {
-                const long elem_2 = (elem0>0) ? domaine_vf.face_voisins(domaine_vf.elem_faces(elem0,ivoisin),direction) : -1;
-                const long elem_3 = (elem1>0) ? domaine_vf.face_voisins(domaine_vf.elem_faces(elem1,ivoisin),direction) : -1;
+                const int elem_2 = (elem0>0) ? domaine_vf.face_voisins(domaine_vf.elem_faces(elem0,ivoisin),direction) : -1;
+                const int elem_3 = (elem1>0) ? domaine_vf.face_voisins(domaine_vf.elem_faces(elem1,ivoisin),direction) : -1;
                 num_elem = std::max(elem_2,elem_3);
                 // S'il n'y a pas de voisin, on est au bord du domaine
                 if (num_elem >= 0)
@@ -1462,18 +1462,18 @@ void Maillage_FT_Disc::calcul_indicatrice(DoubleVect& indicatrice,
         // Correction testee en VDF mais deux cas test VEF ont fait des ecarts
         if(count == 1)
           {
-            faces_to_change.append_line(face, (long)std::lrint(somme));
+            faces_to_change.append_line(face, (int)std::lrint(somme));
           }
         if (count > 1)
           {
-            long indic;
+            int indic;
             if (indicatrice_face[face] == 1.)
               indic = 1;
             else if (indicatrice_face[face] == 0.)
               indic = 0;
             else
               indic = -1;
-            long new_indic = ((somme * 2) > count) ? 1 : 0;
+            int new_indic = ((somme * 2) > count) ? 1 : 0;
             // on compare somme/count avec l'indicatrice
             if (indic != new_indic)
               {
@@ -1484,10 +1484,10 @@ void Maillage_FT_Disc::calcul_indicatrice(DoubleVect& indicatrice,
       }
 
     // Correction du tableau
-    const long n = faces_to_change.dimension(0);
-    for (long i = 0; i < n; i++)
+    const int n = faces_to_change.dimension(0);
+    for (int i = 0; i < n; i++)
       {
-        const long face = faces_to_change(i, 0);
+        const int face = faces_to_change(i, 0);
         if (!faces_doubles(face)) indicatrice_face[face] = faces_to_change(i, 1);
       }
     if (n > 0)
@@ -1529,7 +1529,7 @@ void Maillage_FT_Disc::calcul_indicatrice_arete(const DoubleVect& indicatrice, D
   statistiques().begin_count(stat_counter);
   const Domaine_dis& domaine_dis = refdomaine_dis_.valeur();
   const Domaine_VDF& domaine_vdf = ref_cast(Domaine_VDF, domaine_dis.valeur());
-  const long nb_aretes_reelles = domaine_vdf.nb_aretes_reelles();
+  const int nb_aretes_reelles = domaine_vdf.nb_aretes_reelles();
   const IntVect& orientation_aretes=domaine_vdf.orientation_aretes();
   const IntTab& Elem_Aretes=domaine_vdf.domaine().elem_aretes();
   const IntTab& Qdm=domaine_vdf.Qdm();
@@ -1542,7 +1542,7 @@ void Maillage_FT_Disc::calcul_indicatrice_arete(const DoubleVect& indicatrice, D
   indicatrice_arete = indicatrice_arete_precedente;
 
   {
-    const long nb_aretes_voisines = domaine_vdf.elem_faces().dimension(1);
+    const int nb_aretes_voisines = domaine_vdf.elem_faces().dimension(1);
     // Boucle sur les faces
     // Si l'indicatrice precedente est differente de 0 ou 1 ou que la face est traversee --> alors on recalcule
     const ArrOfInt& index_arete_x = intersections_arete_facettes_x_.index_arete();
@@ -1550,16 +1550,16 @@ void Maillage_FT_Disc::calcul_indicatrice_arete(const DoubleVect& indicatrice, D
     const ArrOfInt& index_arete_z = intersections_arete_facettes_z_.index_arete();
 
     assert(indicatrice_arete.size_array() == nb_aretes_reelles);
-    long i;
+    int i;
     DoubleVect check(indicatrice_arete);
     for (i = 0; i < nb_aretes_reelles; i++)
       {
         if (type_arete(i)!=2) continue; // on ne calcule que pour les aretes_internes
         const double x = indicatrice_arete_precedente[i];
-        long check_voisins = ( ((x != 0.) && (x != 1.)));
+        int check_voisins = ( ((x != 0.) && (x != 1.)));
 
-        long orientation=(dimension-1)-orientation_aretes(i);
-        long index;
+        int orientation=(dimension-1)-orientation_aretes(i);
+        int index;
         if (orientation==0) index=index_arete_x[i];
         else if (orientation==1) index=index_arete_y[i];
         else if (orientation==2) index=index_arete_z[i];
@@ -1578,30 +1578,30 @@ void Maillage_FT_Disc::calcul_indicatrice_arete(const DoubleVect& indicatrice, D
         if (check(i))
           {
             aretes_calculees.clearbit(i);
-            const long ori_arete=(dimension-1)-orientation_aretes(i);
+            const int ori_arete=(dimension-1)-orientation_aretes(i);
 
-            long face1=Qdm(i,0);
-            long face2=Qdm(i,1);
+            int face1=Qdm(i,0);
+            int face2=Qdm(i,1);
 
-            long elem1=domaine_vdf.face_voisins(face1,0);
-            long elem2=domaine_vdf.face_voisins(face2,0);
-            long elem3=domaine_vdf.face_voisins(face1,1);
-            //long elem4=domaine_vdf.face_voisins(face2,1);
+            int elem1=domaine_vdf.face_voisins(face1,0);
+            int elem2=domaine_vdf.face_voisins(face2,0);
+            int elem3=domaine_vdf.face_voisins(face1,1);
+            //int elem4=domaine_vdf.face_voisins(face2,1);
 
-            long face1_av=domaine_vdf.elem_faces(elem1, ori_arete+dimension);
-            long face1_arr=domaine_vdf.elem_faces(elem1, ori_arete);
+            int face1_av=domaine_vdf.elem_faces(elem1, ori_arete+dimension);
+            int face1_arr=domaine_vdf.elem_faces(elem1, ori_arete);
 
-            long elem_av=domaine_vdf.face_voisins(face1_av,1);
-            long elem_arr=domaine_vdf.face_voisins(face1_arr,0);
+            int elem_av=domaine_vdf.face_voisins(face1_av,1);
+            int elem_arr=domaine_vdf.face_voisins(face1_arr,0);
 
             //Cerr << elem1+elem2+elem3+elem_av+elem_arr<< finl;
 
             // Boucle sur les voisins
-            long j;
+            int j;
             for (j = 0; j < nb_aretes_voisines; j++)
               {
                 // On cherche l'element voisin
-                long arete_voisine;
+                int arete_voisine;
 
                 if (j==ori_arete) arete_voisine=Elem_Aretes(elem_av,orientation_aretes(i)); // voir numerotation Aretes dans Hexaedre.cpp
                 else if (j==ori_arete+dimension) arete_voisine=Elem_Aretes(elem_arr,orientation_aretes(i));
@@ -1650,11 +1650,11 @@ void Maillage_FT_Disc::calcul_indicatrice_arete(const DoubleVect& indicatrice, D
     assert(indicatrice_arete.size() == nb_aretes_reelles);
     // Boucle sur les aretes
 
-    for (long i = 0; i < nb_aretes_reelles; i++)
+    for (int i = 0; i < nb_aretes_reelles; i++)
       {
         if (type_arete(i)!=2) continue; // on ne calcule que pour les aretes_internes
-        const long ori_arete=(dimension-1)-orientation_aretes(i);
-        long index;
+        const int ori_arete=(dimension-1)-orientation_aretes(i);
+        int index;
         if (ori_arete==0)
           {
 
@@ -1733,8 +1733,8 @@ void Maillage_FT_Disc::calcul_indicatrice_arete(const DoubleVect& indicatrice, D
   // de la fonction distance.
   {
     const DoubleTab& distance = equation_transport().get_update_distance_interface_aretes();
-    long i;
-    long error_count = 0;
+    int i;
+    int error_count = 0;
 
     for (i = 0; i < nb_aretes_reelles; i++)
       {
@@ -1764,7 +1764,7 @@ void Maillage_FT_Disc::calcul_indicatrice_arete(const DoubleVect& indicatrice, D
       }
   }
   /*
-    for (long arete=0; arete<domaine_vdf.nb_aretes_tot(); arete++)
+    for (int arete=0; arete<domaine_vdf.nb_aretes_tot(); arete++)
       {
         double coeff=0.5;
 
@@ -1784,7 +1784,7 @@ void Maillage_FT_Disc::calcul_indicatrice_arete(const DoubleVect& indicatrice, D
 
     MD_Vector_tools::echange_espace_virtuel(indicatrice_arete,MD_Vector_tools::EV_SOMME_ECHANGE);
 
-    for (long arete=0; arete<nb_aretes_reelles; arete++)
+    for (int arete=0; arete<nb_aretes_reelles; arete++)
       {
         if (aretes_multiples(arete)>0)
           {
@@ -1800,16 +1800,16 @@ void Maillage_FT_Disc::calcul_indicatrice_arete(const DoubleVect& indicatrice, D
   {
     IntTab aretes_to_change(0,2);
     aretes_to_change.set_smart_resize(1);
-    const long nb_faces_arete = 2*dimension;
+    const int nb_faces_arete = 2*dimension;
     const ArrOfInt& index_arete_x = intersections_arete_facettes_x_.index_arete();
     const ArrOfInt& index_arete_y = intersections_arete_facettes_y_.index_arete();
     const ArrOfInt& index_arete_z = intersections_arete_facettes_z_.index_arete();
 
-    for (long arete=0; arete<nb_aretes_reelles; arete++)
+    for (int arete=0; arete<nb_aretes_reelles; arete++)
       {
         if (type_arete(arete)!=2) continue; // on ne calcule que pour les aretes_internes
         // face non traversee par une interface ?
-        const long ori_arete=(dimension-1)-orientation_aretes(arete);
+        const int ori_arete=(dimension-1)-orientation_aretes(arete);
         if (ori_arete==0)
           {
             if (index_arete_x[arete] >= 0)
@@ -1829,29 +1829,29 @@ void Maillage_FT_Disc::calcul_indicatrice_arete(const DoubleVect& indicatrice, D
           exit();
 
         double somme = 0.; //somme des indicatrices des aretes monophasiques voisines
-        long count = 0; //nombre d'aretes monophasiques voisines
+        int count = 0; //nombre d'aretes monophasiques voisines
 
 
-        long face1=Qdm(arete,0);
-        long face2=Qdm(arete,1);
-        //long face3=Qdm(arete,2);
-        //long face4=Qdm(arete,3);
+        int face1=Qdm(arete,0);
+        int face2=Qdm(arete,1);
+        //int face3=Qdm(arete,2);
+        //int face4=Qdm(arete,3);
 
-        long elem1=domaine_vdf.face_voisins(face1,0);
-        long elem2=domaine_vdf.face_voisins(face2,0);
-        long elem3=domaine_vdf.face_voisins(face1,1);
-        //long elem4=domaine_vdf.face_voisins(face2,1);
+        int elem1=domaine_vdf.face_voisins(face1,0);
+        int elem2=domaine_vdf.face_voisins(face2,0);
+        int elem3=domaine_vdf.face_voisins(face1,1);
+        //int elem4=domaine_vdf.face_voisins(face2,1);
 
-        long face1_av=domaine_vdf.elem_faces(elem1, ori_arete+dimension);
-        long face1_arr=domaine_vdf.elem_faces(elem1, ori_arete);
+        int face1_av=domaine_vdf.elem_faces(elem1, ori_arete+dimension);
+        int face1_arr=domaine_vdf.elem_faces(elem1, ori_arete);
 
-        long elem_av=domaine_vdf.face_voisins(face1_av,1);
-        long elem_arr=domaine_vdf.face_voisins(face1_arr,0);
+        int elem_av=domaine_vdf.face_voisins(face1_av,1);
+        int elem_arr=domaine_vdf.face_voisins(face1_arr,0);
 
 
-        for (long ivoisin=0; ivoisin<nb_faces_arete; ivoisin++)
+        for (int ivoisin=0; ivoisin<nb_faces_arete; ivoisin++)
           {
-            long arete_voisine;
+            int arete_voisine;
             if (ivoisin==ori_arete) arete_voisine= (elem_av>=0) ? Elem_Aretes(elem_av,orientation_aretes(arete)) : -1; // voir numerotation Aretes dans Hexaedre.cpp
             else if (ivoisin==ori_arete+dimension) arete_voisine=(elem_arr>=0) ? Elem_Aretes(elem_arr,orientation_aretes(arete)):-1;
 
@@ -1892,18 +1892,18 @@ void Maillage_FT_Disc::calcul_indicatrice_arete(const DoubleVect& indicatrice, D
         // Correction testee en VDF mais deux cas test VEF ont fait des ecarts
         if(count == 1)
           {
-            aretes_to_change.append_line(arete, (long)std::lrint(somme));
+            aretes_to_change.append_line(arete, (int)std::lrint(somme));
           }
         if (count > 1)
           {
-            long indic;
+            int indic;
             if (indicatrice_arete[arete] == 1.)
               indic = 1;
             else if (indicatrice_arete[arete] == 0.)
               indic = 0;
             else
               indic = -1;
-            long new_indic = ((somme * 2) > count) ? 1 : 0;
+            int new_indic = ((somme * 2) > count) ? 1 : 0;
             // on compare somme/count avec l'indicatrice
             if (indic != new_indic)
               {
@@ -1914,10 +1914,10 @@ void Maillage_FT_Disc::calcul_indicatrice_arete(const DoubleVect& indicatrice, D
       }
 
     // Correction du tableau
-    const long n = aretes_to_change.dimension(0);
-    for (long i = 0; i < n; i++)
+    const int n = aretes_to_change.dimension(0);
+    for (int i = 0; i < n; i++)
       {
-        const long arete = aretes_to_change(i, 0);
+        const int arete = aretes_to_change(i, 0);
         if (1) indicatrice_arete[arete] = aretes_to_change(i, 1); // if !faces_doubles(face)
       }
     if (n > 0)
@@ -1944,9 +1944,9 @@ void Maillage_FT_Disc::transporter(const DoubleTab& deplacement)
   assert(deplacement.dimension(0) == sommets_.dimension(0));
   assert(deplacement.dimension(1) == sommets_.dimension(1));
 
-  long i;
-  const long dim = Objet_U::dimension;
-  const long nb_som = nb_sommets();
+  int i;
+  const int dim = Objet_U::dimension;
+  const int nb_som = nb_sommets();
   // La taille est surestimee
   ArrOfInt liste_sommets;
   liste_sommets.set_smart_resize(1);
@@ -1958,13 +1958,13 @@ void Maillage_FT_Disc::transporter(const DoubleTab& deplacement)
   ArrOfIntFT liste_sommets_sortis;
   ArrOfIntFT numero_face_sortie;
 
-  long n = 0;
+  int n = 0;
   for (i = 0; i < nb_som; i++)
     {
       if (! sommet_virtuel(i))
         {
           liste_sommets[n] = i;
-          for (long j = 0; j < dim; j++)
+          for (int j = 0; j < dim; j++)
             vecteur(n, j) = deplacement(i, j);
           n++;
         }
@@ -2028,7 +2028,7 @@ void Maillage_FT_Disc::remplir_structure(const DoubleTab& soms)
 
   Descripteur_FT& espace_distant = desc_sommets_.espace_distant();
   Descripteur_FT& espace_virtuel = desc_sommets_.espace_virtuel();
-  //long nb_som_tot=def_noeud.dimension(0);
+  //int nb_som_tot=def_noeud.dimension(0);
   //def_noeud.resize(nb_som_tot,8);
   //  def_noeud(i,5) = numero de la face de normale x qui contient le sommet (-1 sinon) // EB
   //  def_noeud(i,6) = numero de la face de normale y qui contient le sommet (-1 sinon) // EB
@@ -2063,10 +2063,10 @@ void Maillage_FT_Disc::remplir_structure(const DoubleTab& soms)
   // Fin EB
   //const Zone_dis& zone_dis = refzone_dis_.valeur(); // EB
   //const Zone_VF& zone_vf = ref_cast(Zone_VF, zone_dis.valeur());  // EB
-  //const long nb_faces_reelles=zone_vf.nb_faces(); // EB
+  //const int nb_faces_reelles=zone_vf.nb_faces(); // EB
 
-  long nb_noeuds = def_noeud.dimension(0);
-  for (long noeud=0; noeud<nb_noeuds; noeud++)
+  int nb_noeuds = def_noeud.dimension(0);
+  for (int noeud=0; noeud<nb_noeuds; noeud++)
     {
       def_noeud(noeud,3) =  def_noeud(noeud,4);
       def_noeud(noeud,4) = -1;
@@ -2076,9 +2076,9 @@ void Maillage_FT_Disc::remplir_structure(const DoubleTab& soms)
       def_noeud(noeud,6) = -1;
       def_noeud(noeud,7) = -1;
 
-      long mon_elem=def_noeud(noeud, 3);
+      int mon_elem=def_noeud(noeud, 3);
       // debut EB
-      long elem_virt=-1;
+      int elem_virt=-1;
       IntVect check_som_in_face(2*dimension);
       if (mon_elem>=0) check_som_in_face=1;
       else // Le sommet ne m'appartient pas. Je ne connais pas l'element qui le contient -> je le cherche
@@ -2087,9 +2087,9 @@ void Maillage_FT_Disc::remplir_structure(const DoubleTab& soms)
           assert(elem_virt>=0);
           // Si le sommet est dans le volume de controle d'une face double, on met check_som_in_face a 1.
           check_som_in_face=0;
-          for (long dim=0; dim<2*dimension; dim++) // on parcourt les faces du volume de controle de l'element. Si une des faces est reelles, alors le sommet est dans le volume de controle de la premiere couche de joint
+          for (int dim=0; dim<2*dimension; dim++) // on parcourt les faces du volume de controle de l'element. Si une des faces est reelles, alors le sommet est dans le volume de controle de la premiere couche de joint
             {
-              long la_face=zone_vf.elem_faces(elem_virt,dim);
+              int la_face=zone_vf.elem_faces(elem_virt,dim);
               if (la_face<nb_faces_reelles)  // la face est reelle mais l'element est virtuel -> face_double
                 {
                   check_som_in_face(dim)=1;
@@ -2100,9 +2100,9 @@ void Maillage_FT_Disc::remplir_structure(const DoubleTab& soms)
       if (mon_elem>=0)
         {
           IntVect faces_elem_eulerien(2*dimension);
-          for (long dim=0; dim<2*dimension; dim++) faces_elem_eulerien(dim) = zone_vf.elem_faces(mon_elem,dim); // on recupere les faces de l'element eulerien
+          for (int dim=0; dim<2*dimension; dim++) faces_elem_eulerien(dim) = zone_vf.elem_faces(mon_elem,dim); // on recupere les faces de l'element eulerien
           double pos_sommet, coord_elem;
-          for (long dim=0; dim<dimension; dim++)
+          for (int dim=0; dim<dimension; dim++)
             {
               pos_sommet=sommets_(noeud,dim); // on recupere la position du sommet suivant l'axe "dim"
               coord_elem=zone_vf.xp(mon_elem,dim);
@@ -2131,7 +2131,7 @@ void Maillage_FT_Disc::remplir_structure(const DoubleTab& soms)
   //Construction de som_init_util pour la structure construite
   som_init_util_.resize_array(nb_noeuds);
   som_init_util_ = 0;
-  for (long noeud=0; noeud<nb_noeuds; noeud++)
+  for (int noeud=0; noeud<nb_noeuds; noeud++)
     if (def_noeud(noeud,3)!=-1)
       som_init_util_[noeud] = 1;
 
@@ -2142,7 +2142,7 @@ void Maillage_FT_Disc::remplir_structure(const DoubleTab& soms)
   calculer_coord_noeuds(def_noeud,soms,renum);
 
   {
-    long nbsommets = sommets_.dimension(0);
+    int nbsommets = sommets_.dimension(0);
     sommet_PE_owner_. resize_array(nbsommets);
     sommet_num_owner_.resize_array(nbsommets);
     sommet_elem_.     resize_array(nbsommets);
@@ -2154,14 +2154,14 @@ void Maillage_FT_Disc::remplir_structure(const DoubleTab& soms)
     // Le descripteur des facettes est vide, mais on calcule quand meme
     // le schema de comm pour qu'il soit valide
 
-    for (long i = 0; i < nbsommets; i++)
+    for (int i = 0; i < nbsommets; i++)
       {
         sommet_num_owner_[i] = i;
-        const long elem = def_noeud(renum(i), 3);
-        const long face = def_noeud(renum(i), 4);
-        /*const long face_x = def_noeud(renum(i), 5); // EB
-        const long face_y = def_noeud(renum(i), 6); // EB
-        const long face_z = def_noeud(renum(i), 7); // EB */
+        const int elem = def_noeud(renum(i), 3);
+        const int face = def_noeud(renum(i), 4);
+        /*const int face_x = def_noeud(renum(i), 5); // EB
+        const int face_y = def_noeud(renum(i), 6); // EB
+        const int face_z = def_noeud(renum(i), 7); // EB */
         sommet_elem_[i] = elem;
         sommet_face_bord_[i] = face;
         /*sommet_face_(i,0)=face_x; // EB
@@ -2192,23 +2192,23 @@ void Maillage_FT_Disc::remplir_structure(const DoubleTab& soms)
 
 void Maillage_FT_Disc::construire_noeuds(IntTab& def_noeud,const DoubleTab& soms)
 {
-  long som;
+  int som;
   const Domaine& madomaine = mon_dom_.valeur();
-  const long nb_elements_reels = madomaine.nb_elem();
-  const long nb_sommets_tot = soms.dimension(0);
+  const int nb_elements_reels = madomaine.nb_elem();
+  const int nb_sommets_tot = soms.dimension(0);
 
   //Procedure pour determiner a quel processeur appartiennent les sommets (tmp3)
   //et quel element les contiennent (tmp2)
   ///////////////////////////////////////////////////////////////////////////
 
-  long nb_som_tot;
-  const long dim = Objet_U::dimension;
-  const long moi = Process::me();
-  const long nbproc = Process::nproc();
-  const long chunk_size = 65536*nbproc ; // Lire les sommets par blocs
+  int nb_som_tot;
+  const int dim = Objet_U::dimension;
+  const int moi = Process::me();
+  const int nbproc = Process::nproc();
+  const int chunk_size = 65536*nbproc ; // Lire les sommets par blocs
 
   // Lecture des indices des elements contenant le sommet
-  // long erreur_sommets_exterieurs = 0;
+  // int erreur_sommets_exterieurs = 0;
 
   DoubleTab tmp;
   // tmp2 : pour chaque sommet, -1 si je ne le garde pas, sinon numero de l'element qui contient le sommet
@@ -2217,7 +2217,7 @@ void Maillage_FT_Disc::construire_noeuds(IntTab& def_noeud,const DoubleTab& soms
   ArrOfInt tmp3;
   // tmp4 : pour chaque sommet, -1 si je ne le garde pas, sinon numero de la face qui contient le sommet // EB
   ArrOfInt tmp4; // EB
-  long i = 0;
+  int i = 0;
 
   nb_som_tot = soms.dimension(0);
   if (nb_som_tot>chunk_size)
@@ -2229,18 +2229,18 @@ void Maillage_FT_Disc::construire_noeuds(IntTab& def_noeud,const DoubleTab& soms
 
   while (i < nb_som_tot)
     {
-      const long n_to_read = std::min(chunk_size, nb_som_tot - i);
+      const int n_to_read = std::min(chunk_size, nb_som_tot - i);
       tmp.resize(n_to_read, dim);
       tmp2.resize_array(n_to_read);
       tmp3.resize_array(n_to_read);
       tmp4.resize_array(n_to_read); // EB
-      for (long j = 0; j < n_to_read; j++)
-        for (long k = 0; k < dim; k++)
+      for (int j = 0; j < n_to_read; j++)
+        for (int k = 0; k < dim; k++)
           tmp(j, k) = soms(i+j, k);
 
       madomaine.chercher_elements(tmp, tmp2);
       // Ne pas tenir compte des sommets dans les elements virtuels
-      for (long j = 0; j < n_to_read; j++)
+      for (int j = 0; j < n_to_read; j++)
         if (tmp2[j] >= nb_elements_reels)
           tmp2[j] = -1;
       // Verifier qu'un processeur et un seul prend la main.
@@ -2250,7 +2250,7 @@ void Maillage_FT_Disc::construire_noeuds(IntTab& def_noeud,const DoubleTab& soms
       if (moi == 0)
         {
           // Preparer la premiere liste
-          for (long j = 0; j < n_to_read; j++)
+          for (int j = 0; j < n_to_read; j++)
             if (tmp2[j] >= 0)
               tmp3[j] = moi;
             else
@@ -2261,7 +2261,7 @@ void Maillage_FT_Disc::construire_noeuds(IntTab& def_noeud,const DoubleTab& soms
           // Recevoir une liste d'attribution du processeur precedent
           // et la completer
           recevoir(tmp3, moi - 1, moi, 0 /* canal */);
-          for (long j = 0; j < n_to_read; j++)
+          for (int j = 0; j < n_to_read; j++)
             if (tmp3[j] >= 0) // Le sommet a ete pris par un autre processeur
               tmp2[j] = -1;
             else if (tmp2[j] >= 0) // Le sommet n'a pas ete pris et est chez moi
@@ -2274,7 +2274,7 @@ void Maillage_FT_Disc::construire_noeuds(IntTab& def_noeud,const DoubleTab& soms
       else
         {
           // Le dernier processeur prend les sommets qui restent
-          for (long j = 0; j < n_to_read; j++)
+          for (int j = 0; j < n_to_read; j++)
             if (tmp3[j] < 0)
               {
                 tmp3[j] = moi;
@@ -2289,14 +2289,14 @@ void Maillage_FT_Disc::construire_noeuds(IntTab& def_noeud,const DoubleTab& soms
 
   ////////////////////////////////////////////////////////////////////////////
   def_noeud.resize(nb_sommets_tot, 5);
-  long nb_noeuds = 0;
+  int nb_noeuds = 0;
 
   for (som = 0; som < nb_sommets_tot; som++)
     {
       // Remplissage de def_noeud pour chaque point traites
       nb_noeuds=som;
-      long PE_element;
-      long numero_element_a_stocker;
+      int PE_element;
+      int numero_element_a_stocker;
       PE_element = tmp3[som];
       numero_element_a_stocker = tmp2[som];
       def_noeud(nb_noeuds, 0) = 0;
@@ -2316,13 +2316,13 @@ void Maillage_FT_Disc::construire_noeuds(IntTab& def_noeud,const DoubleTab& soms
 void Maillage_FT_Disc::calculer_coord_noeuds(const IntTab& def_noeud,const DoubleTab& soms,IntTab& renum)
 {
   // Raccourci vers les coordonnees des sommets du maillage eulerien
-  const long nb_noeuds = def_noeud.dimension(0);
+  const int nb_noeuds = def_noeud.dimension(0);
   DoubleTab& coord_noeuds = sommets_;
   coord_noeuds.resize(nb_noeuds, dimension);
-  long noeud;
-  long dimension3 = (dimension == 3);
+  int noeud;
+  int dimension3 = (dimension == 3);
 
-  long indice=0;
+  int indice=0;
   renum.resize(0);
   for (noeud = 0; noeud < nb_noeuds; noeud++)
     {
@@ -2354,9 +2354,9 @@ void Maillage_FT_Disc::transporter_simple(const DoubleTab& deplacement)
   assert(deplacement.dimension(0) == sommets_.dimension(0));
   assert(deplacement.dimension(1) == sommets_.dimension(1));
 
-  long i;
-  const long dim = Objet_U::dimension;
-  const long nb_som = nb_sommets();
+  int i;
+  const int dim = Objet_U::dimension;
+  const int nb_som = nb_sommets();
   // La taille est surestimee
   ArrOfIntFT liste_sommets(nb_som);
   // Le tableau de deplacement des sommets reels
@@ -2364,13 +2364,13 @@ void Maillage_FT_Disc::transporter_simple(const DoubleTab& deplacement)
   ArrOfIntFT liste_sommets_sortis;
   ArrOfIntFT numero_face_sortie;
 
-  long n = 0;
+  int n = 0;
   for (i = 0; i < nb_som; i++)
     {
       if (! sommet_virtuel(i))
         {
           liste_sommets[n] = i;
-          for (long j = 0; j < dim; j++)
+          for (int j = 0; j < dim; j++)
             vecteur(n, j) = deplacement(i, j);
           n++;
         }
@@ -2379,7 +2379,7 @@ void Maillage_FT_Disc::transporter_simple(const DoubleTab& deplacement)
   liste_sommets.resize_array(n);
   vecteur.resize(n, dim);
 
-  long skip_facettes = 1;
+  int skip_facettes = 1;
   deplacer_sommets(liste_sommets,
                    vecteur,
                    liste_sommets_sortis,
@@ -2393,15 +2393,15 @@ void Maillage_FT_Disc::transporter_simple(const DoubleTab& deplacement)
 // Cette methode calcule les equations des plans passant par les aretes de la facette fa7
 //   et perpendiculaires a la facette.
 // Les 3 premiers coefficients (a,b,c) designent la normale a ce plan, orientee vers l'interieur de la facette.
-long Maillage_FT_Disc::calcule_equation_plan_areteFa7(
-  long fa7, long isom,
+int Maillage_FT_Disc::calcule_equation_plan_areteFa7(
+  int fa7, int isom,
   double& a, double& b, double& c, double& d) const
 {
-  long res = 1;
-  const long nb_faces = facettes_.dimension(1);
+  int res = 1;
+  const int nb_faces = facettes_.dimension(1);
   const DoubleTab& normale_facettes = get_update_normale_facettes();
 
-  long som0,som1;
+  int som0,som1;
   double x0, y0, z0, x1, y1, z1;
   double inverse_norme;
   //recuperation des sommets de l'arete
@@ -2430,12 +2430,12 @@ long Maillage_FT_Disc::calcule_equation_plan_areteFa7(
 
 //cette fonction calcule la normale unitaire a la facette, a partir des coordonnees de ses sommets.
 //elle renvoie la surface de la facette.
-double Maillage_FT_Disc::calcul_normale_3D(long num_facette, double norme[3]) const
+double Maillage_FT_Disc::calcul_normale_3D(int num_facette, double norme[3]) const
 {
   double l = -1.;
-  long s0 = facettes_(num_facette,0);
-  long s1 = facettes_(num_facette,1);
-  long s2 = facettes_(num_facette,2);
+  int s0 = facettes_(num_facette,0);
+  int s1 = facettes_(num_facette,1);
+  int s2 = facettes_(num_facette,2);
   double x0 = sommets_(s0,0);
   double y0 = sommets_(s0,1);
   double z0 = sommets_(s0,2);
@@ -2484,7 +2484,7 @@ double Maillage_FT_Disc::calcul_normale_3D(long num_facette, double norme[3]) co
 const ArrOfDouble& Maillage_FT_Disc::get_update_surface_facettes() const
 {
   Maillage_FT_Disc_Data_Cache& data_cache = mesh_data_cache();
-  const long tag = get_mesh_tag();
+  const int tag = get_mesh_tag();
   if (data_cache.tag_surface_ != tag)
     {
       data_cache.tag_surface_ = tag;
@@ -2497,13 +2497,13 @@ const ArrOfDouble& Maillage_FT_Disc::get_update_surface_facettes() const
 // debut EB
 void Maillage_FT_Disc::calcul_cg_fa7()
 {
-  const long nb_fa7=nb_facettes();
+  const int nb_fa7=nb_facettes();
   cg_fa7_.resize(nb_fa7,dimension);
-  for (long fa7=0; fa7<nb_fa7; fa7++)
+  for (int fa7=0; fa7<nb_fa7; fa7++)
     {
-      long s0 = facettes_(fa7,0);
-      long s1 = facettes_(fa7,1);
-      long s2=-1;
+      int s0 = facettes_(fa7,0);
+      int s1 = facettes_(fa7,1);
+      int s2=-1;
       double x2=1e15,y2=1e15;
       double z0=1e15,z1=1e15,z2=1e15;
       if (dimension==3) s2 = facettes_(fa7,2);
@@ -2534,7 +2534,7 @@ void Maillage_FT_Disc::calcul_cg_fa7()
 const DoubleTab& Maillage_FT_Disc::get_update_normale_facettes() const
 {
   Maillage_FT_Disc_Data_Cache& data_cache = mesh_data_cache();
-  const long tag = get_mesh_tag();
+  const int tag = get_mesh_tag();
   if (data_cache.tag_normale_ != tag)
     {
       data_cache.tag_surface_ = tag;
@@ -2545,7 +2545,7 @@ const DoubleTab& Maillage_FT_Disc::get_update_normale_facettes() const
   return data_cache.normale_facettes_;
 }
 
-double Maillage_FT_Disc::compute_surface_and_normale_element(const long elem, const bool normalize, double surface, double normale[3]) const
+double Maillage_FT_Disc::compute_surface_and_normale_element(const int elem, const bool normalize, double surface, double normale[3]) const
 {
   const ArrOfDouble& surface_facettes = get_update_surface_facettes();
   const DoubleTab& normale_facettes = get_update_normale_facettes();
@@ -2556,7 +2556,7 @@ double Maillage_FT_Disc::compute_surface_and_normale_element(const long elem, co
   normale[2]=0.;// = {0.,0.,0.}; // Normale sortante de I=0 vers I=1
   surface = 0.;
   {
-    long index = index_elem[elem];
+    int index = index_elem[elem];
     if (index<0)
       return surface;
     // Boucle sur les faces qui traversent l'element:
@@ -2564,7 +2564,7 @@ double Maillage_FT_Disc::compute_surface_and_normale_element(const long elem, co
       {
         const Intersections_Elem_Facettes_Data& data = intersections.data_intersection(index);
         const double fraction_surf = data.fraction_surface_intersection_ * surface_facettes[data.numero_facette_];
-        for (long dir= 0; dir<Objet_U::dimension; dir++)
+        for (int dir= 0; dir<Objet_U::dimension; dir++)
           normale[dir] += fraction_surf * normale_facettes(data.numero_facette_, dir);
         surface += fraction_surf;
         index = data.index_facette_suivante_;
@@ -2576,14 +2576,14 @@ double Maillage_FT_Disc::compute_surface_and_normale_element(const long elem, co
       const double norm = sqrt(normale[0]*normale[0]+normale[1]*normale[1]+normale[2]*normale[2]);
       if (norm> Objet_U::precision_geom * Objet_U::precision_geom) // c'est a peu pres une surface pour le moment donc norm tres petit.
         {
-          for (long dir= 0; dir<Objet_U::dimension; dir++)
+          for (int dir= 0; dir<Objet_U::dimension; dir++)
             normale[dir] /= norm;
         }
     }
   return surface;
 }
 
-double Maillage_FT_Disc::compute_normale_element(const long elem, const bool normalize, ArrOfDouble& normale) const
+double Maillage_FT_Disc::compute_normale_element(const int elem, const bool normalize, ArrOfDouble& normale) const
 {
   const ArrOfDouble& surface_facettes = get_update_surface_facettes();
   const DoubleTab& normale_facettes = get_update_normale_facettes();
@@ -2591,7 +2591,7 @@ double Maillage_FT_Disc::compute_normale_element(const long elem, const bool nor
   const ArrOfInt& index_elem = intersections.index_elem();
   normale=0.;// Normale sortante de I=0 vers I=1
   {
-    long index = index_elem[elem];
+    int index = index_elem[elem];
     if (index<0)
       return 0.;
     // Boucle sur les faces qui traversent l'element:
@@ -2599,7 +2599,7 @@ double Maillage_FT_Disc::compute_normale_element(const long elem, const bool nor
       {
         const Intersections_Elem_Facettes_Data& data = intersections.data_intersection(index);
         const double fraction_surf = data.fraction_surface_intersection_ * surface_facettes[data.numero_facette_];
-        for (long dir= 0; dir<Objet_U::dimension; dir++)
+        for (int dir= 0; dir<Objet_U::dimension; dir++)
           normale[dir] += fraction_surf * normale_facettes(data.numero_facette_, dir);
         //surface_totale += fraction_surf;
         index = data.index_facette_suivante_;
@@ -2612,7 +2612,7 @@ double Maillage_FT_Disc::compute_normale_element(const long elem, const bool nor
     {
       if (norm> Objet_U::precision_geom * Objet_U::precision_geom) // c'est a peu pres une surface pour le moment donc norm tres petit.
         {
-          for (long dir= 0; dir<Objet_U::dimension; dir++)
+          for (int dir= 0; dir<Objet_U::dimension; dir++)
             normale[dir] /= norm;
         }
     }
@@ -2643,15 +2643,15 @@ const DoubleTab& Maillage_FT_Disc::get_normale_facettes() const
 const ArrOfDouble& Maillage_FT_Disc::get_update_courbure_sommets() const
 {
   Maillage_FT_Disc_Data_Cache& data_cache = mesh_data_cache();
-  const long tag = get_mesh_tag();
+  const int tag = get_mesh_tag();
   if (data_cache.tag_courbure_ != tag)
     {
       data_cache.tag_courbure_ = tag;
       calcul_courbure_sommets(data_cache.courbure_sommets_, 1 /*1st call*/);
 #if (defined(PATCH_HYSTERESIS_V2) || defined(PATCH_HYSTERESIS_V3) )
       // pour evaluer correctement l'angle de la ligne de contact...
-      long ncalls = calcul_courbure_iterations_; // 2;
-      for (long i=2; i<=ncalls; i++)
+      int ncalls = calcul_courbure_iterations_; // 2;
+      for (int i=2; i<=ncalls; i++)
         calcul_courbure_sommets(data_cache.courbure_sommets_, i /*ith call*/);
 #endif
     }
@@ -2666,17 +2666,17 @@ const ArrOfDouble& Maillage_FT_Disc::get_update_courbure_sommets() const
 void Maillage_FT_Disc::calcul_surface_normale(ArrOfDouble& surface, DoubleTab& normale) const
 {
   assert(statut_ >= MINIMAL);
-  long i;
-  long nfacettes_nulles = 0;
-  const long nbfacettes = facettes_.dimension(0);
+  int i;
+  int nfacettes_nulles = 0;
+  const int nbfacettes = facettes_.dimension(0);
   surface.resize_array(nbfacettes);
   normale.resize(nbfacettes, dimension);
   if (dimension == 2)
     {
       for (i = 0; i < nbfacettes; i++)
         {
-          long s0 = facettes_(i,0);
-          long s1 = facettes_(i,1);
+          int s0 = facettes_(i,0);
+          int s1 = facettes_(i,1);
           double dx = sommets_(s1,0) - sommets_(s0,0);
           double dy = sommets_(s1,1) - sommets_(s0,1);
           double l = sqrt(dx * dx + dy * dy);
@@ -2759,7 +2759,7 @@ const DoubleTab& Maillage_FT_Disc::cg_fa7() const
  * dimension(0))
  *
  */
-long Maillage_FT_Disc::nb_sommets() const
+int Maillage_FT_Disc::nb_sommets() const
 {
   if (statut_< MINIMAL)
     return 0;
@@ -2784,7 +2784,7 @@ const IntTab& Maillage_FT_Disc::facettes() const
  * dimension(0))
  *
  */
-long Maillage_FT_Disc::nb_facettes() const
+int Maillage_FT_Disc::nb_facettes() const
 {
   if (statut_< MINIMAL)
     return 0;
@@ -2801,18 +2801,18 @@ long Maillage_FT_Disc::nb_facettes() const
  *  A OPTIMISER eventuellement
  *
  */
-long Maillage_FT_Disc::facettes_voisines(long fa70, long fa71,
-                                         long& iarete0, long& iarete1) const
+int Maillage_FT_Disc::facettes_voisines(int fa70, int fa71,
+                                        int& iarete0, int& iarete1) const
 {
-  long isom0,isom1, som0,som1;
-  long res = 0;
+  int isom0,isom1, som0,som1;
+  int res = 0;
   iarete1 = iarete0 = -1;
-  const long nb_som_par_fa7 = facettes_.dimension(1);
-  long compteur = 0, trouve;
+  const int nb_som_par_fa7 = facettes_.dimension(1);
+  int compteur = 0, trouve;
 
   //on marque aussi les sommets communs
-  long somsCommuns0[3];
-  long somsCommuns1[3];
+  int somsCommuns0[3];
+  int somsCommuns1[3];
   somsCommuns0[0] = somsCommuns0[1] = somsCommuns0[2] = 0;
   somsCommuns1[0] = somsCommuns1[1] = somsCommuns1[2] = 0;
 
@@ -2911,7 +2911,7 @@ long Maillage_FT_Disc::facettes_voisines(long fa70, long fa71,
                   Process::Journal()<<"   somsCommuns0="<<somsCommuns0[0]<<" "<<somsCommuns0[1]<<" "<<somsCommuns0[2]<<finl;
                   Process::Journal()<<"   somsCommuns1="<<somsCommuns1[0]<<" "<<somsCommuns1[1]<<" "<<somsCommuns1[2]<<finl;
                   Process::Journal()<<"   aretes  voisines iarete0="<<iarete0<<" iarete1="<<iarete1<<finl;
-                  Process::Journal()<<"     test = "<< (long) (facettes_(fa70,iarete0)==facettes_(fa71,iarete1)?1:0)<<" res="<<res<<finl;
+                  Process::Journal()<<"     test = "<< (int) (facettes_(fa70,iarete0)==facettes_(fa71,iarete1)?1:0)<<" res="<<res<<finl;
                 }
               assert( facettes_(fa70,iarete0) == facettes_(fa71,(iarete1+1)%nb_som_par_fa7) );
               assert( facettes_(fa71,iarete1) == facettes_(fa70,(iarete0+1)%nb_som_par_fa7) );
@@ -2926,11 +2926,11 @@ long Maillage_FT_Disc::facettes_voisines(long fa70, long fa71,
 // Cette calcule les voisinages des facettes, en parcourant les intersections avec les elements
 // Le maillage doit etre en etat PARCOURU.
 //A OPTIMISER
-long Maillage_FT_Disc::calculer_voisinage_facettes(IntTab& fa7Voisines,
-                                                   const Intersections_Elem_Facettes* ief) const
+int Maillage_FT_Disc::calculer_voisinage_facettes(IntTab& fa7Voisines,
+                                                  const Intersections_Elem_Facettes* ief) const
 {
   Process::Journal()<<"Maillage_FT_Disc::calculer_voisinage_facettes"<<finl;
-  long res = 1;
+  int res = 1;
   if (ief==NULL)
     {
       ief = & intersections_elem_facettes_;
@@ -2940,10 +2940,10 @@ long Maillage_FT_Disc::calculer_voisinage_facettes(IntTab& fa7Voisines,
   fa7Voisines = -1;
 
   ArrOfIntFT fa7s_elem;
-  long i, nb_fa7, ifa70,ifa71,fa70,fa71, iarete0,iarete1;
+  int i, nb_fa7, ifa70,ifa71,fa70,fa71, iarete0,iarete1;
   const Domaine_dis& domaine_dis = refdomaine_dis_.valeur();
   const Domaine& ladomaine = domaine_dis.domaine();
-  const long nb_elem = ladomaine.nb_elem(); // Nombre d'elements reels
+  const int nb_elem = ladomaine.nb_elem(); // Nombre d'elements reels
   for (i=0 ; i<nb_elem ; i++)
     {
       ief->get_liste_facettes_traversantes(i,fa7s_elem);
@@ -3071,7 +3071,7 @@ double Maillage_FT_Disc::changer_temps(double t)
 /*! @brief return mesh_state_tag_
  *
  */
-long Maillage_FT_Disc::get_mesh_tag() const
+int Maillage_FT_Disc::get_mesh_tag() const
 {
   return mesh_state_tag_;
 }
@@ -3084,10 +3084,10 @@ const ArrOfInt& Maillage_FT_Disc::som_init_util() const
   return som_init_util_;
 }
 
-long Maillage_FT_Disc::sauvegarder(Sortie& os) const
+int Maillage_FT_Disc::sauvegarder(Sortie& os) const
 {
-  long special, afaire;
-  const long format_xyz = EcritureLectureSpecial::is_ecriture_special(special, afaire);
+  int special, afaire;
+  const int format_xyz = EcritureLectureSpecial::is_ecriture_special(special, afaire);
   if (format_xyz)
     {
       const Domaine_dis& domaine_dis = refdomaine_dis_.valeur();
@@ -3097,14 +3097,14 @@ long Maillage_FT_Disc::sauvegarder(Sortie& os) const
     }
   else
     {
-      long bytes = 0;
+      int bytes = 0;
       os << que_suis_je() << finl;
       os << mesh_state_tag_ << finl;
       os << temps_physique_ << finl;
       // On augmente la precision d'ecriture du maillage Front Tracking
       // au moment de l'ecriture et on restaure l'ancienne apres
       // Probleme rencontre sur la FA819
-      long old_precision = (long)os.get_ostream().precision(14);
+      int old_precision = (int)os.get_ostream().precision(14);
       os << sommets_;
       bytes += 8 * sommets_.size_array();
       os.precision(old_precision);
@@ -3132,10 +3132,10 @@ long Maillage_FT_Disc::sauvegarder(Sortie& os) const
     }
 }
 
-long Maillage_FT_Disc::reprendre(Entree& is)
+int Maillage_FT_Disc::reprendre(Entree& is)
 {
   reset();
-  const long format_xyz =
+  const int format_xyz =
     EcritureLectureSpecial::is_lecture_special();
   if (format_xyz)
     {
@@ -3193,7 +3193,7 @@ long Maillage_FT_Disc::reprendre(Entree& is)
 /*! @brief fonction qui cree un nouveau sommet par copie d'une existant utilise dans Remailleur_Collision_FT_Collision_Seq
  *
  */
-long Maillage_FT_Disc::copier_sommet(long som)
+int Maillage_FT_Disc::copier_sommet(int som)
 {
   maillage_modifie(MINIMAL);
   if (me()!=sommet_PE_owner_[som])
@@ -3202,8 +3202,8 @@ long Maillage_FT_Disc::copier_sommet(long som)
       return -1;
     }
 
-  long NVsom = nb_sommets();
-  long nb_sommets_tot = NVsom+1;
+  int NVsom = nb_sommets();
+  int nb_sommets_tot = NVsom+1;
   //on redimensionne les tableaux
   sommets_.resize(nb_sommets_tot,dimension);
   sommet_elem_.resize_array(nb_sommets_tot);
@@ -3214,13 +3214,13 @@ long Maillage_FT_Disc::copier_sommet(long som)
   drapeaux_sommets_.resize_array(nb_sommets_tot);
 
   //copie des donnes dui sommet som dans NVsom
-  long k;
+  int k;
   for (k=0 ; k<dimension ; k++)
     {
       sommets_(NVsom,k)      = sommets_(som,k);
     }
   sommet_elem_[NVsom]      = sommet_elem_[som];
-  for (long dim=0; dim<dimension; dim++) sommet_face_(NVsom,dim)      = sommet_face_(som,dim); // EB
+  for (int dim=0; dim<dimension; dim++) sommet_face_(NVsom,dim)      = sommet_face_(som,dim); // EB
   sommet_face_bord_[NVsom] = sommet_face_bord_[som];
   sommet_PE_owner_[NVsom]  = sommet_PE_owner_[som];
   sommet_num_owner_[NVsom] = NVsom;
@@ -3230,9 +3230,9 @@ long Maillage_FT_Disc::copier_sommet(long som)
 }
 
 //idem ci-dessus, mais rend le sommet interne (sommet_face_bord_=-1)
-long Maillage_FT_Disc::copier_sommet_interne(long som)
+int Maillage_FT_Disc::copier_sommet_interne(int som)
 {
-  long NVsom = copier_sommet(som);
+  int NVsom = copier_sommet(som);
 
   if (NVsom>=0)
     {
@@ -3270,18 +3270,18 @@ void Maillage_FT_Disc::creer_sommets_virtuels(const ArrOfInt& liste_sommets,
 {
   if (Comm_Group::check_enabled()) check_sommets();
 
-  const long dimension3 = (dimension == 3);
-  long i;
-  const long n = liste_sommets.size_array();
+  const int dimension3 = (dimension == 3);
+  int i;
+  const int n = liste_sommets.size_array();
   Descripteur_FT& espace_distant = desc_sommets_.espace_distant();
 
   comm.begin_comm();
 
   for (i = 0; i < n; i++)
     {
-      long pe_destination = liste_pe[i];
+      int pe_destination = liste_pe[i];
       assert(pe_destination != me());
-      long numero_sommet = liste_sommets[i];
+      int numero_sommet = liste_sommets[i];
       // Si le sommet est deja connu par le destinataire, on ne l'envoie pas.
       if (espace_distant.contient_element(pe_destination, numero_sommet))
         continue;
@@ -3293,8 +3293,8 @@ void Maillage_FT_Disc::creer_sommets_virtuels(const ArrOfInt& liste_sommets,
       Sortie& send_buffer = comm.send_buffer(pe_destination);
       // On verifie que le sommet est bien reel
       assert(! sommet_virtuel(numero_sommet));
-      long drapeau = drapeaux_sommets_[numero_sommet];
-      long face_bord = sommet_face_bord_[numero_sommet];
+      int drapeau = drapeaux_sommets_[numero_sommet];
+      int face_bord = sommet_face_bord_[numero_sommet];
       double x = sommets_(numero_sommet,0);
       double y = sommets_(numero_sommet,1);
       double z = dimension3 ? sommets_(numero_sommet, 2) : 0.;
@@ -3306,24 +3306,24 @@ void Maillage_FT_Disc::creer_sommets_virtuels(const ArrOfInt& liste_sommets,
   Descripteur_FT& espace_virtuel = desc_sommets_.espace_virtuel();
   // Liste des processeurs de qui on a recu des messages
   const ArrOfInt& recv_pe_list = comm.get_recv_pe_list();
-  const long recv_pe_size = recv_pe_list.size_array();
-  long indice_pe;
+  const int recv_pe_size = recv_pe_list.size_array();
+  int indice_pe;
   for (indice_pe = 0; indice_pe < recv_pe_size; indice_pe++)
     {
-      const long pe_source = recv_pe_list[indice_pe];
+      const int pe_source = recv_pe_list[indice_pe];
       Entree& recv_buffer = comm.recv_buffer(pe_source);
 
       do
         {
           // Numero du sommet sur le PE proprietaire :
-          long numero_sur_pe_source, drapeau, face_bord;
+          int numero_sur_pe_source, drapeau, face_bord;
           double x, y, z;
           recv_buffer >> numero_sur_pe_source >> drapeau >> face_bord >> x >> y >> z;
           if (recv_buffer.eof())
             break;
 
           // Creation du sommet
-          long nsom = sommets_.dimension(0);
+          int nsom = sommets_.dimension(0);
           if (dimension3)
             sommets_.append_line(x, y, z);
           else
@@ -3362,7 +3362,7 @@ void Maillage_FT_Disc::creer_sommets_virtuels(const ArrOfInt& liste_sommets,
 void Maillage_FT_Disc::creer_sommets_virtuels_numowner(const ArrOfInt& request_sommets_pe,
                                                        const ArrOfInt& request_sommets_num)
 {
-  const long nbproc = Process::nproc();
+  const int nbproc = Process::nproc();
   // Liste des processeurs a qui on envoyer des requetes
   //   et de qui on va recevoir des noeuds:
   ArrOfIntFT send_pe_list;
@@ -3373,12 +3373,12 @@ void Maillage_FT_Disc::creer_sommets_virtuels_numowner(const ArrOfInt& request_s
   ArrOfIntFT pe_markers(nbproc);
   pe_markers = 0;
   {
-    long i;
-    const long n = request_sommets_pe.size_array();
+    int i;
+    const int n = request_sommets_pe.size_array();
     assert(n == request_sommets_num.size_array());
     for (i = 0; i < n; i++)
       {
-        const long pe = request_sommets_pe[i];
+        const int pe = request_sommets_pe[i];
         assert(pe != Process::me());
         if (pe_markers[pe] == 0)
           {
@@ -3388,14 +3388,14 @@ void Maillage_FT_Disc::creer_sommets_virtuels_numowner(const ArrOfInt& request_s
       }
   }
   // Calcule la send_pe_list en fonction de la recv_pe_list.
-  // C'est long (communication all_to_all) mais c'est le plus simple
+  // C'est int (communication all_to_all) mais c'est le plus simple
   // car les processeurs de la recv_pe_list ne savent pas a priori
   // de quels processeurs ils vont recevoir des messages.
   {
-    long sz = send_pe_list.size_array();
+    int sz = send_pe_list.size_array();
     ArrOfInt s(sz);
     ArrOfInt r;
-    long i;
+    int i;
     for (i = 0; i < sz; i++) s[i] = send_pe_list[i];
     reverse_send_recv_pe_list(s, r);
     sz = r.size_array();
@@ -3409,12 +3409,12 @@ void Maillage_FT_Disc::creer_sommets_virtuels_numowner(const ArrOfInt& request_s
     schema.set_send_recv_pe_list(send_pe_list, recv_pe_list);
     schema.begin_comm();
     {
-      long i;
-      const long n = request_sommets_pe.size_array();
+      int i;
+      const int n = request_sommets_pe.size_array();
       for (i = 0; i < n; i++)
         {
-          const long pe = request_sommets_pe[i];
-          const long som = request_sommets_num[i];
+          const int pe = request_sommets_pe[i];
+          const int som = request_sommets_num[i];
           schema.send_buffer(pe) << som;
         }
     }
@@ -3424,13 +3424,13 @@ void Maillage_FT_Disc::creer_sommets_virtuels_numowner(const ArrOfInt& request_s
     ArrOfIntFT liste_sommets_pe;  // Sur quel proc faut-il creer un noeud virt ?
     ArrOfIntFT liste_sommets_num; // Numero local du noeud a envoyer
     {
-      long i_pe;
-      const long n_pe = recv_pe_list.size_array();
+      int i_pe;
+      const int n_pe = recv_pe_list.size_array();
       for (i_pe = 0; i_pe < n_pe; i_pe++)
         {
-          const long pe = recv_pe_list[i_pe];
+          const int pe = recv_pe_list[i_pe];
           Entree& buffer = schema.recv_buffer(pe);
-          long num_sommet;
+          int num_sommet;
           while (1)
             {
               buffer >> num_sommet;
@@ -3478,7 +3478,7 @@ void Maillage_FT_Disc::echanger_sommets_PE(const ArrOfInt& liste_sommets,
                                            const DoubleTab& deplacement,
                                            ArrOfInt& liste_nouveaux_sommets,
                                            DoubleTab& deplacement_restant,
-                                           long skip_facettes)
+                                           int skip_facettes)
 {
   //Cerr <<"Maillage_FT_Disc::echanger_sommets_PE" << finl;
 
@@ -3487,9 +3487,9 @@ void Maillage_FT_Disc::echanger_sommets_PE(const ArrOfInt& liste_sommets,
                                                 skip_facettes);
   assert(statut_ >= MINIMAL);
 
-  long i;
+  int i;
   // Nombre de sommets a echanger
-  const long nechange = liste_sommets.size_array();
+  const int nechange = liste_sommets.size_array();
 
   // Numeros des processeurs a qui on envoie les noeuds
   ArrOfIntFT liste_pe(nechange);
@@ -3507,31 +3507,31 @@ void Maillage_FT_Disc::echanger_sommets_PE(const ArrOfInt& liste_sommets,
   const Domaine_VF& domaine_vf = ref_cast(Domaine_VF, domaine_dis.valeur());
   const IntTab& elem_virt_pe_num = ladomaine.elem_virt_pe_num();
   const IntTab& face_virt_pe_num = domaine_vf.face_virt_pe_num();
-  const long nb_elements_reels = ladomaine.nb_elem();
-  const long nb_faces_reelles = domaine_vf.nb_faces();
+  const int nb_elements_reels = ladomaine.nb_elem();
+  const int nb_faces_reelles = domaine_vf.nb_faces();
 
   for (i = 0; i < nechange; i++)
     {
       // Numero de l'element virtuel ou arrive le sommet
-      const long numero_element = liste_elem_virtuel_arrivee[i];
+      const int numero_element = liste_elem_virtuel_arrivee[i];
       // Numero du pe qui possede l'element eulerien
       // (si l'index est negatif, c'est que l'element d'arrivee n'est pas virtuel !)
-      const long index = numero_element - nb_elements_reels;
-      const long pe_destination = elem_virt_pe_num(index, 0);
+      const int index = numero_element - nb_elements_reels;
+      const int pe_destination = elem_virt_pe_num(index, 0);
       // Numero de l'element ou arrive le sommet sur l'autre pe
-      const long element_d_arrivee = elem_virt_pe_num(index, 1);
+      const int element_d_arrivee = elem_virt_pe_num(index, 1);
 
       // Numero de la face de bord d'arrivee sur l'autre pe
       // si le sommet est sur une ligne de contact.
-      const long numero_face = liste_face_virtuelle_arrivee[i];
+      const int numero_face = liste_face_virtuelle_arrivee[i];
       // On verifie qu'on connait la face d'arrivee pour les sommets de bord
       assert( ((sommet_ligne_contact(liste_sommets[i]) != 0) && (numero_face >= 0))
               || ((sommet_ligne_contact(liste_sommets[i]) == 0) && (numero_face < 0)));
-      long face_d_arrivee = -1;
+      int face_d_arrivee = -1;
       if (numero_face >= 0)
         {
           // Calcul du numero local de la face d'arrivee sur le processeur voisin :
-          const long index_face = numero_face - nb_faces_reelles;
+          const int index_face = numero_face - nb_faces_reelles;
           face_d_arrivee = face_virt_pe_num(index_face, 1);
         }
 
@@ -3557,10 +3557,10 @@ void Maillage_FT_Disc::echanger_sommets_PE(const ArrOfInt& liste_sommets,
   sommet_PE_owner_ = -1;
   for (i = 0; i < nechange; i++)
     {
-      const long sommet = liste_sommets[i];
-      const long pe_destination = liste_pe[i];
-      const long element_d_arrivee = liste_elem_arrivee[i];
-      const long face_d_arrivee = liste_face_arrivee[i];
+      const int sommet = liste_sommets[i];
+      const int pe_destination = liste_pe[i];
+      const int element_d_arrivee = liste_elem_arrivee[i];
+      const int face_d_arrivee = liste_face_arrivee[i];
       // Verifie que le meme sommet ne figure pas deux fois dans la liste :
       assert(sommet_PE_owner_[sommet] < 0);
       assert(pe_destination != Process::me());
@@ -3580,14 +3580,14 @@ void Maillage_FT_Disc::echanger_sommets_PE(const ArrOfInt& liste_sommets,
   // avec -1 partout sauf pour les sommets qui changent de procs).
   desc_sommets_.remplir_element_pe(sommet_PE_owner_);
   // On remet a -1 le numero d'element si le sommet n'est pas a moi
-  const long nbsommets = sommets_.dimension(0);
-  const long moi = me();
+  const int nbsommets = sommets_.dimension(0);
+  const int moi = me();
   for (i = 0; i < nbsommets; i++)
     {
       if (sommet_PE_owner_[i] != moi)
         {
           sommet_elem_[i] = -1;
-          //for (long dim=0; dim<dimension; dim++) sommet_face_(i,dim) = -1; // EB
+          //for (int dim=0; dim<dimension; dim++) sommet_face_(i,dim) = -1; // EB
         }
       else
         assert(sommet_elem_[i] >= 0 && sommet_elem_[i] < nb_elements_reels);
@@ -3612,9 +3612,9 @@ void Maillage_FT_Disc::echanger_sommets_PE(const ArrOfInt& liste_sommets,
     // Remplissage des buffers
     for (i = 0; i < nechange; i++)
       {
-        const long pe_destination = liste_pe[i];
-        const long sommet = liste_sommets[i];
-        const long num_owner = sommet_num_owner_[sommet];
+        const int pe_destination = liste_pe[i];
+        const int sommet = liste_sommets[i];
+        const int num_owner = sommet_num_owner_[sommet];
         const double x = deplacement(i, 0);
         const double y = deplacement(i, 1);
         const double z = deplacement(i, 2);
@@ -3624,16 +3624,16 @@ void Maillage_FT_Disc::echanger_sommets_PE(const ArrOfInt& liste_sommets,
     comm.echange_taille_et_messages();
     // Recuperation des donnees
     const ArrOfInt& recv_pe_list = comm.get_recv_pe_list();
-    const long recv_pe_size = recv_pe_list.size_array();
-    long n_recus = 0;
-    const long dim = Objet_U::dimension;
-    for (long indice_pe = 0; indice_pe < recv_pe_size; indice_pe++)
+    const int recv_pe_size = recv_pe_list.size_array();
+    int n_recus = 0;
+    const int dim = Objet_U::dimension;
+    for (int indice_pe = 0; indice_pe < recv_pe_size; indice_pe++)
       {
-        const long pe_source = recv_pe_list[indice_pe];
+        const int pe_source = recv_pe_list[indice_pe];
         Entree& recv_buffer = comm.recv_buffer(pe_source);
         while (1)
           {
-            long sommet;
+            int sommet;
             double x, y, z;
             recv_buffer >> sommet >> x >> y >> z;
             if (recv_buffer.eof())
@@ -3660,22 +3660,22 @@ void Maillage_FT_Disc::update_sommet_face()
 {
   const Domaine_dis& domaine_dis = refdomaine_dis_.valeur();
   const Domaine_VF& domaine_vf = ref_cast(Domaine_VF,domaine_dis.valeur());
-  const long nb_som=sommets_.dimension(0);
+  const int nb_som=sommets_.dimension(0);
   sommet_face_.resize(nb_som,dimension);
 
-  long mon_elem;
+  int mon_elem;
 
-  for (long som=0; som<nb_som; som++)
+  for (int som=0; som<nb_som; som++)
     {
-      for (long dim=0; dim<dimension; dim++) sommet_face_(som,dim)=-1;
+      for (int dim=0; dim<dimension; dim++) sommet_face_(som,dim)=-1;
       mon_elem=sommet_elem_(som);
 
       if (mon_elem>=0)
         {
           IntVect faces_elem_eulerien(2*dimension);
-          for (long dim=0; dim<2*dimension; dim++) faces_elem_eulerien(dim) = domaine_vf.elem_faces(mon_elem,dim); // on recupere les faces de l'element eulerien
+          for (int dim=0; dim<2*dimension; dim++) faces_elem_eulerien(dim) = domaine_vf.elem_faces(mon_elem,dim); // on recupere les faces de l'element eulerien
           double pos_sommet, coord_elem;
-          for (long dim=0; dim<dimension; dim++)
+          for (int dim=0; dim<dimension; dim++)
             {
               pos_sommet=sommets_(som,dim); // on recupere la position du sommet suivant l'axe "dim"
               coord_elem=domaine_vf.xp(mon_elem,dim);
@@ -3694,18 +3694,18 @@ void Maillage_FT_Disc::update_sommet_arete()
   const Domaine_dis& domaine_dis = refdomaine_dis_.valeur();
   const Domaine& domaine = domaine_dis.domaine();
   const Domaine_VF& domaine_vf = ref_cast(Domaine_VF, domaine_dis.valeur());
-  const long nb_som=sommets_.dimension(0);
+  const int nb_som=sommets_.dimension(0);
   sommet_arete_.resize(nb_som,dimension);
-  long nb_arete_elem=12;
-  long mon_elem;
+  int nb_arete_elem=12;
+  int mon_elem;
   IntVect aretes_elem_eulerien(nb_arete_elem);
   const IntTab& elem_aretes = domaine.elem_aretes();
-  long arete_bas_gauche,arete_bas_droite,arete_haut_gauche,arete_haut_droite;
+  int arete_bas_gauche,arete_bas_droite,arete_haut_gauche,arete_haut_droite;
   double cgx,cgy,cgz;
   double somx,somy,somz;
-  for (long som=0; som<nb_som; som++)
+  for (int som=0; som<nb_som; som++)
     {
-      for (long dim=0; dim<dimension; dim++) sommet_arete_(som,dim)=-1;
+      for (int dim=0; dim<dimension; dim++) sommet_arete_(som,dim)=-1;
       mon_elem=sommet_elem_(som);
       if (mon_elem>=0)
         {
@@ -3779,28 +3779,28 @@ static void ordonner_sommets_facettes(IntTab& facettes,
                                       const ArrOfInt& sommet_num_owner)
 {
   assert(facettes.dimension(1) == 3);
-  const long nb_facettes = facettes.dimension(0);
-  long i;
+  const int nb_facettes = facettes.dimension(0);
+  int i;
   for (i = 0; i < nb_facettes; i++)
     {
-      long s0,s1,s2;
+      int s0,s1,s2;
       s0 = facettes(i,0);
       s1 = facettes(i,1);
       s2 = facettes(i,2);
       if (s0 == s1) // Facette invalide a effacer
         s2 = s0;    // il faut qu'elle reste invalide apres permutation
-      long pe0,pe1,pe2;
+      int pe0,pe1,pe2;
       pe0 = sommet_PE_owner[s0];
       pe1 = sommet_PE_owner[s1];
       pe2 = sommet_PE_owner[s2];
-      long num0,num1,num2;
+      int num0,num1,num2;
       num0 = sommet_num_owner[s0];
       num1 = sommet_num_owner[s1];
       num2 = sommet_num_owner[s2];
       while (pe1 < pe0 || (pe1 == pe0 && num1 < num0)
              || pe2 < pe0 || (pe2 == pe0 && num2 < num0))
         {
-          long tmp;
+          int tmp;
           tmp = s0;
           s0 = s1;
           s1 = s2;
@@ -3859,10 +3859,10 @@ void Maillage_FT_Disc::corriger_proprietaires_facettes()
                                 sommet_PE_owner_,
                                 sommet_num_owner_);
     }
-  long i;
-  const long moi = me();
+  int i;
+  const int moi = me();
   {
-    const long nbfacettes = facettes_.dimension(0);
+    const int nbfacettes = facettes_.dimension(0);
     // Quel est le proprietaire actuel des facettes ?
     // (d'apres le descripteur des facettes)
     facette_pe.resize_array(nbfacettes);
@@ -3876,9 +3876,9 @@ void Maillage_FT_Disc::corriger_proprietaires_facettes()
     liste_PE.resize_array(0);
     for (i = 0; i < nbfacettes; i++)
       {
-        long pe_actuel = facette_pe[i];
-        long premier_sommet = facettes_(i, 0);
-        long pe_legitime = sommet_PE_owner_[premier_sommet];
+        int pe_actuel = facette_pe[i];
+        int premier_sommet = facettes_(i, 0);
+        int pe_legitime = sommet_PE_owner_[premier_sommet];
         if (pe_actuel == moi && pe_actuel != pe_legitime)
           {
             liste_facettes.append_array(i);
@@ -3907,7 +3907,7 @@ void Maillage_FT_Disc::corriger_proprietaires_facettes()
   {
     // Simple resize, on n'a fait qu'ajouter des elements virtuels qui seront
     // ecrases par echange_espace_virtuel
-    const long nbfacettes = facettes_.dimension(0);
+    const int nbfacettes = facettes_.dimension(0);
     facette_pe.resize_array(nbfacettes);
     desc_facettes_.echange_espace_virtuel(facette_pe);
     // Mise a jour des espaces distants et virtuels (c'est la qu'on change
@@ -3969,14 +3969,14 @@ void Maillage_FT_Disc::creer_facettes_virtuelles(const ArrOfInt& liste_facettes,
   //  token DATA_NOEUD
   //  numero du sommet
   //  numero du pe0
-  static const long DATA_FACETTE = 0;
-  static const long DATA_NOEUD = 1;
-  long data_facette[8];
-  long data_noeud[3];
+  static const int DATA_FACETTE = 0;
+  static const int DATA_NOEUD = 1;
+  int data_facette[8];
+  int data_noeud[3];
   data_facette[0] = DATA_FACETTE;
   data_noeud[0] = DATA_NOEUD;
 
-  const long n_proc = nproc();
+  const int n_proc = nproc();
   ArrOfIntFT liste_sommets;   // liste des sommets a envoyer
   ArrOfIntFT liste_sommets_pe;// pour chaque sommet, numero du pe a qui envoyer
   ArrOfIntFT recv_pe_flags;   // pour chaque pe, recoit-t-il des sommets ?
@@ -3984,8 +3984,8 @@ void Maillage_FT_Disc::creer_facettes_virtuelles(const ArrOfInt& liste_facettes,
   ArrOfIntFT send_pe_flags;   // pour chaque pe, envoie-t-il des sommets ?
   ArrOfIntFT send_pe_list;    // liste des pe qui envoient des sommets
 
-  long i;
-  const long moi = me();
+  int i;
+  const int moi = me();
 
   liste_sommets.resize_array(0);
   liste_sommets_pe.resize_array(0);
@@ -4010,13 +4010,13 @@ void Maillage_FT_Disc::creer_facettes_virtuelles(const ArrOfInt& liste_facettes,
   }
   comm.begin_comm();
   {
-    const long nbfacettes = liste_facettes.size_array();
+    const int nbfacettes = liste_facettes.size_array();
     Descripteur_FT& espace_distant = desc_facettes_.espace_distant();
 
     for (i = 0; i < nbfacettes; i++)
       {
-        const long facette = liste_facettes[i];
-        const long pe_destination = liste_facettes_pe[i];
+        const int facette = liste_facettes[i];
+        const int pe_destination = liste_facettes_pe[i];
         assert(pe_destination != moi);
 
         // Si la facette est deja virtuelle sur le pe_destination, inutile
@@ -4027,14 +4027,14 @@ void Maillage_FT_Disc::creer_facettes_virtuelles(const ArrOfInt& liste_facettes,
         // Ajout de la facette a l'espace distant
         espace_distant.ajoute_element(pe_destination, facette);
 
-        long n_data = 1;
+        int n_data = 1;
         data_facette[n_data++] = facette; // Numero de la facette chez le proprietaire
 
-        for (long j = 0; j < dimension; j++)
+        for (int j = 0; j < dimension; j++)
           {
-            const long sommet = facettes_(facette, j);
-            const long le_sommet_num_owner = sommet_num_owner_[sommet];
-            const long sommet_pe = sommet_PE_owner_[sommet];
+            const int sommet = facettes_(facette, j);
+            const int le_sommet_num_owner = sommet_num_owner_[sommet];
+            const int sommet_pe = sommet_PE_owner_[sommet];
 
             // Donnees de la facette pour le destinataire de la facette
             data_facette[n_data++] = le_sommet_num_owner;
@@ -4079,14 +4079,14 @@ void Maillage_FT_Disc::creer_facettes_virtuelles(const ArrOfInt& liste_facettes,
   // virtuels.
   {
     const ArrOfInt& pe_voisins = comm.get_recv_pe_list();
-    const long nb_voisins = pe_voisins.size_array();
+    const int nb_voisins = pe_voisins.size_array();
     for (i = 0; i < nb_voisins; i++)
       {
-        const long pe_source = pe_voisins[i];
+        const int pe_source = pe_voisins[i];
         Entree& buffer = comm.recv_buffer(pe_source);
         while (1)
           {
-            long token;
+            int token;
             buffer.get(& token, 1);
             if (buffer.eof())
               break;
@@ -4097,14 +4097,14 @@ void Maillage_FT_Disc::creer_facettes_virtuelles(const ArrOfInt& liste_facettes,
                 {
                   buffer.get(data_facette, 2*dimension+1);
                   liste_facettes_pe_source.append_array(pe_source); // pe proprietaire de la facette
-                  const long num_facette = data_facette[0];
+                  const int num_facette = data_facette[0];
                   liste_facettes_num_owner.append_array(num_facette);
-                  for (long j = 0; j < dimension; j++)
+                  for (int j = 0; j < dimension; j++)
                     {
                       // Numero du sommet sur le pe proprietaire
-                      long sommet_num = data_facette[j*2+1];
+                      int sommet_num = data_facette[j*2+1];
                       // Numero du pe proprietaire du sommet
-                      long sommet_pe = data_facette[j*2+2];
+                      int sommet_pe = data_facette[j*2+2];
                       if (sommet_pe != moi)
                         recv_pe_flags[sommet_pe] = 1;
                       liste_facettes_sommets.append_array(sommet_num);
@@ -4147,15 +4147,15 @@ void Maillage_FT_Disc::creer_facettes_virtuelles(const ArrOfInt& liste_facettes,
 
   // Creation des facettes virtuelles
   {
-    const long dimension3 = (dimension == 3);
+    const int dimension3 = (dimension == 3);
     // Conversion des numeros distants des sommets en numeros locaux,
     // le resultat remplace le contenu de liste_facettes_sommets.
     convertir_numero_distant_local(desc_sommets_, sommet_num_owner_,
                                    liste_facettes_sommets,
                                    liste_facettes_sommets_pe,
                                    liste_facettes_sommets);
-    const long nb_new_facettes = liste_facettes_pe_source.size_array();
-    long nbfacettes = facettes_.dimension(0);
+    const int nb_new_facettes = liste_facettes_pe_source.size_array();
+    int nbfacettes = facettes_.dimension(0);
     facettes_.resize(nbfacettes + nb_new_facettes, dimension);
     facette_num_owner_.resize_array(nbfacettes + nb_new_facettes);
     for (i = 0; i < nb_new_facettes; i++)
@@ -4214,9 +4214,9 @@ void Maillage_FT_Disc::echanger_facettes(const ArrOfInt& liste_facettes,
                                          ArrOfInt& facettes_recues_numelement)
 {
   if (Comm_Group::check_enabled()) check_mesh();
-  const long moi = me();
-  long i;
-  const long nb_facettes_envoi = liste_facettes.size_array();
+  const int moi = me();
+  int i;
+  const int nb_facettes_envoi = liste_facettes.size_array();
 
   // Numeros des elements euleriens associes a chaque facette (numero local
   // de l'element sur le pe qui possede cet element)
@@ -4227,7 +4227,7 @@ void Maillage_FT_Disc::echanger_facettes(const ArrOfInt& liste_facettes,
 
   const Domaine_dis& domaine_dis = refdomaine_dis_.valeur();
   const Domaine& le_dom = domaine_dis.domaine();
-  const long nb_elem = le_dom.nb_elem(); // Nombre d'elements reels
+  const int nb_elem = le_dom.nb_elem(); // Nombre d'elements reels
   {
     liste_pe_dest.resize_array(nb_facettes_envoi);
     liste_elem_arrivee_local.resize_array(nb_facettes_envoi);
@@ -4236,14 +4236,14 @@ void Maillage_FT_Disc::echanger_facettes(const ArrOfInt& liste_facettes,
 
     for (i = 0; i < nb_facettes_envoi; i++)
       {
-        const long elem_voisin = liste_elem_arrivee[i];
+        const int elem_voisin = liste_elem_arrivee[i];
         // Calcul de l'index de l'element dans elem_virt_pe_num (l'indice 0
         // correspond au premier element virtuel, soit l'element nb_elem)
-        const long index = elem_voisin - nb_elem;
+        const int index = elem_voisin - nb_elem;
         // Numero du pe qui possede l'element voisin
-        const long pe = elem_virt_pe_num(index, 0);
+        const int pe = elem_virt_pe_num(index, 0);
         // Numero local de l'element sur ce pe.
-        const long elem_local = elem_virt_pe_num(index, 1);
+        const int elem_local = elem_virt_pe_num(index, 1);
         liste_pe_dest[i] = pe;
         liste_elem_arrivee_local[i] = elem_local;
       }
@@ -4262,7 +4262,7 @@ void Maillage_FT_Disc::echanger_facettes(const ArrOfInt& liste_facettes,
   // Lors de la communication finale entre les procs B et les procs C,
   // ces drapeaux indiquent si on recoit des donnees et si on en envoie
   // a chacun des processeurs.
-  static long nbproc = Process::nproc();
+  static int nbproc = Process::nproc();
   static ArrOfIntFT BtoC_send_pe_flags(nbproc);
   static ArrOfIntFT BtoC_recv_pe_flags(nbproc);
   BtoC_send_pe_flags = 0;
@@ -4276,11 +4276,11 @@ void Maillage_FT_Disc::echanger_facettes(const ArrOfInt& liste_facettes,
     comm.begin_comm();
     for (i = 0; i < nb_facettes_envoi; i++)
       {
-        const long facette = liste_facettes[i];
-        const long PE_destinataire = liste_pe_dest[i];
-        const long premier_sommet = facettes_(facette, 0);
-        const long PE_proprietaire = sommet_PE_owner_[premier_sommet];
-        const long facette_num_owner = facette_num_owner_[facette];
+        const int facette = liste_facettes[i];
+        const int PE_destinataire = liste_pe_dest[i];
+        const int premier_sommet = facettes_(facette, 0);
+        const int PE_proprietaire = sommet_PE_owner_[premier_sommet];
+        const int facette_num_owner = facette_num_owner_[facette];
         if (PE_proprietaire == moi)
           {
             facettes_to_send.append_array(facette_num_owner);
@@ -4295,14 +4295,14 @@ void Maillage_FT_Disc::echanger_facettes(const ArrOfInt& liste_facettes,
       }
     comm.echange_taille_et_messages();
     const ArrOfInt& recv_pe_list = comm.get_recv_pe_list();
-    const long nb_recv_pe = recv_pe_list.size_array();
+    const int nb_recv_pe = recv_pe_list.size_array();
     for (i = 0; i < nb_recv_pe; i++)
       {
-        const long pe_source = recv_pe_list[i];
+        const int pe_source = recv_pe_list[i];
         Entree& buffer = comm.recv_buffer(pe_source);
         while (1)
           {
-            long facette, PE_destinataire;
+            int facette, PE_destinataire;
             buffer >> facette >> PE_destinataire;
             if (buffer.eof())
               break;
@@ -4335,12 +4335,12 @@ void Maillage_FT_Disc::echanger_facettes(const ArrOfInt& liste_facettes,
     comm.begin_comm();
     for (i = 0; i < nb_facettes_envoi; i++)
       {
-        const long facette = liste_facettes[i];
-        const long PE_destinataire = liste_pe_dest[i];
-        const long element_arrivee = liste_elem_arrivee_local[i];
-        const long premier_sommet = facettes_(facette, 0);
-        const long PE_proprietaire = sommet_PE_owner_[premier_sommet];
-        const long facette_num_owner = facette_num_owner_[facette];
+        const int facette = liste_facettes[i];
+        const int PE_destinataire = liste_pe_dest[i];
+        const int element_arrivee = liste_elem_arrivee_local[i];
+        const int premier_sommet = facettes_(facette, 0);
+        const int PE_proprietaire = sommet_PE_owner_[premier_sommet];
+        const int facette_num_owner = facette_num_owner_[facette];
         assert (PE_destinataire != moi);
         comm.send_buffer(PE_destinataire) << facette_num_owner
                                           << PE_proprietaire
@@ -4353,14 +4353,14 @@ void Maillage_FT_Disc::echanger_facettes(const ArrOfInt& liste_facettes,
     facettes_recues_numfacettes.resize_array(0);
     facettes_recues_numelement.resize_array(0);
     const ArrOfInt& recv_pe_list = comm.get_recv_pe_list();
-    const long nb_recv_pe = recv_pe_list.size_array();
+    const int nb_recv_pe = recv_pe_list.size_array();
     for (i = 0; i < nb_recv_pe; i++)
       {
-        const long pe_source = recv_pe_list[i];
+        const int pe_source = recv_pe_list[i];
         Entree& buffer = comm.recv_buffer(pe_source);
         while (1)
           {
-            long facette = -1, PE_proprietaire = -1, element_arrivee = -1;
+            int facette = -1, PE_proprietaire = -1, element_arrivee = -1;
             buffer >> facette >> PE_proprietaire >> element_arrivee;
             if (buffer.eof())
               break;
@@ -4417,11 +4417,11 @@ void Maillage_FT_Disc::echanger_facettes_face_x(const ArrOfInt& liste_facettes,
                                                 ArrOfInt& facettes_recues_numface)
 {
   if (Comm_Group::check_enabled()) check_mesh();
-  const long moi = me();
-  long i=0;
-  long indice=0;
-  long nb_facettes_envoi = liste_facettes.size_array();
-  const long nb_facettes_envoi_init=liste_facettes.size_array();
+  const int moi = me();
+  int i=0;
+  int indice=0;
+  int nb_facettes_envoi = liste_facettes.size_array();
+  const int nb_facettes_envoi_init=liste_facettes.size_array();
   // Numeros des faces euleriennes associes a chaque facette (numero local
   // de la face sur le pe qui possede cet element)
   static ArrOfIntFT liste_facex_arrivee_local;
@@ -4437,7 +4437,7 @@ void Maillage_FT_Disc::echanger_facettes_face_x(const ArrOfInt& liste_facettes,
   const ArrOfInt& faces_doubles = le_domaine_vf.faces_doubles();
   const IntTab& faces_doubles_pe_num = le_domaine_vf.faces_doubles_pe_num();
   const IntTab& faces_doubles_virt_pe_num = le_domaine_vf.faces_doubles_virt_pe_num();
-  const long nb_face = le_domaine_vf.nb_faces(); // Nombre de faces reelles
+  const int nb_face = le_domaine_vf.nb_faces(); // Nombre de faces reelles
   {
     liste_pe_dest_x.resize_array(nb_facettes_envoi);
     liste_facex_arrivee_local.resize_array(nb_facettes_envoi);
@@ -4446,8 +4446,8 @@ void Maillage_FT_Disc::echanger_facettes_face_x(const ArrOfInt& liste_facettes,
 
     while (i<nb_facettes_envoi_init)
       {
-        const long face_voisine = liste_face_arrivee[i];
-        const long face_voisine_double = (faces_doubles_virt_pe_num(face_voisine,0)>0);
+        const int face_voisine = liste_face_arrivee[i];
+        const int face_voisine_double = (faces_doubles_virt_pe_num(face_voisine,0)>0);
         if (faces_doubles(face_voisine) && face_voisine < nb_face)
           {
             liste_pe_dest_x[indice] = faces_doubles_pe_num(face_voisine,0);
@@ -4476,18 +4476,18 @@ void Maillage_FT_Disc::echanger_facettes_face_x(const ArrOfInt& liste_facettes,
             // Ainsi, dans le cas present, le proc 1 ne connait pas la fa7 et le proc 2 la connait
             // c'est donc uniquement au proc 2 que l'on envoie la fa7
 
-            const long fa7=liste_facettes[i];
-            const long pe1=faces_doubles_virt_pe_num(face_voisine,0);
-            const long face_1=faces_doubles_virt_pe_num(face_voisine,1);
-            const long pe2=faces_doubles_virt_pe_num(face_voisine,2);
-            const long face_2=faces_doubles_virt_pe_num(face_voisine,3);
+            const int fa7=liste_facettes[i];
+            const int pe1=faces_doubles_virt_pe_num(face_voisine,0);
+            const int face_1=faces_doubles_virt_pe_num(face_voisine,1);
+            const int pe2=faces_doubles_virt_pe_num(face_voisine,2);
+            const int face_2=faces_doubles_virt_pe_num(face_voisine,3);
 
-            long fa7_reelle_pour_pe1=1;
+            int fa7_reelle_pour_pe1=1;
             fa7_reelle_pour_pe1 = (sommet_PE_owner_(facettes_(fa7,0))==pe1) ? 1 : 0;
-            long fa7_reelle_pour_pe2=1;
+            int fa7_reelle_pour_pe2=1;
             fa7_reelle_pour_pe2 = (sommet_PE_owner_(facettes_(fa7,0))==pe2) ? 1 : 0;
-            const long fa7_existante_pour_pe1= fa7_reelle_pour_pe1 || espace_distant.contient_element(pe1, fa7);
-            const long fa7_existante_pour_pe2= fa7_reelle_pour_pe2 || espace_distant.contient_element(pe2, fa7);
+            const int fa7_existante_pour_pe1= fa7_reelle_pour_pe1 || espace_distant.contient_element(pe1, fa7);
+            const int fa7_existante_pour_pe2= fa7_reelle_pour_pe2 || espace_distant.contient_element(pe2, fa7);
             if (fa7_existante_pour_pe1)
               {
                 liste_pe_dest_x[indice] = pe1;
@@ -4509,9 +4509,9 @@ void Maillage_FT_Disc::echanger_facettes_face_x(const ArrOfInt& liste_facettes,
           {
             // Calcul de l'index de la face dans face_virt_pe_num (l'indice 0
             // correspond a la premiere face virtuelle, soit la face nb_face)
-            const long index = face_voisine - nb_face;
-            const long pe = face_virt_pe_num(index, 0);
-            const long face_locale = face_virt_pe_num(index, 1);
+            const int index = face_voisine - nb_face;
+            const int pe = face_virt_pe_num(index, 0);
+            const int face_locale = face_virt_pe_num(index, 1);
             liste_pe_dest_x[indice] = pe;
             liste_facex_arrivee_local[indice] = face_locale;
             la_liste_facettes[indice]=liste_facettes[i];
@@ -4539,7 +4539,7 @@ void Maillage_FT_Disc::echanger_facettes_face_x(const ArrOfInt& liste_facettes,
   // Lors de la communication finale entre les procs B et les procs C,
   // ces drapeaux indiquent si on recoit des donnees et si on en envoie
   // a chacun des processeurs.
-  static long nbproc = Process::nproc();
+  static int nbproc = Process::nproc();
   static ArrOfIntFT BtoC_send_pe_flags_x(nbproc);
   static ArrOfIntFT BtoC_recv_pe_flags_x(nbproc);
   BtoC_send_pe_flags_x = 0;
@@ -4553,11 +4553,11 @@ void Maillage_FT_Disc::echanger_facettes_face_x(const ArrOfInt& liste_facettes,
     comm.begin_comm();
     for (i = 0; i < nb_facettes_envoi; i++)
       {
-        const long facette = la_liste_facettes[i];
-        const long PE_destinataire = liste_pe_dest_x[i];
-        const long premier_sommet = facettes_(facette, 0);
-        const long PE_proprietaire = sommet_PE_owner_[premier_sommet];
-        const long facette_num_owner = facette_num_owner_[facette];
+        const int facette = la_liste_facettes[i];
+        const int PE_destinataire = liste_pe_dest_x[i];
+        const int premier_sommet = facettes_(facette, 0);
+        const int PE_proprietaire = sommet_PE_owner_[premier_sommet];
+        const int facette_num_owner = facette_num_owner_[facette];
         if (PE_proprietaire == moi)
           {
             facettes_to_send_x.append_array(facette_num_owner);
@@ -4572,14 +4572,14 @@ void Maillage_FT_Disc::echanger_facettes_face_x(const ArrOfInt& liste_facettes,
       }
     comm.echange_taille_et_messages();
     const ArrOfInt& recv_pe_list = comm.get_recv_pe_list();
-    const long nb_recv_pe = recv_pe_list.size_array();
+    const int nb_recv_pe = recv_pe_list.size_array();
     for (i = 0; i < nb_recv_pe; i++)
       {
-        const long pe_source = recv_pe_list[i];
+        const int pe_source = recv_pe_list[i];
         Entree& buffer = comm.recv_buffer(pe_source);
         while (1)
           {
-            long facette, PE_destinataire;
+            int facette, PE_destinataire;
             buffer >> facette >> PE_destinataire;
             if (buffer.eof())
               break;
@@ -4612,12 +4612,12 @@ void Maillage_FT_Disc::echanger_facettes_face_x(const ArrOfInt& liste_facettes,
     comm.begin_comm();
     for (i = 0; i < nb_facettes_envoi; i++)
       {
-        const long facette = la_liste_facettes[i];
-        const long PE_destinataire = liste_pe_dest_x[i];
-        const long face_arrivee = liste_facex_arrivee_local[i];
-        const long premier_sommet = facettes_(facette, 0);
-        const long PE_proprietaire = sommet_PE_owner_[premier_sommet];
-        const long facette_num_owner = facette_num_owner_[facette];
+        const int facette = la_liste_facettes[i];
+        const int PE_destinataire = liste_pe_dest_x[i];
+        const int face_arrivee = liste_facex_arrivee_local[i];
+        const int premier_sommet = facettes_(facette, 0);
+        const int PE_proprietaire = sommet_PE_owner_[premier_sommet];
+        const int facette_num_owner = facette_num_owner_[facette];
         assert (PE_destinataire != moi);
         comm.send_buffer(PE_destinataire) << facette_num_owner
                                           << PE_proprietaire
@@ -4630,14 +4630,14 @@ void Maillage_FT_Disc::echanger_facettes_face_x(const ArrOfInt& liste_facettes,
     facettes_recues_numfacettes.resize_array(0);
     facettes_recues_numface.resize_array(0);
     const ArrOfInt& recv_pe_list = comm.get_recv_pe_list();
-    const long nb_recv_pe = recv_pe_list.size_array();
+    const int nb_recv_pe = recv_pe_list.size_array();
     for (i = 0; i < nb_recv_pe; i++)
       {
-        const long pe_source = recv_pe_list[i];
+        const int pe_source = recv_pe_list[i];
         Entree& buffer = comm.recv_buffer(pe_source);
         while (1)
           {
-            long facette = -1, PE_proprietaire = -1, face_arrivee = -1;
+            int facette = -1, PE_proprietaire = -1, face_arrivee = -1;
             buffer >> facette >> PE_proprietaire >> face_arrivee;
             if (buffer.eof())
               break;
@@ -4697,11 +4697,11 @@ void Maillage_FT_Disc::echanger_facettes_face_y(const ArrOfInt& liste_facettes,
                                                 ArrOfInt& facettes_recues_numface)
 {
   if (Comm_Group::check_enabled()) check_mesh();
-  const long moi = me();
-  long i=0;
-  long indice=0;
-  long nb_facettes_envoi = liste_facettes.size_array();
-  const long nb_facettes_envoi_init=liste_facettes.size_array();
+  const int moi = me();
+  int i=0;
+  int indice=0;
+  int nb_facettes_envoi = liste_facettes.size_array();
+  const int nb_facettes_envoi_init=liste_facettes.size_array();
   // Numeros des faces euleriennes associes a chaque facette (numero local
   // de la face sur le pe qui possede cet element)
   static ArrOfIntFT liste_facey_arrivee_local;
@@ -4719,7 +4719,7 @@ void Maillage_FT_Disc::echanger_facettes_face_y(const ArrOfInt& liste_facettes,
   const IntTab& faces_doubles_pe_num = le_domaine_vf.faces_doubles_pe_num();
   const IntTab& faces_doubles_virt_pe_num = le_domaine_vf.faces_doubles_virt_pe_num();
 
-  const long nb_face = le_domaine_vf.nb_faces(); // Nombre de faces reelles
+  const int nb_face = le_domaine_vf.nb_faces(); // Nombre de faces reelles
   {
     liste_pe_dest_y.resize_array(nb_facettes_envoi);
     liste_facey_arrivee_local.resize_array(nb_facettes_envoi);
@@ -4728,8 +4728,8 @@ void Maillage_FT_Disc::echanger_facettes_face_y(const ArrOfInt& liste_facettes,
     //Cerr << "liste_face_arrivee.size_array() " << liste_face_arrivee.size_array() << finl;
     while (i < nb_facettes_envoi_init)
       {
-        const long face_voisine = liste_face_arrivee[i];
-        const long face_voisine_double = (faces_doubles_virt_pe_num(face_voisine,0)>0);
+        const int face_voisine = liste_face_arrivee[i];
+        const int face_voisine_double = (faces_doubles_virt_pe_num(face_voisine,0)>0);
         if (faces_doubles(face_voisine) && face_voisine < nb_face)
           {
             liste_pe_dest_y[indice] = faces_doubles_pe_num(face_voisine,0);
@@ -4740,18 +4740,18 @@ void Maillage_FT_Disc::echanger_facettes_face_y(const ArrOfInt& liste_facettes,
 
         else if (face_voisine_double && face_voisine >= nb_face)
           {
-            const long fa7=liste_facettes[i];
-            const long pe1=faces_doubles_virt_pe_num(face_voisine,0);
-            const long face_1=faces_doubles_virt_pe_num(face_voisine,1);
-            const long pe2=faces_doubles_virt_pe_num(face_voisine,2);
-            const long face_2=faces_doubles_virt_pe_num(face_voisine,3);
+            const int fa7=liste_facettes[i];
+            const int pe1=faces_doubles_virt_pe_num(face_voisine,0);
+            const int face_1=faces_doubles_virt_pe_num(face_voisine,1);
+            const int pe2=faces_doubles_virt_pe_num(face_voisine,2);
+            const int face_2=faces_doubles_virt_pe_num(face_voisine,3);
 
-            long fa7_reelle_pour_pe1=1;
+            int fa7_reelle_pour_pe1=1;
             fa7_reelle_pour_pe1 = (sommet_PE_owner_(facettes_(fa7,0))==pe1) ? 1 : 0;
-            long fa7_reelle_pour_pe2=1;
+            int fa7_reelle_pour_pe2=1;
             fa7_reelle_pour_pe2 = (sommet_PE_owner_(facettes_(fa7,0))==pe2) ? 1 : 0;
-            const long fa7_existante_pour_pe1= fa7_reelle_pour_pe1 || espace_distant.contient_element(pe1, fa7);
-            const long fa7_existante_pour_pe2= fa7_reelle_pour_pe2 || espace_distant.contient_element(pe2, fa7);
+            const int fa7_existante_pour_pe1= fa7_reelle_pour_pe1 || espace_distant.contient_element(pe1, fa7);
+            const int fa7_existante_pour_pe2= fa7_reelle_pour_pe2 || espace_distant.contient_element(pe2, fa7);
 
             if (fa7_existante_pour_pe1)
               {
@@ -4775,11 +4775,11 @@ void Maillage_FT_Disc::echanger_facettes_face_y(const ArrOfInt& liste_facettes,
           {
             // Calcul de l'index de la face dans face_virt_pe_num (l'indice 0
             // correspond a la premiere face virtuelle, soit la face nb_face)
-            const long index = face_voisine - nb_face;
+            const int index = face_voisine - nb_face;
             // Numero du pe qui possede la face voisine
-            const long pe = face_virt_pe_num(index, 0);
+            const int pe = face_virt_pe_num(index, 0);
             // Numero local de la face sur ce pe.
-            const long face_locale = face_virt_pe_num(index, 1);
+            const int face_locale = face_virt_pe_num(index, 1);
             liste_pe_dest_y[indice] = pe;
             liste_facey_arrivee_local[indice] = face_locale;
             la_liste_facettes[indice]=liste_facettes[i];
@@ -4808,7 +4808,7 @@ void Maillage_FT_Disc::echanger_facettes_face_y(const ArrOfInt& liste_facettes,
   // Lors de la communication finale entre les procs B et les procs C,
   // ces drapeaux indiquent si on recoit des donnees et si on en envoie
   // a chacun des processeurs.
-  static long nbproc = Process::nproc();
+  static int nbproc = Process::nproc();
   static ArrOfIntFT BtoC_send_pe_flags_y(nbproc);
   static ArrOfIntFT BtoC_recv_pe_flags_y(nbproc);
   BtoC_send_pe_flags_y = 0;
@@ -4822,11 +4822,11 @@ void Maillage_FT_Disc::echanger_facettes_face_y(const ArrOfInt& liste_facettes,
     comm.begin_comm();
     for (i = 0; i < nb_facettes_envoi; i++)
       {
-        const long facette = la_liste_facettes[i];
-        const long PE_destinataire = liste_pe_dest_y[i];
-        const long premier_sommet = facettes_(facette, 0);
-        const long PE_proprietaire = sommet_PE_owner_[premier_sommet];
-        const long facette_num_owner = facette_num_owner_[facette];
+        const int facette = la_liste_facettes[i];
+        const int PE_destinataire = liste_pe_dest_y[i];
+        const int premier_sommet = facettes_(facette, 0);
+        const int PE_proprietaire = sommet_PE_owner_[premier_sommet];
+        const int facette_num_owner = facette_num_owner_[facette];
         if (PE_proprietaire == moi)
           {
             facettes_to_send_y.append_array(facette_num_owner);
@@ -4841,14 +4841,14 @@ void Maillage_FT_Disc::echanger_facettes_face_y(const ArrOfInt& liste_facettes,
       }
     comm.echange_taille_et_messages();
     const ArrOfInt& recv_pe_list = comm.get_recv_pe_list();
-    const long nb_recv_pe = recv_pe_list.size_array();
+    const int nb_recv_pe = recv_pe_list.size_array();
     for (i = 0; i < nb_recv_pe; i++)
       {
-        const long pe_source = recv_pe_list[i];
+        const int pe_source = recv_pe_list[i];
         Entree& buffer = comm.recv_buffer(pe_source);
         while (1)
           {
-            long facette, PE_destinataire;
+            int facette, PE_destinataire;
             buffer >> facette >> PE_destinataire;
             if (buffer.eof())
               break;
@@ -4880,12 +4880,12 @@ void Maillage_FT_Disc::echanger_facettes_face_y(const ArrOfInt& liste_facettes,
     comm.begin_comm();
     for (i = 0; i < nb_facettes_envoi; i++)
       {
-        const long facette = la_liste_facettes[i];
-        const long PE_destinataire = liste_pe_dest_y[i];
-        const long face_arrivee = liste_facey_arrivee_local[i];
-        const long premier_sommet = facettes_(facette, 0);
-        const long PE_proprietaire = sommet_PE_owner_[premier_sommet];
-        const long facette_num_owner = facette_num_owner_[facette];
+        const int facette = la_liste_facettes[i];
+        const int PE_destinataire = liste_pe_dest_y[i];
+        const int face_arrivee = liste_facey_arrivee_local[i];
+        const int premier_sommet = facettes_(facette, 0);
+        const int PE_proprietaire = sommet_PE_owner_[premier_sommet];
+        const int facette_num_owner = facette_num_owner_[facette];
         assert (PE_destinataire != moi);
         comm.send_buffer(PE_destinataire) << facette_num_owner
                                           << PE_proprietaire
@@ -4898,14 +4898,14 @@ void Maillage_FT_Disc::echanger_facettes_face_y(const ArrOfInt& liste_facettes,
     facettes_recues_numfacettes.resize_array(0);
     facettes_recues_numface.resize_array(0);
     const ArrOfInt& recv_pe_list = comm.get_recv_pe_list();
-    const long nb_recv_pe = recv_pe_list.size_array();
+    const int nb_recv_pe = recv_pe_list.size_array();
     for (i = 0; i < nb_recv_pe; i++)
       {
-        const long pe_source = recv_pe_list[i];
+        const int pe_source = recv_pe_list[i];
         Entree& buffer = comm.recv_buffer(pe_source);
         while (1)
           {
-            long facette = -1, PE_proprietaire = -1, face_arrivee = -1;
+            int facette = -1, PE_proprietaire = -1, face_arrivee = -1;
             buffer >> facette >> PE_proprietaire >> face_arrivee;
             if (buffer.eof())
               break;
@@ -4962,11 +4962,11 @@ void Maillage_FT_Disc::echanger_facettes_face_z(const ArrOfInt& liste_facettes,
                                                 ArrOfInt& facettes_recues_numface)
 {
   if (Comm_Group::check_enabled()) check_mesh();
-  const long moi = me();
-  long i=0;
-  long indice=0;
-  long nb_facettes_envoi = liste_facettes.size_array();
-  const long nb_facettes_envoi_init=liste_facettes.size_array();
+  const int moi = me();
+  int i=0;
+  int indice=0;
+  int nb_facettes_envoi = liste_facettes.size_array();
+  const int nb_facettes_envoi_init=liste_facettes.size_array();
   // Numeros des faces euleriennes associes a chaque facette (numero local
   // de la face sur le pe qui possede cet element)
   static ArrOfIntFT liste_facez_arrivee_local;
@@ -4984,7 +4984,7 @@ void Maillage_FT_Disc::echanger_facettes_face_z(const ArrOfInt& liste_facettes,
   const IntTab& faces_doubles_pe_num = le_domaine_vf.faces_doubles_pe_num();
   const IntTab& faces_doubles_virt_pe_num = le_domaine_vf.faces_doubles_virt_pe_num();
 
-  const long nb_face = le_domaine_vf.nb_faces(); // Nombre de faces reelles
+  const int nb_face = le_domaine_vf.nb_faces(); // Nombre de faces reelles
   {
     liste_pe_dest_z.resize_array(nb_facettes_envoi);
     liste_facez_arrivee_local.resize_array(nb_facettes_envoi);
@@ -4992,8 +4992,8 @@ void Maillage_FT_Disc::echanger_facettes_face_z(const ArrOfInt& liste_facettes,
     const IntTab& face_virt_pe_num = le_domaine_vf.face_virt_pe_num();
     while (i < nb_facettes_envoi_init)
       {
-        const long face_voisine = liste_face_arrivee[i];
-        const long face_voisine_double = (faces_doubles_virt_pe_num(face_voisine,0)>0);
+        const int face_voisine = liste_face_arrivee[i];
+        const int face_voisine_double = (faces_doubles_virt_pe_num(face_voisine,0)>0);
         if (faces_doubles(face_voisine) && face_voisine < nb_face)
           {
             //Cerr << "face_double " << le_domaine_vf.xv(face_voisine,0) << " " << le_domaine_vf.xv(face_voisine,1) << " " << le_domaine_vf.xv(face_voisine,2) << finl;
@@ -5005,18 +5005,18 @@ void Maillage_FT_Disc::echanger_facettes_face_z(const ArrOfInt& liste_facettes,
 
         else if (face_voisine_double && face_voisine >= nb_face)
           {
-            const long fa7=liste_facettes[i];
-            const long pe1=faces_doubles_virt_pe_num(face_voisine,0);
-            const long face_1=faces_doubles_virt_pe_num(face_voisine,1);
-            const long pe2=faces_doubles_virt_pe_num(face_voisine,2);
-            const long face_2=faces_doubles_virt_pe_num(face_voisine,3);
+            const int fa7=liste_facettes[i];
+            const int pe1=faces_doubles_virt_pe_num(face_voisine,0);
+            const int face_1=faces_doubles_virt_pe_num(face_voisine,1);
+            const int pe2=faces_doubles_virt_pe_num(face_voisine,2);
+            const int face_2=faces_doubles_virt_pe_num(face_voisine,3);
 
-            long fa7_reelle_pour_pe1=1;
+            int fa7_reelle_pour_pe1=1;
             fa7_reelle_pour_pe1 = (sommet_PE_owner_(facettes_(fa7,0))==pe1) ? 1 : 0;
-            long fa7_reelle_pour_pe2=1;
+            int fa7_reelle_pour_pe2=1;
             fa7_reelle_pour_pe2 = (sommet_PE_owner_(facettes_(fa7,0))==pe2) ? 1 : 0;
-            const long fa7_existante_pour_pe1= fa7_reelle_pour_pe1 || espace_distant.contient_element(pe1, fa7);
-            const long fa7_existante_pour_pe2= fa7_reelle_pour_pe2 || espace_distant.contient_element(pe2, fa7);
+            const int fa7_existante_pour_pe1= fa7_reelle_pour_pe1 || espace_distant.contient_element(pe1, fa7);
+            const int fa7_existante_pour_pe2= fa7_reelle_pour_pe2 || espace_distant.contient_element(pe2, fa7);
 
             if (fa7_existante_pour_pe1)
               {
@@ -5038,11 +5038,11 @@ void Maillage_FT_Disc::echanger_facettes_face_z(const ArrOfInt& liste_facettes,
           {
             // Calcul de l'index de la face dans face_virt_pe_num (l'indice 0
             // correspond a la premiere face virtuelle, soit la face nb_face)
-            const long index = face_voisine - nb_face;
+            const int index = face_voisine - nb_face;
             // Numero du pe qui possede la face voisine
-            const long pe = face_virt_pe_num(index, 0);
+            const int pe = face_virt_pe_num(index, 0);
             // Numero local de la face sur ce pe.
-            const long face_locale = face_virt_pe_num(index, 1);
+            const int face_locale = face_virt_pe_num(index, 1);
             liste_pe_dest_z[indice] = pe;
             liste_facez_arrivee_local[indice] = face_locale;
             la_liste_facettes[indice]=liste_facettes[i];
@@ -5070,7 +5070,7 @@ void Maillage_FT_Disc::echanger_facettes_face_z(const ArrOfInt& liste_facettes,
   // Lors de la communication finale entre les procs B et les procs C,
   // ces drapeaux indiquent si on recoit des donnees et si on en envoie
   // a chacun des processeurs.
-  static long nbproc = Process::nproc();
+  static int nbproc = Process::nproc();
   static ArrOfIntFT BtoC_send_pe_flags_z(nbproc);
   static ArrOfIntFT BtoC_recv_pe_flags_z(nbproc);
   BtoC_send_pe_flags_z = 0;
@@ -5084,11 +5084,11 @@ void Maillage_FT_Disc::echanger_facettes_face_z(const ArrOfInt& liste_facettes,
     comm.begin_comm();
     for (i = 0; i < nb_facettes_envoi; i++)
       {
-        const long facette = la_liste_facettes[i];
-        const long PE_destinataire = liste_pe_dest_z[i];
-        const long premier_sommet = facettes_(facette, 0);
-        const long PE_proprietaire = sommet_PE_owner_[premier_sommet];
-        const long facette_num_owner = facette_num_owner_[facette];
+        const int facette = la_liste_facettes[i];
+        const int PE_destinataire = liste_pe_dest_z[i];
+        const int premier_sommet = facettes_(facette, 0);
+        const int PE_proprietaire = sommet_PE_owner_[premier_sommet];
+        const int facette_num_owner = facette_num_owner_[facette];
         if (PE_proprietaire == moi)
           {
             facettes_to_send_z.append_array(facette_num_owner);
@@ -5103,14 +5103,14 @@ void Maillage_FT_Disc::echanger_facettes_face_z(const ArrOfInt& liste_facettes,
       }
     comm.echange_taille_et_messages();
     const ArrOfInt& recv_pe_list = comm.get_recv_pe_list();
-    const long nb_recv_pe = recv_pe_list.size_array();
+    const int nb_recv_pe = recv_pe_list.size_array();
     for (i = 0; i < nb_recv_pe; i++)
       {
-        const long pe_source = recv_pe_list[i];
+        const int pe_source = recv_pe_list[i];
         Entree& buffer = comm.recv_buffer(pe_source);
         while (1)
           {
-            long facette, PE_destinataire;
+            int facette, PE_destinataire;
             buffer >> facette >> PE_destinataire;
             if (buffer.eof())
               break;
@@ -5143,12 +5143,12 @@ void Maillage_FT_Disc::echanger_facettes_face_z(const ArrOfInt& liste_facettes,
     comm.begin_comm();
     for (i = 0; i < nb_facettes_envoi; i++)
       {
-        const long facette = la_liste_facettes[i];
-        const long PE_destinataire = liste_pe_dest_z[i];
-        const long face_arrivee = liste_facez_arrivee_local[i];
-        const long premier_sommet = facettes_(facette, 0);
-        const long PE_proprietaire = sommet_PE_owner_[premier_sommet];
-        const long facette_num_owner = facette_num_owner_[facette];
+        const int facette = la_liste_facettes[i];
+        const int PE_destinataire = liste_pe_dest_z[i];
+        const int face_arrivee = liste_facez_arrivee_local[i];
+        const int premier_sommet = facettes_(facette, 0);
+        const int PE_proprietaire = sommet_PE_owner_[premier_sommet];
+        const int facette_num_owner = facette_num_owner_[facette];
         assert (PE_destinataire != moi);
         comm.send_buffer(PE_destinataire) << facette_num_owner
                                           << PE_proprietaire
@@ -5161,14 +5161,14 @@ void Maillage_FT_Disc::echanger_facettes_face_z(const ArrOfInt& liste_facettes,
     facettes_recues_numfacettes.resize_array(0);
     facettes_recues_numface.resize_array(0);
     const ArrOfInt& recv_pe_list = comm.get_recv_pe_list();
-    const long nb_recv_pe = recv_pe_list.size_array();
+    const int nb_recv_pe = recv_pe_list.size_array();
     for (i = 0; i < nb_recv_pe; i++)
       {
-        const long pe_source = recv_pe_list[i];
+        const int pe_source = recv_pe_list[i];
         Entree& buffer = comm.recv_buffer(pe_source);
         while (1)
           {
-            long facette = -1, PE_proprietaire = -1, face_arrivee = -1;
+            int facette = -1, PE_proprietaire = -1, face_arrivee = -1;
             buffer >> facette >> PE_proprietaire >> face_arrivee;
             if (buffer.eof())
               break;
@@ -5224,11 +5224,11 @@ void Maillage_FT_Disc::echanger_facettes_arete_x(const ArrOfInt& liste_facettes,
                                                  ArrOfInt& facettes_recues_numarete)
 {
   if (Comm_Group::check_enabled()) check_mesh();
-  const long moi = me();
-  long i=0;
-  long indice=0;
-  long nb_facettes_envoi = liste_facettes.size_array();
-  const long nb_facettes_envoi_init=liste_facettes.size_array();
+  const int moi = me();
+  int i=0;
+  int indice=0;
+  int nb_facettes_envoi = liste_facettes.size_array();
+  const int nb_facettes_envoi_init=liste_facettes.size_array();
   // Numeros des faces euleriennes associes a chaque facette (numero local
   // de la face sur le pe qui possede cet element)
   static ArrOfIntFT liste_aretex_arrivee_local;
@@ -5246,41 +5246,41 @@ void Maillage_FT_Disc::echanger_facettes_arete_x(const ArrOfInt& liste_facettes,
   //const IntTab& aretes_multiples_pe_num = le_domaine_vf.aretes_multiples_pe_num();
   const IntTab& aretes_multiples_virt_pe_num = le_domaine_vf.aretes_multiples_virt_pe_num();
 
-  const long nb_aretes_reelles = le_domaine_vf.domaine().nb_aretes(); // Nombre de faces reelles
+  const int nb_aretes_reelles = le_domaine_vf.domaine().nb_aretes(); // Nombre de faces reelles
   {
     liste_pe_dest_aretex.resize_array(nb_facettes_envoi);
     liste_aretex_arrivee_local.resize_array(nb_facettes_envoi);
 
     while (i<nb_facettes_envoi_init)
       {
-        const long arete_voisine = liste_arete_arrivee[i];
-        const long arete_voisine_multiple = (aretes_multiples(arete_voisine)>0);
-        const long arete_mult=aretes_multiples(arete_voisine);
+        const int arete_voisine = liste_arete_arrivee[i];
+        const int arete_voisine_multiple = (aretes_multiples(arete_voisine)>0);
+        const int arete_mult=aretes_multiples(arete_voisine);
 
         if (arete_voisine_multiple)
           {
-            const long fa7=liste_facettes[i];
-            const long pe1=aretes_multiples_virt_pe_num(arete_voisine,0);
-            const long arete_1=aretes_multiples_virt_pe_num(arete_voisine,1);
-            const long pe2=aretes_multiples_virt_pe_num(arete_voisine,2);
-            const long arete_2=aretes_multiples_virt_pe_num(arete_voisine,3);
-            const long pe3=aretes_multiples_virt_pe_num(arete_voisine,4);
-            const long arete_3=aretes_multiples_virt_pe_num(arete_voisine,5);
-            const long pe4=aretes_multiples_virt_pe_num(arete_voisine,6);
-            const long arete_4=aretes_multiples_virt_pe_num(arete_voisine,7);
-            long fa7_reelle_pour_pe1=1;
+            const int fa7=liste_facettes[i];
+            const int pe1=aretes_multiples_virt_pe_num(arete_voisine,0);
+            const int arete_1=aretes_multiples_virt_pe_num(arete_voisine,1);
+            const int pe2=aretes_multiples_virt_pe_num(arete_voisine,2);
+            const int arete_2=aretes_multiples_virt_pe_num(arete_voisine,3);
+            const int pe3=aretes_multiples_virt_pe_num(arete_voisine,4);
+            const int arete_3=aretes_multiples_virt_pe_num(arete_voisine,5);
+            const int pe4=aretes_multiples_virt_pe_num(arete_voisine,6);
+            const int arete_4=aretes_multiples_virt_pe_num(arete_voisine,7);
+            int fa7_reelle_pour_pe1=1;
             fa7_reelle_pour_pe1 = (sommet_PE_owner_(facettes_(fa7,0))==pe1) ? 1 : 0;
-            long fa7_reelle_pour_pe2=1;
+            int fa7_reelle_pour_pe2=1;
             fa7_reelle_pour_pe2 = (sommet_PE_owner_(facettes_(fa7,0))==pe2) ? 1 : 0;
-            long fa7_reelle_pour_pe3=1;
+            int fa7_reelle_pour_pe3=1;
             fa7_reelle_pour_pe3 = (sommet_PE_owner_(facettes_(fa7,0))==pe3) ? 1 : 0;
-            long fa7_reelle_pour_pe4=1;
+            int fa7_reelle_pour_pe4=1;
             fa7_reelle_pour_pe4 = (sommet_PE_owner_(facettes_(fa7,0))==pe4) ? 1 : 0;
 
-            const long fa7_existante_pour_pe1= (pe1>=0) ? (fa7_reelle_pour_pe1 || espace_distant.contient_element(pe1, fa7)) : 0;
-            const long fa7_existante_pour_pe2= (pe2>=0) ? (fa7_reelle_pour_pe2 || espace_distant.contient_element(pe2, fa7)) : 0;
-            const long fa7_existante_pour_pe3= (pe3>=0) ? (fa7_reelle_pour_pe3 || espace_distant.contient_element(pe3, fa7)) : 0;
-            const long fa7_existante_pour_pe4= (pe4>=0) ? (fa7_reelle_pour_pe4 || espace_distant.contient_element(pe4, fa7)) : 0;
+            const int fa7_existante_pour_pe1= (pe1>=0) ? (fa7_reelle_pour_pe1 || espace_distant.contient_element(pe1, fa7)) : 0;
+            const int fa7_existante_pour_pe2= (pe2>=0) ? (fa7_reelle_pour_pe2 || espace_distant.contient_element(pe2, fa7)) : 0;
+            const int fa7_existante_pour_pe3= (pe3>=0) ? (fa7_reelle_pour_pe3 || espace_distant.contient_element(pe3, fa7)) : 0;
+            const int fa7_existante_pour_pe4= (pe4>=0) ? (fa7_reelle_pour_pe4 || espace_distant.contient_element(pe4, fa7)) : 0;
 
             if (fa7_existante_pour_pe1 && pe1!=moi)
               {
@@ -5325,9 +5325,9 @@ void Maillage_FT_Disc::echanger_facettes_arete_x(const ArrOfInt& liste_facettes,
           }
         else
           {
-            const long index = arete_voisine - nb_aretes_reelles;
-            const long pe = arete_virt_pe_num(index, 0);
-            const long arete_locale = arete_virt_pe_num(index, 1);
+            const int index = arete_voisine - nb_aretes_reelles;
+            const int pe = arete_virt_pe_num(index, 0);
+            const int arete_locale = arete_virt_pe_num(index, 1);
             liste_pe_dest_aretex[indice] = pe;
             liste_aretex_arrivee_local[indice] = arete_locale;
             la_liste_facettes[indice]=liste_facettes[i];
@@ -5358,7 +5358,7 @@ void Maillage_FT_Disc::echanger_facettes_arete_x(const ArrOfInt& liste_facettes,
   // Lors de la communication finale entre les procs B et les procs C,
   // ces drapeaux indiquent si on recoit des donnees et si on en envoie
   // a chacun des processeurs.
-  static long nbproc = Process::nproc();
+  static int nbproc = Process::nproc();
   static ArrOfIntFT BtoC_send_pe_flags_x(nbproc);
   static ArrOfIntFT BtoC_recv_pe_flags_x(nbproc);
   BtoC_send_pe_flags_x = 0;
@@ -5372,11 +5372,11 @@ void Maillage_FT_Disc::echanger_facettes_arete_x(const ArrOfInt& liste_facettes,
     comm.begin_comm();
     for (i = 0; i < nb_facettes_envoi; i++)
       {
-        const long facette = la_liste_facettes[i];
-        const long PE_destinataire = liste_pe_dest_aretex[i];
-        const long premier_sommet = facettes_(facette, 0);
-        const long PE_proprietaire = sommet_PE_owner_[premier_sommet];
-        const long facette_num_owner = facette_num_owner_[facette];
+        const int facette = la_liste_facettes[i];
+        const int PE_destinataire = liste_pe_dest_aretex[i];
+        const int premier_sommet = facettes_(facette, 0);
+        const int PE_proprietaire = sommet_PE_owner_[premier_sommet];
+        const int facette_num_owner = facette_num_owner_[facette];
         if (PE_proprietaire == moi)
           {
             facettes_to_send_aretex.append_array(facette_num_owner);
@@ -5391,14 +5391,14 @@ void Maillage_FT_Disc::echanger_facettes_arete_x(const ArrOfInt& liste_facettes,
       }
     comm.echange_taille_et_messages();
     const ArrOfInt& recv_pe_list = comm.get_recv_pe_list();
-    const long nb_recv_pe = recv_pe_list.size_array();
+    const int nb_recv_pe = recv_pe_list.size_array();
     for (i = 0; i < nb_recv_pe; i++)
       {
-        const long pe_source = recv_pe_list[i];
+        const int pe_source = recv_pe_list[i];
         Entree& buffer = comm.recv_buffer(pe_source);
         while (1)
           {
-            long facette, PE_destinataire;
+            int facette, PE_destinataire;
             buffer >> facette >> PE_destinataire;
             if (buffer.eof())
               break;
@@ -5431,12 +5431,12 @@ void Maillage_FT_Disc::echanger_facettes_arete_x(const ArrOfInt& liste_facettes,
     comm.begin_comm();
     for (i = 0; i < nb_facettes_envoi; i++)
       {
-        const long facette = la_liste_facettes[i];
-        const long PE_destinataire = liste_pe_dest_aretex[i];
-        const long arete_arrivee = liste_aretex_arrivee_local[i];
-        const long premier_sommet = facettes_(facette, 0);
-        const long PE_proprietaire = sommet_PE_owner_[premier_sommet];
-        const long facette_num_owner = facette_num_owner_[facette];
+        const int facette = la_liste_facettes[i];
+        const int PE_destinataire = liste_pe_dest_aretex[i];
+        const int arete_arrivee = liste_aretex_arrivee_local[i];
+        const int premier_sommet = facettes_(facette, 0);
+        const int PE_proprietaire = sommet_PE_owner_[premier_sommet];
+        const int facette_num_owner = facette_num_owner_[facette];
         assert (PE_destinataire != moi);
         comm.send_buffer(PE_destinataire) << facette_num_owner
                                           << PE_proprietaire
@@ -5449,14 +5449,14 @@ void Maillage_FT_Disc::echanger_facettes_arete_x(const ArrOfInt& liste_facettes,
     facettes_recues_numfacettes.resize_array(0);
     facettes_recues_numarete.resize_array(0);
     const ArrOfInt& recv_pe_list = comm.get_recv_pe_list();
-    const long nb_recv_pe = recv_pe_list.size_array();
+    const int nb_recv_pe = recv_pe_list.size_array();
     for (i = 0; i < nb_recv_pe; i++)
       {
-        const long pe_source = recv_pe_list[i];
+        const int pe_source = recv_pe_list[i];
         Entree& buffer = comm.recv_buffer(pe_source);
         while (1)
           {
-            long facette = -1, PE_proprietaire = -1, arete_arrivee = -1;
+            int facette = -1, PE_proprietaire = -1, arete_arrivee = -1;
             buffer >> facette >> PE_proprietaire >> arete_arrivee;
             if (buffer.eof())
               break;
@@ -5513,11 +5513,11 @@ void Maillage_FT_Disc::echanger_facettes_arete_y(const ArrOfInt& liste_facettes,
                                                  ArrOfInt& facettes_recues_numarete)
 {
   if (Comm_Group::check_enabled()) check_mesh();
-  const long moi = me();
-  long i=0;
-  long indice=0;
-  long nb_facettes_envoi = liste_facettes.size_array();
-  const long nb_facettes_envoi_init=liste_facettes.size_array();
+  const int moi = me();
+  int i=0;
+  int indice=0;
+  int nb_facettes_envoi = liste_facettes.size_array();
+  const int nb_facettes_envoi_init=liste_facettes.size_array();
 
   // Numeros des faces euleriennes associes a chaque facette (numero local
   // de la face sur le pe qui possede cet element)
@@ -5535,41 +5535,41 @@ void Maillage_FT_Disc::echanger_facettes_arete_y(const ArrOfInt& liste_facettes,
   const IntTab& arete_virt_pe_num = le_domaine_vf.arete_virt_pe_num();
   //const IntTab& aretes_multiples_pe_num = le_domaine_vf.aretes_multiples_pe_num();
   const IntTab& aretes_multiples_virt_pe_num = le_domaine_vf.aretes_multiples_virt_pe_num();
-  const long nb_aretes_reelles = le_domaine_vf.domaine().nb_aretes(); // Nombre de faces reelles
+  const int nb_aretes_reelles = le_domaine_vf.domaine().nb_aretes(); // Nombre de faces reelles
   {
     liste_pe_dest_aretey.resize_array(nb_facettes_envoi);
     liste_aretey_arrivee_local.resize_array(nb_facettes_envoi);
 
     while (i<nb_facettes_envoi_init)
       {
-        const long arete_voisine = liste_arete_arrivee[i];
-        const long arete_voisine_multiple = (aretes_multiples(arete_voisine)>0);
-        const long arete_mult=aretes_multiples(arete_voisine);
+        const int arete_voisine = liste_arete_arrivee[i];
+        const int arete_voisine_multiple = (aretes_multiples(arete_voisine)>0);
+        const int arete_mult=aretes_multiples(arete_voisine);
 
         if (arete_voisine_multiple)
           {
-            const long fa7=liste_facettes[i];
-            const long pe1=aretes_multiples_virt_pe_num(arete_voisine,0);
-            const long arete_1=aretes_multiples_virt_pe_num(arete_voisine,1);
-            const long pe2=aretes_multiples_virt_pe_num(arete_voisine,2);
-            const long arete_2=aretes_multiples_virt_pe_num(arete_voisine,3);
-            const long pe3=aretes_multiples_virt_pe_num(arete_voisine,4);
-            const long arete_3=aretes_multiples_virt_pe_num(arete_voisine,5);
-            const long pe4=aretes_multiples_virt_pe_num(arete_voisine,6);
-            const long arete_4=aretes_multiples_virt_pe_num(arete_voisine,7);
-            long fa7_reelle_pour_pe1=1;
+            const int fa7=liste_facettes[i];
+            const int pe1=aretes_multiples_virt_pe_num(arete_voisine,0);
+            const int arete_1=aretes_multiples_virt_pe_num(arete_voisine,1);
+            const int pe2=aretes_multiples_virt_pe_num(arete_voisine,2);
+            const int arete_2=aretes_multiples_virt_pe_num(arete_voisine,3);
+            const int pe3=aretes_multiples_virt_pe_num(arete_voisine,4);
+            const int arete_3=aretes_multiples_virt_pe_num(arete_voisine,5);
+            const int pe4=aretes_multiples_virt_pe_num(arete_voisine,6);
+            const int arete_4=aretes_multiples_virt_pe_num(arete_voisine,7);
+            int fa7_reelle_pour_pe1=1;
             fa7_reelle_pour_pe1 = (sommet_PE_owner_(facettes_(fa7,0))==pe1) ? 1 : 0;
-            long fa7_reelle_pour_pe2=1;
+            int fa7_reelle_pour_pe2=1;
             fa7_reelle_pour_pe2 = (sommet_PE_owner_(facettes_(fa7,0))==pe2) ? 1 : 0;
-            long fa7_reelle_pour_pe3=1;
+            int fa7_reelle_pour_pe3=1;
             fa7_reelle_pour_pe3 = (sommet_PE_owner_(facettes_(fa7,0))==pe3) ? 1 : 0;
-            long fa7_reelle_pour_pe4=1;
+            int fa7_reelle_pour_pe4=1;
             fa7_reelle_pour_pe4 = (sommet_PE_owner_(facettes_(fa7,0))==pe4) ? 1 : 0;
 
-            const long fa7_existante_pour_pe1= (pe1>=0) ? fa7_reelle_pour_pe1 || espace_distant.contient_element(pe1, fa7) : 0;
-            const long fa7_existante_pour_pe2= (pe2>=0) ? fa7_reelle_pour_pe2 || espace_distant.contient_element(pe2, fa7) : 0;
-            const long fa7_existante_pour_pe3= (pe3>=0) ? fa7_reelle_pour_pe3 || espace_distant.contient_element(pe3, fa7) : 0;
-            const long fa7_existante_pour_pe4= (pe4>=0) ? fa7_reelle_pour_pe4 || espace_distant.contient_element(pe4, fa7) : 0;
+            const int fa7_existante_pour_pe1= (pe1>=0) ? fa7_reelle_pour_pe1 || espace_distant.contient_element(pe1, fa7) : 0;
+            const int fa7_existante_pour_pe2= (pe2>=0) ? fa7_reelle_pour_pe2 || espace_distant.contient_element(pe2, fa7) : 0;
+            const int fa7_existante_pour_pe3= (pe3>=0) ? fa7_reelle_pour_pe3 || espace_distant.contient_element(pe3, fa7) : 0;
+            const int fa7_existante_pour_pe4= (pe4>=0) ? fa7_reelle_pour_pe4 || espace_distant.contient_element(pe4, fa7) : 0;
 
             if (fa7_existante_pour_pe1 && pe1!=moi)
               {
@@ -5615,9 +5615,9 @@ void Maillage_FT_Disc::echanger_facettes_arete_y(const ArrOfInt& liste_facettes,
           }
         else
           {
-            const long index = arete_voisine - nb_aretes_reelles;
-            const long pe = arete_virt_pe_num(index, 0);
-            const long arete_locale = arete_virt_pe_num(index, 1);
+            const int index = arete_voisine - nb_aretes_reelles;
+            const int pe = arete_virt_pe_num(index, 0);
+            const int arete_locale = arete_virt_pe_num(index, 1);
             liste_pe_dest_aretey[indice] = pe;
             liste_aretey_arrivee_local[indice] = arete_locale;
             la_liste_facettes[indice]=liste_facettes[i];
@@ -5647,7 +5647,7 @@ void Maillage_FT_Disc::echanger_facettes_arete_y(const ArrOfInt& liste_facettes,
   // Lors de la communication finale entre les procs B et les procs C,
   // ces drapeaux indiquent si on recoit des donnees et si on en envoie
   // a chacun des processeurs.
-  static long nbproc = Process::nproc();
+  static int nbproc = Process::nproc();
   static ArrOfIntFT BtoC_send_pe_flags_aretey(nbproc);
   static ArrOfIntFT BtoC_recv_pe_flags_aretey(nbproc);
   BtoC_send_pe_flags_aretey = 0;
@@ -5661,11 +5661,11 @@ void Maillage_FT_Disc::echanger_facettes_arete_y(const ArrOfInt& liste_facettes,
     comm.begin_comm();
     for (i = 0; i < nb_facettes_envoi; i++)
       {
-        const long facette = la_liste_facettes[i];
-        const long PE_destinataire = liste_pe_dest_aretey[i];
-        const long premier_sommet = facettes_(facette, 0);
-        const long PE_proprietaire = sommet_PE_owner_[premier_sommet];
-        const long facette_num_owner = facette_num_owner_[facette];
+        const int facette = la_liste_facettes[i];
+        const int PE_destinataire = liste_pe_dest_aretey[i];
+        const int premier_sommet = facettes_(facette, 0);
+        const int PE_proprietaire = sommet_PE_owner_[premier_sommet];
+        const int facette_num_owner = facette_num_owner_[facette];
         if (PE_proprietaire == moi)
           {
             facettes_to_send_aretey.append_array(facette_num_owner);
@@ -5680,14 +5680,14 @@ void Maillage_FT_Disc::echanger_facettes_arete_y(const ArrOfInt& liste_facettes,
       }
     comm.echange_taille_et_messages();
     const ArrOfInt& recv_pe_list = comm.get_recv_pe_list();
-    const long nb_recv_pe = recv_pe_list.size_array();
+    const int nb_recv_pe = recv_pe_list.size_array();
     for (i = 0; i < nb_recv_pe; i++)
       {
-        const long pe_source = recv_pe_list[i];
+        const int pe_source = recv_pe_list[i];
         Entree& buffer = comm.recv_buffer(pe_source);
         while (1)
           {
-            long facette, PE_destinataire;
+            int facette, PE_destinataire;
             buffer >> facette >> PE_destinataire;
             if (buffer.eof())
               break;
@@ -5720,12 +5720,12 @@ void Maillage_FT_Disc::echanger_facettes_arete_y(const ArrOfInt& liste_facettes,
     comm.begin_comm();
     for (i = 0; i < nb_facettes_envoi; i++)
       {
-        const long facette = la_liste_facettes[i];
-        const long PE_destinataire = liste_pe_dest_aretey[i];
-        const long arete_arrivee = liste_aretey_arrivee_local[i];
-        const long premier_sommet = facettes_(facette, 0);
-        const long PE_proprietaire = sommet_PE_owner_[premier_sommet];
-        const long facette_num_owner = facette_num_owner_[facette];
+        const int facette = la_liste_facettes[i];
+        const int PE_destinataire = liste_pe_dest_aretey[i];
+        const int arete_arrivee = liste_aretey_arrivee_local[i];
+        const int premier_sommet = facettes_(facette, 0);
+        const int PE_proprietaire = sommet_PE_owner_[premier_sommet];
+        const int facette_num_owner = facette_num_owner_[facette];
         assert (PE_destinataire != moi);
         comm.send_buffer(PE_destinataire) << facette_num_owner
                                           << PE_proprietaire
@@ -5738,14 +5738,14 @@ void Maillage_FT_Disc::echanger_facettes_arete_y(const ArrOfInt& liste_facettes,
     facettes_recues_numfacettes.resize_array(0);
     facettes_recues_numarete.resize_array(0);
     const ArrOfInt& recv_pe_list = comm.get_recv_pe_list();
-    const long nb_recv_pe = recv_pe_list.size_array();
+    const int nb_recv_pe = recv_pe_list.size_array();
     for (i = 0; i < nb_recv_pe; i++)
       {
-        const long pe_source = recv_pe_list[i];
+        const int pe_source = recv_pe_list[i];
         Entree& buffer = comm.recv_buffer(pe_source);
         while (1)
           {
-            long facette = -1, PE_proprietaire = -1, arete_arrivee = -1;
+            int facette = -1, PE_proprietaire = -1, arete_arrivee = -1;
             buffer >> facette >> PE_proprietaire >> arete_arrivee;
             if (buffer.eof())
               break;
@@ -5802,11 +5802,11 @@ void Maillage_FT_Disc::echanger_facettes_arete_z(const ArrOfInt& liste_facettes,
                                                  ArrOfInt& facettes_recues_numarete)
 {
   if (Comm_Group::check_enabled()) check_mesh();
-  const long moi = me();
-  long i=0;
-  long indice=0;
-  long nb_facettes_envoi = liste_facettes.size_array();
-  const long nb_facettes_envoi_init=liste_facettes.size_array();
+  const int moi = me();
+  int i=0;
+  int indice=0;
+  int nb_facettes_envoi = liste_facettes.size_array();
+  const int nb_facettes_envoi_init=liste_facettes.size_array();
   // Numeros des faces euleriennes associes a chaque facette (numero local
   // de la face sur le pe qui possede cet element)
   static ArrOfIntFT liste_aretez_arrivee_local;
@@ -5823,41 +5823,41 @@ void Maillage_FT_Disc::echanger_facettes_arete_z(const ArrOfInt& liste_facettes,
   const IntTab& arete_virt_pe_num = le_domaine_vf.arete_virt_pe_num();
   //const IntTab& aretes_multiples_pe_num = le_domaine_vf.aretes_multiples_pe_num();
   const IntTab& aretes_multiples_virt_pe_num = le_domaine_vf.aretes_multiples_virt_pe_num();
-  const long nb_aretes_reelles = le_domaine_vf.domaine().nb_aretes(); // Nombre de faces reelles
+  const int nb_aretes_reelles = le_domaine_vf.domaine().nb_aretes(); // Nombre de faces reelles
   {
     liste_pe_dest_aretez.resize_array(nb_facettes_envoi);
     liste_aretez_arrivee_local.resize_array(nb_facettes_envoi);
 
     while (i<nb_facettes_envoi_init)
       {
-        const long arete_voisine = liste_arete_arrivee[i];
-        const long arete_voisine_multiple = (aretes_multiples(arete_voisine)>0);
-        const long arete_mult=aretes_multiples(arete_voisine);
+        const int arete_voisine = liste_arete_arrivee[i];
+        const int arete_voisine_multiple = (aretes_multiples(arete_voisine)>0);
+        const int arete_mult=aretes_multiples(arete_voisine);
         if (arete_voisine_multiple)
           {
-            const long fa7=liste_facettes[i];
-            const long pe1=aretes_multiples_virt_pe_num(arete_voisine,0);
-            const long arete_1=aretes_multiples_virt_pe_num(arete_voisine,1);
-            const long pe2=aretes_multiples_virt_pe_num(arete_voisine,2);
-            const long arete_2=aretes_multiples_virt_pe_num(arete_voisine,3);
-            const long pe3=aretes_multiples_virt_pe_num(arete_voisine,4);
-            const long arete_3=aretes_multiples_virt_pe_num(arete_voisine,5);
-            const long pe4=aretes_multiples_virt_pe_num(arete_voisine,6);
-            const long arete_4=aretes_multiples_virt_pe_num(arete_voisine,7);
+            const int fa7=liste_facettes[i];
+            const int pe1=aretes_multiples_virt_pe_num(arete_voisine,0);
+            const int arete_1=aretes_multiples_virt_pe_num(arete_voisine,1);
+            const int pe2=aretes_multiples_virt_pe_num(arete_voisine,2);
+            const int arete_2=aretes_multiples_virt_pe_num(arete_voisine,3);
+            const int pe3=aretes_multiples_virt_pe_num(arete_voisine,4);
+            const int arete_3=aretes_multiples_virt_pe_num(arete_voisine,5);
+            const int pe4=aretes_multiples_virt_pe_num(arete_voisine,6);
+            const int arete_4=aretes_multiples_virt_pe_num(arete_voisine,7);
 
-            long fa7_reelle_pour_pe1=1;
+            int fa7_reelle_pour_pe1=1;
             fa7_reelle_pour_pe1 = (sommet_PE_owner_(facettes_(fa7,0))==pe1) ? 1 : 0;
-            long fa7_reelle_pour_pe2=1;
+            int fa7_reelle_pour_pe2=1;
             fa7_reelle_pour_pe2 = (sommet_PE_owner_(facettes_(fa7,0))==pe2) ? 1 : 0;
-            long fa7_reelle_pour_pe3=1;
+            int fa7_reelle_pour_pe3=1;
             fa7_reelle_pour_pe3 = (sommet_PE_owner_(facettes_(fa7,0))==pe3) ? 1 : 0;
-            long fa7_reelle_pour_pe4=1;
+            int fa7_reelle_pour_pe4=1;
             fa7_reelle_pour_pe4 = (sommet_PE_owner_(facettes_(fa7,0))==pe4) ? 1 : 0;
 
-            const long fa7_existante_pour_pe1= (pe1>=0) ? fa7_reelle_pour_pe1 || espace_distant.contient_element(pe1, fa7) : 0;
-            const long fa7_existante_pour_pe2= (pe2>=0) ? fa7_reelle_pour_pe2 || espace_distant.contient_element(pe2, fa7) : 0;
-            const long fa7_existante_pour_pe3= (pe3>=0) ? fa7_reelle_pour_pe3 || espace_distant.contient_element(pe3, fa7) : 0;
-            const long fa7_existante_pour_pe4= (pe4>=0) ? fa7_reelle_pour_pe4 || espace_distant.contient_element(pe4, fa7) : 0;
+            const int fa7_existante_pour_pe1= (pe1>=0) ? fa7_reelle_pour_pe1 || espace_distant.contient_element(pe1, fa7) : 0;
+            const int fa7_existante_pour_pe2= (pe2>=0) ? fa7_reelle_pour_pe2 || espace_distant.contient_element(pe2, fa7) : 0;
+            const int fa7_existante_pour_pe3= (pe3>=0) ? fa7_reelle_pour_pe3 || espace_distant.contient_element(pe3, fa7) : 0;
+            const int fa7_existante_pour_pe4= (pe4>=0) ? fa7_reelle_pour_pe4 || espace_distant.contient_element(pe4, fa7) : 0;
 
             /*
             Cerr << "arete_mult " << arete_mult <<
@@ -5912,9 +5912,9 @@ void Maillage_FT_Disc::echanger_facettes_arete_z(const ArrOfInt& liste_facettes,
           }
         else
           {
-            const long index = arete_voisine - nb_aretes_reelles;
-            const long pe = arete_virt_pe_num(index, 0);
-            const long arete_locale = arete_virt_pe_num(index, 1);
+            const int index = arete_voisine - nb_aretes_reelles;
+            const int pe = arete_virt_pe_num(index, 0);
+            const int arete_locale = arete_virt_pe_num(index, 1);
             liste_pe_dest_aretez[indice] = pe;
             liste_aretez_arrivee_local[indice] = arete_locale;
             la_liste_facettes[indice]=liste_facettes[i];
@@ -5933,7 +5933,7 @@ void Maillage_FT_Disc::echanger_facettes_arete_z(const ArrOfInt& liste_facettes,
   /*Cerr << "APRES TRI" << finl;
   for (i =0; i<liste_aretez_arrivee_local.size_array(); i++)
     {
-      long arete=liste_aretez_arrivee_local(i);
+      int arete=liste_aretez_arrivee_local(i);
       Cerr << "arete " << arete << " pe_dist " << liste_pe_dest_aretez(i) << finl;
     }
     */
@@ -5951,7 +5951,7 @@ void Maillage_FT_Disc::echanger_facettes_arete_z(const ArrOfInt& liste_facettes,
   // Lors de la communication finale entre les procs B et les procs C,
   // ces drapeaux indiquent si on recoit des donnees et si on en envoie
   // a chacun des processeurs.
-  static long nbproc = Process::nproc();
+  static int nbproc = Process::nproc();
   static ArrOfIntFT BtoC_send_pe_flags_aretez(nbproc);
   static ArrOfIntFT BtoC_recv_pe_flags_aretez(nbproc);
   BtoC_send_pe_flags_aretez = 0;
@@ -5965,11 +5965,11 @@ void Maillage_FT_Disc::echanger_facettes_arete_z(const ArrOfInt& liste_facettes,
     comm.begin_comm();
     for (i = 0; i < nb_facettes_envoi; i++)
       {
-        const long facette = la_liste_facettes[i];
-        const long PE_destinataire = liste_pe_dest_aretez[i];
-        const long premier_sommet = facettes_(facette, 0);
-        const long PE_proprietaire = sommet_PE_owner_[premier_sommet];
-        const long facette_num_owner = facette_num_owner_[facette];
+        const int facette = la_liste_facettes[i];
+        const int PE_destinataire = liste_pe_dest_aretez[i];
+        const int premier_sommet = facettes_(facette, 0);
+        const int PE_proprietaire = sommet_PE_owner_[premier_sommet];
+        const int facette_num_owner = facette_num_owner_[facette];
         if (PE_proprietaire == moi)
           {
             facettes_to_send_aretez.append_array(facette_num_owner);
@@ -5984,14 +5984,14 @@ void Maillage_FT_Disc::echanger_facettes_arete_z(const ArrOfInt& liste_facettes,
       }
     comm.echange_taille_et_messages();
     const ArrOfInt& recv_pe_list = comm.get_recv_pe_list();
-    const long nb_recv_pe = recv_pe_list.size_array();
+    const int nb_recv_pe = recv_pe_list.size_array();
     for (i = 0; i < nb_recv_pe; i++)
       {
-        const long pe_source = recv_pe_list[i];
+        const int pe_source = recv_pe_list[i];
         Entree& buffer = comm.recv_buffer(pe_source);
         while (1)
           {
-            long facette, PE_destinataire;
+            int facette, PE_destinataire;
             buffer >> facette >> PE_destinataire;
             if (buffer.eof())
               break;
@@ -6024,12 +6024,12 @@ void Maillage_FT_Disc::echanger_facettes_arete_z(const ArrOfInt& liste_facettes,
     comm.begin_comm();
     for (i = 0; i < nb_facettes_envoi; i++)
       {
-        const long facette = la_liste_facettes[i];
-        const long PE_destinataire = liste_pe_dest_aretez[i];
-        const long arete_arrivee = liste_aretez_arrivee_local[i];
-        const long premier_sommet = facettes_(facette, 0);
-        const long PE_proprietaire = sommet_PE_owner_[premier_sommet];
-        const long facette_num_owner = facette_num_owner_[facette];
+        const int facette = la_liste_facettes[i];
+        const int PE_destinataire = liste_pe_dest_aretez[i];
+        const int arete_arrivee = liste_aretez_arrivee_local[i];
+        const int premier_sommet = facettes_(facette, 0);
+        const int PE_proprietaire = sommet_PE_owner_[premier_sommet];
+        const int facette_num_owner = facette_num_owner_[facette];
         assert (PE_destinataire != moi);
         comm.send_buffer(PE_destinataire) << facette_num_owner
                                           << PE_proprietaire
@@ -6042,14 +6042,14 @@ void Maillage_FT_Disc::echanger_facettes_arete_z(const ArrOfInt& liste_facettes,
     facettes_recues_numfacettes.resize_array(0);
     facettes_recues_numarete.resize_array(0);
     const ArrOfInt& recv_pe_list = comm.get_recv_pe_list();
-    const long nb_recv_pe = recv_pe_list.size_array();
+    const int nb_recv_pe = recv_pe_list.size_array();
     for (i = 0; i < nb_recv_pe; i++)
       {
-        const long pe_source = recv_pe_list[i];
+        const int pe_source = recv_pe_list[i];
         Entree& buffer = comm.recv_buffer(pe_source);
         while (1)
           {
-            long facette = -1, PE_proprietaire = -1, arete_arrivee = -1;
+            int facette = -1, PE_proprietaire = -1, arete_arrivee = -1;
             buffer >> facette >> PE_proprietaire >> arete_arrivee;
             if (buffer.eof())
               break;
@@ -6119,15 +6119,15 @@ void Maillage_FT_Disc::convertir_numero_distant_local(const Desc_Structure_FT& d
                                                       ArrOfInt& numeros_locaux) const
 {
   const Descripteur_FT& espace_virtuel = descripteur.espace_virtuel();
-  const long nb_numeros = numeros_distants.size_array();
+  const int nb_numeros = numeros_distants.size_array();
   numeros_locaux.resize_array(nb_numeros);
-  const long moi = me();
+  const int moi = me();
 
-  for (long index = 0; index < nb_numeros; index++)
+  for (int index = 0; index < nb_numeros; index++)
     {
-      const long numero_distant = numeros_distants[index];
-      const long pe = pe_distant[index];
-      long numero_local = -1;
+      const int numero_distant = numeros_distants[index];
+      const int pe = pe_distant[index];
+      int numero_local = -1;
 
       if (pe == moi)
         {
@@ -6137,13 +6137,13 @@ void Maillage_FT_Disc::convertir_numero_distant_local(const Desc_Structure_FT& d
         {
           // Recherche parmi les sommets virtuels du pe:
           const ArrOfInt& elements_virtuels = espace_virtuel.elements(pe);
-          const long n = elements_virtuels.size_array();
+          const int n = elements_virtuels.size_array();
           // Elem est un numero de facette ou de sommet
-          long i;
+          int i;
           for (i = 0; i < n; i++)
             {
-              const long elem = elements_virtuels[i];
-              const long numero_distant_de_elem = element_num_owner[elem];
+              const int elem = elements_virtuels[i];
+              const int numero_distant_de_elem = element_num_owner[elem];
               if (numero_distant == numero_distant_de_elem)
                 {
                   numero_local = elem;
@@ -6157,12 +6157,12 @@ void Maillage_FT_Disc::convertir_numero_distant_local(const Desc_Structure_FT& d
 }
 void Maillage_FT_Disc::convertir_numero_distant_local(const Desc_Structure_FT& descripteur,
                                                       const ArrOfInt& element_num_owner,
-                                                      const long numero_distant,
-                                                      const long pe_distant,
-                                                      long& numero_local) const
+                                                      const int numero_distant,
+                                                      const int pe_distant,
+                                                      int& numero_local) const
 {
   const Descripteur_FT& espace_virtuel = descripteur.espace_virtuel();
-  const long moi = me();
+  const int moi = me();
 
   numero_local = -1;
 
@@ -6174,13 +6174,13 @@ void Maillage_FT_Disc::convertir_numero_distant_local(const Desc_Structure_FT& d
     {
       // Recherche parmi les sommets virtuels du pe:
       const ArrOfInt& elements_virtuels = espace_virtuel.elements(pe_distant);
-      const long n = elements_virtuels.size_array();
+      const int n = elements_virtuels.size_array();
       // Elem est un numero de facette ou de sommet
-      long i;
+      int i;
       for (i = 0; i < n; i++)
         {
-          const long elem = elements_virtuels[i];
-          const long numero_distant_de_elem = element_num_owner[elem];
+          const int elem = elements_virtuels[i];
+          const int numero_distant_de_elem = element_num_owner[elem];
           if (numero_distant == numero_distant_de_elem)
             {
               numero_local = elem;
@@ -6212,29 +6212,29 @@ void Maillage_FT_Disc::convertir_numero_distant_local(const Desc_Structure_FT& d
 // - deplacement du point (deplacer_un_point)
 // - deplacement du sommet (deplacer_un_sommet) : appel a deplacer_un_point + gestion des transferts entre processeurs
 //fonctions statiques (pour ne pas utiliser des membres propres au maillage
-long Maillage_FT_Disc::deplacer_un_point(double& x, double& y, double& z,
-                                         double x1, double y1, double z1,
-                                         long& element,
-                                         long& face_bord,
-                                         const Parcours_interface& parcours,
-                                         const Domaine_VF& domaine_vf,
-                                         const IntTab& face_voisins,
-                                         long skip_facettes)
+int Maillage_FT_Disc::deplacer_un_point(double& x, double& y, double& z,
+                                        double x1, double y1, double z1,
+                                        int& element,
+                                        int& face_bord,
+                                        const Parcours_interface& parcours,
+                                        const Domaine_VF& domaine_vf,
+                                        const IntTab& face_voisins,
+                                        int skip_facettes)
 {
   // Valeur de retour de la fonction :
-  long continuer = -2;
+  int continuer = -2;
   // Rappel : face_bord < -1  <=>  le sommet est sur une ligne de contact
   // La face de bord ou passe le sommet (si ligne contact) :
-  long face_suivante = -2;
+  int face_suivante = -2;
   // L'element ou passe le sommet :
-  long element_suivant = -2;
+  int element_suivant = -2;
 
   if (face_bord < 0)
     {
       // Le noeud n'est pas une ligne de contact
       // Si on ne trouve pas d'intersection, on recupere pos_intersection=1.
       double pos_intersection = 1.;
-      const long face_sortie =
+      const int face_sortie =
         parcours.calculer_face_sortie_element(domaine_vf, element,
                                               x, y, z,
                                               x1, y1, z1,
@@ -6246,8 +6246,8 @@ long Maillage_FT_Disc::deplacer_un_point(double& x, double& y, double& z,
       if (face_sortie >= 0)
         {
           // Le sommet sort de l'element, quel est l'element voisin ?
-          const long elem0 = face_voisins(face_sortie, 0);
-          const long elem1 = face_voisins(face_sortie, 1);
+          const int elem0 = face_voisins(face_sortie, 0);
+          const int elem1 = face_voisins(face_sortie, 1);
           element_suivant = elem0 + elem1 - element;
           if (element_suivant < 0)
             {
@@ -6278,7 +6278,7 @@ long Maillage_FT_Disc::deplacer_un_point(double& x, double& y, double& z,
         {
           // Le sommet est sur un bord => ligne de contact
           // Le sommet se deplace sur la face de bord. Par ou sort-il ?
-          const long nouvelle_face_bord =
+          const int nouvelle_face_bord =
             parcours.calculer_sortie_face_bord(face_bord, element,
                                                x, y, z,
                                                x1, y1, z1,
@@ -6289,8 +6289,8 @@ long Maillage_FT_Disc::deplacer_un_point(double& x, double& y, double& z,
               // Numero de la face suivante :
               face_suivante = nouvelle_face_bord;
               // Numero de l'element adjacent a cette face
-              const long elem0 = face_voisins(face_suivante, 0);
-              const long elem1 = face_voisins(face_suivante, 1);
+              const int elem0 = face_voisins(face_suivante, 0);
+              const int elem1 = face_voisins(face_suivante, 1);
               element_suivant = elem0 + elem1 + 1;
               assert((elem0 == -1 || elem1 == -1)
                      && (elem0 >= 0 || elem1 >= 0));
@@ -6320,28 +6320,28 @@ long Maillage_FT_Disc::deplacer_un_point(double& x, double& y, double& z,
   return continuer;
 }
 
-long Maillage_FT_Disc::deplacer_un_sommet(double& x, double& y, double& z,
-                                          double x1, double y1, double z1,
-                                          long& element,
-                                          long& face_bord,
-                                          const long num_sommet,
-                                          const Parcours_interface& parcours,
-                                          const Domaine_VF& domaine_vf,
-                                          const IntTab& face_voisins,
-                                          ArrOfInt& sommets_envoyes,
-                                          ArrOfInt& element_virtuel_arrivee,
-                                          ArrOfInt& face_virtuelle_arrivee,
-                                          DoubleTab& deplacement_restant,
-                                          long skip_facettes)
+int Maillage_FT_Disc::deplacer_un_sommet(double& x, double& y, double& z,
+                                         double x1, double y1, double z1,
+                                         int& element,
+                                         int& face_bord,
+                                         const int num_sommet,
+                                         const Parcours_interface& parcours,
+                                         const Domaine_VF& domaine_vf,
+                                         const IntTab& face_voisins,
+                                         ArrOfInt& sommets_envoyes,
+                                         ArrOfInt& element_virtuel_arrivee,
+                                         ArrOfInt& face_virtuelle_arrivee,
+                                         DoubleTab& deplacement_restant,
+                                         int skip_facettes)
 
 {
   // Valeur de retour de la fonction :
-  long continuer = -2;
+  int continuer = -2;
   // Rappel : face_bord < -1  <=>  le sommet est sur une ligne de contact
   // La face de bord ou passe le sommet (si ligne contact) :
-  long face_suivante = -2;
+  int face_suivante = -2;
   // L'element ou passe le sommet :
-  long element_suivant = -2;
+  int element_suivant = -2;
 
   // -------------------------------------------------------------
   // PREMIERE ETAPE : calcul de "face_suivante", "element_suivant" et "continuer" :
@@ -6362,7 +6362,7 @@ long Maillage_FT_Disc::deplacer_un_sommet(double& x, double& y, double& z,
   // -------------------------------------------------------------
   if (continuer)
     {
-      const long nb_elem_reels = domaine_vf.nb_elem();
+      const int nb_elem_reels = domaine_vf.nb_elem();
       if (element_suivant >= nb_elem_reels)
         {
           if (num_sommet>=0)
@@ -6373,7 +6373,7 @@ long Maillage_FT_Disc::deplacer_un_sommet(double& x, double& y, double& z,
               sommets_envoyes.append_array(num_sommet);
               element_virtuel_arrivee.append_array(element_suivant);
               face_virtuelle_arrivee.append_array(face_suivante);
-              const long n = deplacement_restant.dimension(0);
+              const int n = deplacement_restant.dimension(0);
               deplacement_restant.resize(n+1, 3);
               deplacement_restant(n,0) = x1 - x;
               deplacement_restant(n,1) = y1 - y;
@@ -6417,7 +6417,7 @@ void Maillage_FT_Disc::deplacer_sommets(const ArrOfInt& liste_sommets_initiale,
                                         const DoubleTab& deplacement_initial,
                                         ArrOfInt& liste_sommets_sortis,
                                         ArrOfInt& numero_face_sortie,
-                                        long skip_facettes)
+                                        int skip_facettes)
 
 {
   assert(deplacement_initial.dimension(0) == liste_sommets_initiale.size_array());
@@ -6425,7 +6425,7 @@ void Maillage_FT_Disc::deplacer_sommets(const ArrOfInt& liste_sommets_initiale,
 
   if (Comm_Group::check_enabled()) check_mesh(1,0,skip_facettes);
 
-  const long dimension3 = (Objet_U::dimension == 3);
+  const int dimension3 = (Objet_U::dimension == 3);
   const Domaine_VF& domaine_vf = ref_cast(Domaine_VF, refdomaine_dis_.valeur().valeur());
   const Parcours_interface& parcours = refparcours_interface_.valeur();
   const IntTab& face_voisins = domaine_vf.face_voisins();
@@ -6461,9 +6461,9 @@ void Maillage_FT_Disc::deplacer_sommets(const ArrOfInt& liste_sommets_initiale,
   liste_sommets = liste_sommets_initiale;
   {
     // Remplissage du tableau "deplacement" qui a toujours 3 colonnes.
-    const long n = deplacement_initial.dimension(0);
+    const int n = deplacement_initial.dimension(0);
     deplacement.resize(n, 3);
-    for (long i = 0; i < n; i++)
+    for (int i = 0; i < n; i++)
       {
         deplacement(i, 0) = deplacement_initial(i, 0);
         deplacement(i, 1) = deplacement_initial(i, 1);
@@ -6472,21 +6472,21 @@ void Maillage_FT_Disc::deplacer_sommets(const ArrOfInt& liste_sommets_initiale,
   }
 
   // Boucle : "tant qu'il reste des noeuds a deplacer sur l'un des processeurs"
-  long somme_nb_sommets_envoyes = 0;
-  const long max_iterations_echange = 50;
-  long nb_iterations_echange = 0;
+  int somme_nb_sommets_envoyes = 0;
+  const int max_iterations_echange = 50;
+  int nb_iterations_echange = 0;
 
   do
     {
-      const long nbsommets = liste_sommets.size_array();
+      const int nbsommets = liste_sommets.size_array();
       sommets_envoyes.resize_array(0);
       element_virtuel_arrivee.resize_array(0);
       face_virtuelle_arrivee.resize_array(0);
       deplacement_restant.resize(0, 3);
 
-      for (long i_sommet = 0; i_sommet < nbsommets; i_sommet++)
+      for (int i_sommet = 0; i_sommet < nbsommets; i_sommet++)
         {
-          const long num_sommet = liste_sommets[i_sommet];
+          const int num_sommet = liste_sommets[i_sommet];
           // Coordonnee courante du sommet (on la deplace d'element en element)
           double x0  = sommets_(num_sommet, 0);
           double y0  = sommets_(num_sommet, 1);
@@ -6496,13 +6496,13 @@ void Maillage_FT_Disc::deplacer_sommets(const ArrOfInt& liste_sommets_initiale,
           const double y1 = y0 + deplacement(i_sommet, 1);
           const double z1 = (dimension3) ? (z0 + deplacement(i_sommet, 2)) : 0.;
           // Numero de l'element ou se trouve le sommet
-          long element = sommet_elem_[num_sommet];
+          int element = sommet_elem_[num_sommet];
           // Numero de la face de bord ou se trouve le sommet (si ligne de contact)
-          long face_bord = sommet_face_bord_[num_sommet];
+          int face_bord = sommet_face_bord_[num_sommet];
 
           assert(element >= 0); // Pas de sommet virtuel dans la liste !
-          long continuer = 0;
-          long face_bord_m2, face_bord_m1 = -10;
+          int continuer = 0;
+          int face_bord_m2, face_bord_m1 = -10;
           // Boucle de deplacement du sommet d'element en element
 
           do
@@ -6543,11 +6543,11 @@ void Maillage_FT_Disc::deplacer_sommets(const ArrOfInt& liste_sommets_initiale,
           //debut  EB
           /*
           IntVect check_som_in_face(2*dimension);
-          //const long nb_faces_reelles=zone_vf.nb_faces(); // EB
-          for (long dim=0; dim<dimension; dim++) sommet_face_(num_sommet,dim)=-1;
+          //const int nb_faces_reelles=zone_vf.nb_faces(); // EB
+          for (int dim=0; dim<dimension; dim++) sommet_face_(num_sommet,dim)=-1;
 
-          long mon_elem=-1;
-          long elem_virt=-1;
+          int mon_elem=-1;
+          int elem_virt=-1;
           mon_elem=sommet_elem_(num_sommet); // Si le sommet m'appartient, alors je recupere l'element qui le contient -> je remonte aux faces par rapport a sa position relative au cg de l'element
           //Cerr << "mon_elem " << mon_elem << finl;
           if (mon_elem>=0) check_som_in_face=1;
@@ -6557,9 +6557,9 @@ void Maillage_FT_Disc::deplacer_sommets(const ArrOfInt& liste_sommets_initiale,
               assert(elem_virt>=0);
               // Si le sommet est dans le volume de controle d'une face double, on met check_som_in_face a 1.
               check_som_in_face=0;
-              for (long dim=0; dim<2*dimension; dim++) // on parcourt les faces du volume de controle de l'element. Si une des faces est reelles, alors le sommet est dans le volume de controle de la premiere couche de joint
+              for (int dim=0; dim<2*dimension; dim++) // on parcourt les faces du volume de controle de l'element. Si une des faces est reelles, alors le sommet est dans le volume de controle de la premiere couche de joint
                 {
-                  long la_face=zone_vf.elem_faces(elem_virt,dim);
+                  int la_face=zone_vf.elem_faces(elem_virt,dim);
 
                   if (faces_doubles(la_face))  // la face est reelle mais l'element est virtuel -> face_double
                     {
@@ -6572,9 +6572,9 @@ void Maillage_FT_Disc::deplacer_sommets(const ArrOfInt& liste_sommets_initiale,
             {
 
               IntVect faces_elem_eulerien(2*dimension);
-              for (long dim=0; dim<2*dimension; dim++) faces_elem_eulerien(dim) = zone_vf.elem_faces(mon_elem,dim); // on recupere les faces de l'element eulerien
+              for (int dim=0; dim<2*dimension; dim++) faces_elem_eulerien(dim) = zone_vf.elem_faces(mon_elem,dim); // on recupere les faces de l'element eulerien
               double pos_sommet, coord_elem;
-              for (long dim=0; dim<dimension; dim++)
+              for (int dim=0; dim<dimension; dim++)
                 {
                   pos_sommet=sommets_(num_sommet,dim); // on recupere la position du sommet suivant l'axe "dim"
                   coord_elem=zone_vf.xp(mon_elem,dim);
@@ -6596,7 +6596,7 @@ void Maillage_FT_Disc::deplacer_sommets(const ArrOfInt& liste_sommets_initiale,
       // de contact, sommet_face_bord_ doit etre >= 0 meme si c'est un sommet virtuel)
       desc_sommets_.echange_espace_virtuel(sommet_face_bord_);
 
-      const long nb_sommets_envoyes = sommets_envoyes.size_array();
+      const int nb_sommets_envoyes = sommets_envoyes.size_array();
       somme_nb_sommets_envoyes = mp_sum(nb_sommets_envoyes);
       if (somme_nb_sommets_envoyes > 0)
         {
@@ -6632,19 +6632,19 @@ void Maillage_FT_Disc::deplacer_sommets(const ArrOfInt& liste_sommets_initiale,
 
 // Description :
 //  Verification de la coherence de la structure de donnees des sommets.
-long Maillage_FT_Disc::check_sommets(long error_is_fatal) const
+int Maillage_FT_Disc::check_sommets(int error_is_fatal) const
 {
   const double invalid_value = DMAXFLOAT*0.9;
-  const long dimension3 = (Objet_U::dimension == 3);
-  const long moi = Process::me();
+  const int dimension3 = (Objet_U::dimension == 3);
+  const int moi = Process::me();
   const Domaine_dis& domaine_dis = refdomaine_dis_.valeur();
   const Domaine_VF& domaine_vf = ref_cast(Domaine_VF, domaine_dis.valeur());
-  const long nb_elements_reels = domaine_vf.nb_elem();
-  long i, j;
+  const int nb_elements_reels = domaine_vf.nb_elem();
+  int i, j;
 
   if (statut_ == RESET)
     {
-      long ok = (nb_sommets() == 0);
+      int ok = (nb_sommets() == 0);
       ok = ok && (sommet_elem_.size_array() == 0);
       ok = ok && (sommet_face_.size_array() == 0); // EB
       ok = ok && (sommet_face_bord_.size_array() == 0);
@@ -6664,7 +6664,7 @@ long Maillage_FT_Disc::check_sommets(long error_is_fatal) const
   // Verification que les espaces distants et virtuels sont coherents:
   desc_sommets_.check();
   // Verification des tailles des tableaux:
-  const long nbsommets = sommets_.dimension(0);
+  const int nbsommets = sommets_.dimension(0);
   if (sommets_.dimension(1) != Objet_U::dimension)
     Journal() << "Erreur sommets_.dimension(1) != Objet_U::dimension" << finl;
   // Verification de sommet_PE_owner_ : on le recalcule et on compare
@@ -6734,15 +6734,15 @@ long Maillage_FT_Disc::check_sommets(long error_is_fatal) const
     // l'espace virtuel.
     const Descripteur_FT& espace_virtuel = desc_sommets_.espace_virtuel();
     const ArrOfInt& pe_voisins = espace_virtuel.pe_voisins();
-    const long nb_pe_voisins = pe_voisins.size_array();
-    for (long indice_pe = 0; indice_pe < nb_pe_voisins; indice_pe++)
+    const int nb_pe_voisins = pe_voisins.size_array();
+    for (int indice_pe = 0; indice_pe < nb_pe_voisins; indice_pe++)
       {
-        const long pe = pe_voisins[indice_pe];
+        const int pe = pe_voisins[indice_pe];
         const ArrOfInt& elements = espace_virtuel.elements(pe);
-        const long n = elements.size_array();
+        const int n = elements.size_array();
         for (i = 0; i < n; i++)
           {
-            const long num_sommet = elements[i];
+            const int num_sommet = elements[i];
             copie_sommets(num_sommet, 0) = invalid_value;
             copie_sommets(num_sommet, 1) = invalid_value;
             if (dimension3)
@@ -6797,8 +6797,8 @@ long Maillage_FT_Disc::check_sommets(long error_is_fatal) const
 
     for (i = 0; i < nbsommets; i++)
       {
-        const long num_element = sommet_elem_[i];
-        const long pe = sommet_PE_owner_[i];
+        const int num_element = sommet_elem_[i];
+        const int pe = sommet_PE_owner_[i];
         if (pe != moi && num_element >= 0)
           {
             Journal() << "Erreur sommet_num_owner_[" << i;
@@ -6863,12 +6863,12 @@ long Maillage_FT_Disc::check_sommets(long error_is_fatal) const
       const IntTab& face_voisins = domaine_vf.face_voisins();
       for (i = 0; i < nbsommets; i++)
         {
-          const long face = sommet_face_bord_[i];
-          const long element = sommet_elem_[i];
+          const int face = sommet_face_bord_[i];
+          const int element = sommet_elem_[i];
           if (face >= 0 && !sommet_virtuel(i))
             {
-              const long voisin0 = face_voisins(face, 0);
-              const long voisin1 = face_voisins(face, 1);
+              const int voisin0 = face_voisins(face, 0);
+              const int voisin1 = face_voisins(face, 1);
               if (voisin0 >= 0 && voisin1 >= 0)
                 {
                   Journal() << "Erreur sommet_face_bord_[" << i;
@@ -6900,11 +6900,11 @@ long Maillage_FT_Disc::check_sommets(long error_is_fatal) const
 
 static True_int fct_tri_facettes(const void *pt1, const void *pt2)
 {
-  const long *a = (const long *) pt1;
-  const long *b = (const long *) pt2;
+  const int *a = (const int *) pt1;
+  const int *b = (const int *) pt2;
 
-  long i, x = 0;
-  const long dim = Objet_U::dimension;
+  int i, x = 0;
+  const int dim = Objet_U::dimension;
   for (i = 0; i < dim; i++)
     {
       x = a[i] - b[i];
@@ -6924,14 +6924,14 @@ static True_int fct_tri_facettes(const void *pt1, const void *pt2)
 //  == proprietaire premier sommet".
 //  Si skip_facettes != 0    on ne considere que check_sommets()
 
-long Maillage_FT_Disc::check_mesh(long error_is_fatal, long skip_facette_pe, long skip_facettes) const
+int Maillage_FT_Disc::check_mesh(int error_is_fatal, int skip_facette_pe, int skip_facettes) const
 {
   static const Stat_Counter_Id stat_counter = statistiques().new_counter(3, "Check_mesh", "FrontTracking");
   statistiques().begin_count(stat_counter);
 
   const double invalid_value = DMAXFLOAT*0.9;
-  long i, j;
-  long return_code = -1;
+  int i, j;
+  int return_code = -1;
 
   return_code = check_sommets(error_is_fatal);
   if (return_code == 0)
@@ -6942,7 +6942,7 @@ long Maillage_FT_Disc::check_mesh(long error_is_fatal, long skip_facette_pe, lon
 
   if (return_code < 0 && statut_ == RESET)
     {
-      long ok = (nb_facettes() == 0);
+      int ok = (nb_facettes() == 0);
       ok = ok && (facette_num_owner_.size_array() == 0);
       ok = ok && (desc_facettes_.espace_virtuel().pe_voisins().size_array() == 0);
       ok = ok && (desc_facettes_.espace_distant().pe_voisins().size_array() == 0);
@@ -6959,8 +6959,8 @@ long Maillage_FT_Disc::check_mesh(long error_is_fatal, long skip_facette_pe, lon
     {
       desc_facettes_.check();
       // Verification des tailles des tableaux:
-      const long nbsommets = sommets_.dimension(0);
-      const long nbfacettes = facettes_.dimension(0);
+      const int nbsommets = sommets_.dimension(0);
+      const int nbfacettes = facettes_.dimension(0);
       if (facettes_.dimension(1) != Objet_U::dimension)
         Journal() << "Erreur facettes_.dimension(1) != Objet_U::dimension" << finl;
 
@@ -6971,15 +6971,15 @@ long Maillage_FT_Disc::check_mesh(long error_is_fatal, long skip_facette_pe, lon
       // On verifie que les coordonnees des sommets sont les memes sur tous les procs.
       // Pour ca, on cree un tableau contenant les coordonnees des sommets des facettes,
       // on echange l'espace virtuel du tableau et on compare au tableau facettes_ et sommets_
-      const long dim_carre = Objet_U::dimension * Objet_U::dimension;
+      const int dim_carre = Objet_U::dimension * Objet_U::dimension;
       DoubleTabFT coord_facettes(nbfacettes, dim_carre);
 
       for (i = 0; i < nbfacettes; i++)
         {
-          long n = 0;
+          int n = 0;
           for (j = 0; j < Objet_U::dimension; j++)
             {
-              const long som = facettes_(i, j);
+              const int som = facettes_(i, j);
               if (som >= nbsommets)
                 {
                   Journal() << "Erreur facettes_(" << i << "," << j;
@@ -6992,22 +6992,22 @@ long Maillage_FT_Disc::check_mesh(long error_is_fatal, long skip_facette_pe, lon
                     }
                   return_code = 0;
                 }
-              for (long k = 0; k < Objet_U::dimension; k++)
+              for (int k = 0; k < Objet_U::dimension; k++)
                 coord_facettes(i, n++) = sommets_(som, k);
             }
         }
       // On invalide les espaces virtuels:
       const Descripteur_FT& espace_virtuel = desc_facettes_.espace_virtuel();
       const ArrOfInt& pe_voisins = espace_virtuel.pe_voisins();
-      const long nb_pe_voisins = pe_voisins.size_array();
-      for (long indice_pe = 0; indice_pe < nb_pe_voisins; indice_pe++)
+      const int nb_pe_voisins = pe_voisins.size_array();
+      for (int indice_pe = 0; indice_pe < nb_pe_voisins; indice_pe++)
         {
-          const long pe = pe_voisins[indice_pe];
+          const int pe = pe_voisins[indice_pe];
           const ArrOfInt& elements = espace_virtuel.elements(pe);
-          const long n = elements.size_array();
+          const int n = elements.size_array();
           for (i = 0; i < n; i++)
             {
-              const long num_facette = elements[i];
+              const int num_facette = elements[i];
               for (j = 0; j < dim_carre; j++)
                 coord_facettes(num_facette, j) = invalid_value;
             }
@@ -7016,11 +7016,11 @@ long Maillage_FT_Disc::check_mesh(long error_is_fatal, long skip_facette_pe, lon
       // Verification des coordonnees
       for (i = 0; i < nbfacettes; i++)
         {
-          long n = 0;
+          int n = 0;
           for (j = 0; j < Objet_U::dimension; j++)
             {
-              const long som = facettes_(i, j);
-              for (long k = 0; k < Objet_U::dimension; k++)
+              const int som = facettes_(i, j);
+              for (int k = 0; k < Objet_U::dimension; k++)
                 {
                   double original = sommets_(som, k);
                   double copie = coord_facettes(i, n++);
@@ -7067,18 +7067,18 @@ long Maillage_FT_Disc::check_mesh(long error_is_fatal, long skip_facette_pe, lon
       {
         IntTabFT copie_facettes = facettes_;
         // tri du tableau
-        long * data = copie_facettes.addr();
-        const long nbr_facettes = facettes_.dimension(0);
+        int * data = copie_facettes.addr();
+        const int nbr_facettes = facettes_.dimension(0);
         assert(Objet_U::dimension == facettes_.dimension(1));
-        qsort(data, nbr_facettes, facettes_.dimension(1)*sizeof(long),
+        qsort(data, nbr_facettes, facettes_.dimension(1)*sizeof(int),
               fct_tri_facettes);
         // recherche des doublons
-        long ii, jj;
-        long count = 0;
-        const long nb_som_facettes = Objet_U::dimension;
+        int ii, jj;
+        int count = 0;
+        const int nb_som_facettes = Objet_U::dimension;
         for (ii = 1; ii < nbr_facettes; ii++)
           {
-            long facette_a_supprimer = (copie_facettes(ii,0) == copie_facettes(ii,1));
+            int facette_a_supprimer = (copie_facettes(ii,0) == copie_facettes(ii,1));
             if (! facette_a_supprimer)
               {
                 for (jj = 0; jj < nb_som_facettes; jj++)
@@ -7111,9 +7111,9 @@ long Maillage_FT_Disc::check_mesh(long error_is_fatal, long skip_facette_pe, lon
           // On verifie:
           for (i = 0; i < nbfacettes; i++)
             {
-              long pe_actuel = facette_pe[i];
-              long premier_sommet = facettes_(i, 0);
-              long pe_legitime = sommet_PE_owner_[premier_sommet];
+              int pe_actuel = facette_pe[i];
+              int premier_sommet = facettes_(i, 0);
+              int pe_legitime = sommet_PE_owner_[premier_sommet];
               if (pe_actuel != pe_legitime)
                 {
                   Journal() << "Erreur facette " << i;
@@ -7180,7 +7180,7 @@ void Maillage_FT_Disc::nettoyer_maillage()
   // La verification par un Maillage_FT_IJK::check_mesh aura lieu a la fin de cette routine.
   if (Comm_Group::check_enabled()) Maillage_FT_Disc::check_mesh(1,0,1);
 
-  const long dimension3 = (Objet_U::dimension==3);
+  const int dimension3 = (Objet_U::dimension==3);
   ArrOfIntFT new_elements;
 
   // On decale toutes les facettes reelles pour remplir les trous
@@ -7188,13 +7188,13 @@ void Maillage_FT_Disc::nettoyer_maillage()
   // * facettes_
   // * facette_num_owner_
   {
-    const long nbfacettes = facettes_.dimension(0);
-    long n = 0;
-    long i;
+    const int nbfacettes = facettes_.dimension(0);
+    int n = 0;
+    int i;
     for (i = 0; i < nbfacettes; i++)
       {
-        const long invalide = (facettes_(i,0) == facettes_(i,1));
-        const long virtuelle = facette_virtuelle(i);
+        const int invalide = (facettes_(i,0) == facettes_(i,1));
+        const int virtuelle = facette_virtuelle(i);
         if (!invalide && !virtuelle)
           {
             facettes_(n, 0) = facettes_(i, 0);
@@ -7222,12 +7222,12 @@ void Maillage_FT_Disc::nettoyer_maillage()
   ArrOfIntFT sommets_utilises(nb_sommets());
   {
     ArrOfInt& tab = facettes_;  // vu comme unidimensionnel
-    const long nb_sommets_facettes = tab.size_array();
+    const int nb_sommets_facettes = tab.size_array();
     sommets_utilises = 0;
     // Boucle sur tous les sommets de toutes les facettes
-    for (long i = 0; i < nb_sommets_facettes; i++)
+    for (int i = 0; i < nb_sommets_facettes; i++)
       {
-        const long sommet = tab[i];
+        const int sommet = tab[i];
         sommets_utilises[sommet]++;
       }
   }
@@ -7247,17 +7247,17 @@ void Maillage_FT_Disc::nettoyer_maillage()
     {
       Descripteur_FT& espace_virtuel = desc_sommets_.espace_virtuel();
       const ArrOfInt& pe_voisins = espace_virtuel.pe_voisins();
-      const long nb_pe_voisins = pe_voisins.size_array();
-      for (long indice_pe = 0; indice_pe < nb_pe_voisins; indice_pe++)
+      const int nb_pe_voisins = pe_voisins.size_array();
+      for (int indice_pe = 0; indice_pe < nb_pe_voisins; indice_pe++)
         {
-          const long pe = pe_voisins[indice_pe];
+          const int pe = pe_voisins[indice_pe];
           const ArrOfInt& elements = espace_virtuel.elements(pe); // EB : les elements sont les sommets lagrangiens. Voir Descipteur_FT.h
-          const long nb_elements = elements.size_array(); // EB : nb_elements = nombre de sommets distants/virtuels du pe
+          const int nb_elements = elements.size_array(); // EB : nb_elements = nombre de sommets distants/virtuels du pe
           Sortie& buffer = comm.send_buffer(pe);
           new_elements.resize_array(0);
-          for (long i = 0; i < nb_elements; i++)
+          for (int i = 0; i < nb_elements; i++)
             {
-              const long sommet = elements[i];
+              const int sommet = elements[i];
               if (sommets_utilises[sommet])
                 {
                   // Le sommet est utilise, on le laisse dans la liste
@@ -7280,19 +7280,19 @@ void Maillage_FT_Disc::nettoyer_maillage()
     {
       Descripteur_FT& espace_distant = desc_sommets_.espace_distant();
       const ArrOfInt& pe_voisins = comm.get_recv_pe_list();
-      const long nb_pe_voisins = pe_voisins.size_array();
-      for (long indice_pe = 0; indice_pe < nb_pe_voisins; indice_pe++)
+      const int nb_pe_voisins = pe_voisins.size_array();
+      for (int indice_pe = 0; indice_pe < nb_pe_voisins; indice_pe++)
         {
-          const long pe = pe_voisins[indice_pe];
+          const int pe = pe_voisins[indice_pe];
           const ArrOfInt& elements = espace_distant.elements(pe);
-          const long nb_elements = elements.size_array();
+          const int nb_elements = elements.size_array();
           Entree& buffer = comm.recv_buffer(pe);
-          long element_courant = 0;
+          int element_courant = 0;
           new_elements.resize_array(0);
           do
             {
               // rang du prochain sommet a supprimer dans "elements"
-              long rang_sommet;
+              int rang_sommet;
               buffer >> rang_sommet;
               if (buffer.eof())
                 rang_sommet = nb_elements;
@@ -7301,7 +7301,7 @@ void Maillage_FT_Disc::nettoyer_maillage()
               // On conserve les sommets jusqu'a rang_sommet exclu
               for (; element_courant < rang_sommet; element_courant++)
                 {
-                  const long sommet = elements[element_courant];
+                  const int sommet = elements[element_courant];
                   new_elements.append_array(sommet);
                   // On marque du sommet car il est utilise
                   // dans un espace distant
@@ -7332,10 +7332,10 @@ void Maillage_FT_Disc::nettoyer_maillage()
   // inutilises.
   ArrOfIntFT renum_sommets(sommets_.dimension(0));
   {
-    const long nbsommets = sommets_.dimension(0);
+    const int nbsommets = sommets_.dimension(0);
     // Compteur de sommets apres suppression
-    long n = 0;
-    for (long i = 0; i < nbsommets; i++)
+    int n = 0;
+    for (int i = 0; i < nbsommets; i++)
       {
         if (sommets_utilises[i])
           {
@@ -7346,7 +7346,7 @@ void Maillage_FT_Disc::nettoyer_maillage()
               sommets_(n, 2) = sommets_(i, 2);
             sommet_elem_[n] = sommet_elem_[i];
             if(i<sommet_face_.dimension(0) && n <sommet_face_.dimension(0))
-              for (long dim=0; dim<dimension; dim++) sommet_face_(n,dim) = sommet_face_(i,dim); // EB
+              for (int dim=0; dim<dimension; dim++) sommet_face_(n,dim) = sommet_face_(i,dim); // EB
             sommet_face_bord_[n] = sommet_face_bord_[i];
             sommet_PE_owner_[n] = sommet_PE_owner_[i];
             drapeaux_sommets_[n] = drapeaux_sommets_[i];
@@ -7368,7 +7368,7 @@ void Maillage_FT_Disc::nettoyer_maillage()
   // Renumerotation des sommets dans desc_sommets
   {
     // Boucle sur les deux espaces : distant et virtuel
-    for (long num_espace = 0; num_espace < 2; num_espace++)
+    for (int num_espace = 0; num_espace < 2; num_espace++)
       {
         // Espace_dv est soit l'ESPACE_D(istant), soit l'ESPACE_V(irtuel).
         Descripteur_FT& espace_dv =
@@ -7377,17 +7377,17 @@ void Maillage_FT_Disc::nettoyer_maillage()
           : desc_sommets_.espace_virtuel();
 
         const ArrOfInt& pe_voisins = espace_dv.pe_voisins();
-        const long nb_pe_voisins = pe_voisins.size_array();
-        for (long indice_pe = 0; indice_pe < nb_pe_voisins; indice_pe++)
+        const int nb_pe_voisins = pe_voisins.size_array();
+        for (int indice_pe = 0; indice_pe < nb_pe_voisins; indice_pe++)
           {
-            const long pe = pe_voisins[indice_pe];
+            const int pe = pe_voisins[indice_pe];
             const ArrOfInt& elements = espace_dv.elements(pe);
-            const long nb_elements = elements.size_array();
+            const int nb_elements = elements.size_array();
             new_elements.resize_array(nb_elements);
-            for (long i = 0; i < nb_elements; i++)
+            for (int i = 0; i < nb_elements; i++)
               {
-                const long num_sommet = elements[i];
-                const long new_num = renum_sommets[num_sommet];
+                const int num_sommet = elements[i];
+                const int new_num = renum_sommets[num_sommet];
                 assert(new_num >= 0);
                 new_elements[i] = new_num;
               }
@@ -7401,9 +7401,9 @@ void Maillage_FT_Disc::nettoyer_maillage()
 
   // Mise a jour de sommet_num_owner_:
   {
-    const long nbsommets = sommets_.dimension(0);
+    const int nbsommets = sommets_.dimension(0);
     sommet_num_owner_.resize_array(nbsommets);
-    for (long i = 0; i < nbsommets; i++)
+    for (int i = 0; i < nbsommets; i++)
       sommet_num_owner_[i] = i;
     desc_sommets_.echange_espace_virtuel(sommet_num_owner_);
   }
@@ -7411,12 +7411,12 @@ void Maillage_FT_Disc::nettoyer_maillage()
   // Renumerotation des sommets dans facettes_
   {
     ArrOfInt& tab = facettes_;  // vu comme unidimensionnel
-    const long nb_sommets_facettes = tab.size_array();
+    const int nb_sommets_facettes = tab.size_array();
     // Boucle sur tous les sommets de toutes les facettes
-    for (long i = 0; i < nb_sommets_facettes; i++)
+    for (int i = 0; i < nb_sommets_facettes; i++)
       {
-        const long sommet = tab[i];
-        const long new_num = renum_sommets[sommet];
+        const int sommet = tab[i];
+        const int new_num = renum_sommets[sommet];
         tab[i] = new_num;
       }
   }
@@ -7433,10 +7433,10 @@ void Maillage_FT_Disc::nettoyer_maillage()
  */
 void Maillage_FT_Disc::supprimer_facettes(const ArrOfInt& liste_facettes)
 {
-  const long n = liste_facettes.size_array();
-  for (long i = 0; i < n; i++)
+  const int n = liste_facettes.size_array();
+  for (int i = 0; i < n; i++)
     {
-      long j = liste_facettes[i];
+      int j = liste_facettes[i];
       // On rend la facette j "invalide" pour nettoyer_maillage()
       facettes_(j, 1) = facettes_(j, 0);
     }
@@ -7450,19 +7450,19 @@ void Maillage_FT_Disc::nettoyer_noeuds_virtuels_et_frontieres()
   assert(statut_ >= MINIMAL);
 
   if (Comm_Group::check_enabled()) check_mesh(1,1,1);
-  const long dimension3 = (Objet_U::dimension==3);
+  const int dimension3 = (Objet_U::dimension==3);
   ArrOfIntFT new_elements;
   ArrOfIntFT sommets_utilises(nb_sommets());
   sommets_utilises=0;
 
   //On detecte les sommets utilises
   //On ne retient pas les sommets virtuels et ceux situes sur des faces de frontiere ouverte
-  for (long som=0; som<nb_sommets(); som++)
+  for (int som=0; som<nb_sommets(); som++)
     {
       const Domaine_Cl_dis_base& zcl = equation_transport().get_probleme_base().equation(0).domaine_Cl_dis().valeur();
-      long face_loc;
-      long face_bord = sommet_face_bord_[som];
-      long face_fr_ouverte = 0;
+      int face_loc;
+      int face_bord = sommet_face_bord_[som];
+      int face_fr_ouverte = 0;
       if ((face_bord!=-1))
         {
           const Cond_lim_base& type_cl = zcl.condition_limite_de_la_face_reelle(face_bord,face_loc);
@@ -7491,17 +7491,17 @@ void Maillage_FT_Disc::nettoyer_noeuds_virtuels_et_frontieres()
     {
       Descripteur_FT& espace_virtuel = desc_sommets_.espace_virtuel();
       const ArrOfInt& pe_voisins = espace_virtuel.pe_voisins();
-      const long nb_pe_voisins = pe_voisins.size_array();
-      for (long indice_pe = 0; indice_pe < nb_pe_voisins; indice_pe++)
+      const int nb_pe_voisins = pe_voisins.size_array();
+      for (int indice_pe = 0; indice_pe < nb_pe_voisins; indice_pe++)
         {
-          const long pe = pe_voisins[indice_pe];
+          const int pe = pe_voisins[indice_pe];
           const ArrOfInt& elements = espace_virtuel.elements(pe);
-          const long nb_elements = elements.size_array();
+          const int nb_elements = elements.size_array();
           Sortie& buffer = comm.send_buffer(pe);
           new_elements.resize_array(0);
-          for (long i = 0; i < nb_elements; i++)
+          for (int i = 0; i < nb_elements; i++)
             {
-              const long sommet = elements[i];
+              const int sommet = elements[i];
               if (sommets_utilises[sommet])
                 {
                   // Le sommet est utilise, on le laisse dans la liste
@@ -7524,19 +7524,19 @@ void Maillage_FT_Disc::nettoyer_noeuds_virtuels_et_frontieres()
     {
       Descripteur_FT& espace_distant = desc_sommets_.espace_distant();
       const ArrOfInt& pe_voisins = comm.get_recv_pe_list();
-      const long nb_pe_voisins = pe_voisins.size_array();
-      for (long indice_pe = 0; indice_pe < nb_pe_voisins; indice_pe++)
+      const int nb_pe_voisins = pe_voisins.size_array();
+      for (int indice_pe = 0; indice_pe < nb_pe_voisins; indice_pe++)
         {
-          const long pe = pe_voisins[indice_pe];
+          const int pe = pe_voisins[indice_pe];
           const ArrOfInt& elements = espace_distant.elements(pe);
-          const long nb_elements = elements.size_array();
+          const int nb_elements = elements.size_array();
           Entree& buffer = comm.recv_buffer(pe);
-          long element_courant = 0;
+          int element_courant = 0;
           new_elements.resize_array(0);
           do
             {
               // rang du prochain sommet a supprimer dans "elements"
-              long rang_sommet;
+              int rang_sommet;
               buffer >> rang_sommet;
               if (buffer.eof())
                 rang_sommet = nb_elements;
@@ -7545,7 +7545,7 @@ void Maillage_FT_Disc::nettoyer_noeuds_virtuels_et_frontieres()
               // On conserve les sommets jusqu'a rang_sommet exclu
               for (; element_courant < rang_sommet; element_courant++)
                 {
-                  const long sommet = elements[element_courant];
+                  const int sommet = elements[element_courant];
                   new_elements.append_array(sommet);
                   // On marque du sommet car il est utilise
                   // dans un espace distant
@@ -7578,10 +7578,10 @@ void Maillage_FT_Disc::nettoyer_noeuds_virtuels_et_frontieres()
   // inutilises.
   ArrOfIntFT renum_sommets(sommets_.dimension(0));
   {
-    const long nbsommets = sommets_.dimension(0);
+    const int nbsommets = sommets_.dimension(0);
     // Compteur de sommets apres suppression
-    long n = 0;
-    for (long i = 0; i < nbsommets; i++)
+    int n = 0;
+    for (int i = 0; i < nbsommets; i++)
       {
         if (sommets_utilises[i])
           {
@@ -7591,7 +7591,7 @@ void Maillage_FT_Disc::nettoyer_noeuds_virtuels_et_frontieres()
             if (dimension3)
               sommets_(n, 2) = sommets_(i, 2);
             sommet_elem_[n] = sommet_elem_[i];
-            for (long dim=0; dim<dimension; dim++) sommet_face_(n,dim) = sommet_face_(i,dim); // EB
+            for (int dim=0; dim<dimension; dim++) sommet_face_(n,dim) = sommet_face_(i,dim); // EB
             sommet_face_bord_[n] = sommet_face_bord_[i];
             sommet_PE_owner_[n] = sommet_PE_owner_[i];
             drapeaux_sommets_[n] = drapeaux_sommets_[i];
@@ -7618,7 +7618,7 @@ void Maillage_FT_Disc::nettoyer_noeuds_virtuels_et_frontieres()
   // Renumerotation des sommets dans desc_sommets
   {
     // Boucle sur les deux espaces : distant et virtuel
-    for (long num_espace = 0; num_espace < 2; num_espace++)
+    for (int num_espace = 0; num_espace < 2; num_espace++)
       {
         // Espace_dv est soit l'ESPACE_D(istant), soit l'ESPACE_V(irtuel).
         Descripteur_FT& espace_dv =
@@ -7627,17 +7627,17 @@ void Maillage_FT_Disc::nettoyer_noeuds_virtuels_et_frontieres()
           : desc_sommets_.espace_virtuel();
 
         const ArrOfInt& pe_voisins = espace_dv.pe_voisins();
-        const long nb_pe_voisins = pe_voisins.size_array();
-        for (long indice_pe = 0; indice_pe < nb_pe_voisins; indice_pe++)
+        const int nb_pe_voisins = pe_voisins.size_array();
+        for (int indice_pe = 0; indice_pe < nb_pe_voisins; indice_pe++)
           {
-            const long pe = pe_voisins[indice_pe];
+            const int pe = pe_voisins[indice_pe];
             const ArrOfInt& elements = espace_dv.elements(pe);
-            const long nb_elements = elements.size_array();
+            const int nb_elements = elements.size_array();
             new_elements.resize_array(nb_elements);
-            for (long i = 0; i < nb_elements; i++)
+            for (int i = 0; i < nb_elements; i++)
               {
-                const long num_sommet = elements[i];
-                const long new_num = renum_sommets[num_sommet];
+                const int num_sommet = elements[i];
+                const int new_num = renum_sommets[num_sommet];
                 assert(new_num >= 0);
                 new_elements[i] = new_num;
               }
@@ -7651,9 +7651,9 @@ void Maillage_FT_Disc::nettoyer_noeuds_virtuels_et_frontieres()
 
   // Mise a jour de sommet_num_owner_:
   {
-    const long nbsommets = sommets_.dimension(0);
+    const int nbsommets = sommets_.dimension(0);
     sommet_num_owner_.resize_array(nbsommets);
-    for (long i = 0; i < nbsommets; i++)
+    for (int i = 0; i < nbsommets; i++)
       sommet_num_owner_[i] = i;
     desc_sommets_.echange_espace_virtuel(sommet_num_owner_);
   }
@@ -7662,12 +7662,12 @@ void Maillage_FT_Disc::nettoyer_noeuds_virtuels_et_frontieres()
   if (Comm_Group::check_enabled()) check_mesh(1,1,1);
 }
 
-void Maillage_FT_Disc::nettoyer_phase(const Nom& nom_eq, const long phase)
+void Maillage_FT_Disc::nettoyer_phase(const Nom& nom_eq, const int phase)
 {
   assert(statut_ >= MINIMAL);
 
   if (Comm_Group::check_enabled()) check_mesh(1,1,1);
-  const long dimension3 = (Objet_U::dimension==3);
+  const int dimension3 = (Objet_U::dimension==3);
   ArrOfIntFT new_elements;
   ArrOfIntFT sommets_utilises(nb_sommets());
   sommets_utilises=0;
@@ -7675,10 +7675,10 @@ void Maillage_FT_Disc::nettoyer_phase(const Nom& nom_eq, const long phase)
   Transport_Interfaces_FT_Disc& eq_interf = ref_cast_non_const(Transport_Interfaces_FT_Disc,eq);
   const DoubleTab& indic =  eq_interf.inconnue().valeurs();
   double phase_reelle = double(phase);
-  long elem;
+  int elem;
 
   //Les sommets utilises sont ceux places dans la phase marquee
-  for (long som=0; som<nb_sommets(); som++)
+  for (int som=0; som<nb_sommets(); som++)
     {
       elem = sommet_elem_[som];
       if (est_egal(indic(elem),phase_reelle))
@@ -7701,17 +7701,17 @@ void Maillage_FT_Disc::nettoyer_phase(const Nom& nom_eq, const long phase)
     {
       Descripteur_FT& espace_virtuel = desc_sommets_.espace_virtuel();
       const ArrOfInt& pe_voisins = espace_virtuel.pe_voisins();
-      const long nb_pe_voisins = pe_voisins.size_array();
-      for (long indice_pe = 0; indice_pe < nb_pe_voisins; indice_pe++)
+      const int nb_pe_voisins = pe_voisins.size_array();
+      for (int indice_pe = 0; indice_pe < nb_pe_voisins; indice_pe++)
         {
-          const long pe = pe_voisins[indice_pe];
+          const int pe = pe_voisins[indice_pe];
           const ArrOfInt& elements = espace_virtuel.elements(pe);
-          const long nb_elements = elements.size_array();
+          const int nb_elements = elements.size_array();
           Sortie& buffer = comm.send_buffer(pe);
           new_elements.resize_array(0);
-          for (long i = 0; i < nb_elements; i++)
+          for (int i = 0; i < nb_elements; i++)
             {
-              const long sommet = elements[i];
+              const int sommet = elements[i];
               if (sommets_utilises[sommet])
                 {
                   // Le sommet est utilise, on le laisse dans la liste
@@ -7734,19 +7734,19 @@ void Maillage_FT_Disc::nettoyer_phase(const Nom& nom_eq, const long phase)
     {
       Descripteur_FT& espace_distant = desc_sommets_.espace_distant();
       const ArrOfInt& pe_voisins = comm.get_recv_pe_list();
-      const long nb_pe_voisins = pe_voisins.size_array();
-      for (long indice_pe = 0; indice_pe < nb_pe_voisins; indice_pe++)
+      const int nb_pe_voisins = pe_voisins.size_array();
+      for (int indice_pe = 0; indice_pe < nb_pe_voisins; indice_pe++)
         {
-          const long pe = pe_voisins[indice_pe];
+          const int pe = pe_voisins[indice_pe];
           const ArrOfInt& elements = espace_distant.elements(pe);
-          const long nb_elements = elements.size_array();
+          const int nb_elements = elements.size_array();
           Entree& buffer = comm.recv_buffer(pe);
-          long element_courant = 0;
+          int element_courant = 0;
           new_elements.resize_array(0);
           do
             {
               // rang du prochain sommet a supprimer dans "elements"
-              long rang_sommet;
+              int rang_sommet;
               buffer >> rang_sommet;
               if (buffer.eof())
                 rang_sommet = nb_elements;
@@ -7755,7 +7755,7 @@ void Maillage_FT_Disc::nettoyer_phase(const Nom& nom_eq, const long phase)
               // On conserve les sommets jusqu'a rang_sommet exclu
               for (; element_courant < rang_sommet; element_courant++)
                 {
-                  const long sommet = elements[element_courant];
+                  const int sommet = elements[element_courant];
                   new_elements.append_array(sommet);
                   // On marque du sommet car il est utilise
                   // dans un espace distant
@@ -7787,10 +7787,10 @@ void Maillage_FT_Disc::nettoyer_phase(const Nom& nom_eq, const long phase)
   // inutilises.
   ArrOfIntFT renum_sommets(sommets_.dimension(0));
   {
-    const long nbsommets = sommets_.dimension(0);
+    const int nbsommets = sommets_.dimension(0);
     // Compteur de sommets apres suppression
-    long n = 0;
-    for (long i = 0; i < nbsommets; i++)
+    int n = 0;
+    for (int i = 0; i < nbsommets; i++)
       {
         if (sommets_utilises[i])
           {
@@ -7800,7 +7800,7 @@ void Maillage_FT_Disc::nettoyer_phase(const Nom& nom_eq, const long phase)
             if (dimension3)
               sommets_(n, 2) = sommets_(i, 2);
             sommet_elem_[n] = sommet_elem_[i];
-            for (long dim=0; dim<dimension; dim++) sommet_face_(n,dim) = sommet_face_(i,dim); // EB
+            for (int dim=0; dim<dimension; dim++) sommet_face_(n,dim) = sommet_face_(i,dim); // EB
             sommet_face_bord_[n] = sommet_face_bord_[i];
             sommet_PE_owner_[n] = sommet_PE_owner_[i];
             drapeaux_sommets_[n] = drapeaux_sommets_[i];
@@ -7827,7 +7827,7 @@ void Maillage_FT_Disc::nettoyer_phase(const Nom& nom_eq, const long phase)
   // Renumerotation des sommets dans desc_sommets
   {
     // Boucle sur les deux espaces : distant et virtuel
-    for (long num_espace = 0; num_espace < 2; num_espace++)
+    for (int num_espace = 0; num_espace < 2; num_espace++)
       {
         // Espace_dv est soit l'ESPACE_D(istant), soit l'ESPACE_V(irtuel).
         Descripteur_FT& espace_dv =
@@ -7836,17 +7836,17 @@ void Maillage_FT_Disc::nettoyer_phase(const Nom& nom_eq, const long phase)
           : desc_sommets_.espace_virtuel();
 
         const ArrOfInt& pe_voisins = espace_dv.pe_voisins();
-        const long nb_pe_voisins = pe_voisins.size_array();
-        for (long indice_pe = 0; indice_pe < nb_pe_voisins; indice_pe++)
+        const int nb_pe_voisins = pe_voisins.size_array();
+        for (int indice_pe = 0; indice_pe < nb_pe_voisins; indice_pe++)
           {
-            const long pe = pe_voisins[indice_pe];
+            const int pe = pe_voisins[indice_pe];
             const ArrOfInt& elements = espace_dv.elements(pe);
-            const long nb_elements = elements.size_array();
+            const int nb_elements = elements.size_array();
             new_elements.resize_array(nb_elements);
-            for (long i = 0; i < nb_elements; i++)
+            for (int i = 0; i < nb_elements; i++)
               {
-                const long num_sommet = elements[i];
-                const long new_num = renum_sommets[num_sommet];
+                const int num_sommet = elements[i];
+                const int new_num = renum_sommets[num_sommet];
                 assert(new_num >= 0);
                 new_elements[i] = new_num;
               }
@@ -7860,9 +7860,9 @@ void Maillage_FT_Disc::nettoyer_phase(const Nom& nom_eq, const long phase)
 
   // Mise a jour de sommet_num_owner_:
   {
-    const long nbsommets = sommets_.dimension(0);
+    const int nbsommets = sommets_.dimension(0);
     sommet_num_owner_.resize_array(nbsommets);
-    for (long i = 0; i < nbsommets; i++)
+    for (int i = 0; i < nbsommets; i++)
       sommet_num_owner_[i] = i;
     desc_sommets_.echange_espace_virtuel(sommet_num_owner_);
   }
@@ -7890,16 +7890,16 @@ inline void produit_vectoriel(const ArrOfDouble& a, const ArrOfDouble& b, ArrOfD
   resu[2] = a[0]*b[1] - a[1]*b[0];
 }
 
-void Maillage_FT_Disc::pre_lissage_courbure(ArrOfDouble& store_courbure_sommets, const long nitera) const
+void Maillage_FT_Disc::pre_lissage_courbure(ArrOfDouble& store_courbure_sommets, const int nitera) const
 {
   // Un peu de lissage :
-  const long nsom = nb_sommets();
+  const int nsom = nb_sommets();
   const ArrOfDouble& surface = get_update_surface_facettes();
   ArrOfDouble tmp_courbure_sommets(store_courbure_sommets);
   ArrOfDouble surface_autour_sommets(store_courbure_sommets);
 
-  long i_facette;
-  for (long iter = 0; iter < nitera; iter++)
+  int i_facette;
+  for (int iter = 0; iter < nitera; iter++)
     {
       tmp_courbure_sommets = store_courbure_sommets;
       store_courbure_sommets = 0.;
@@ -7910,12 +7910,12 @@ void Maillage_FT_Disc::pre_lissage_courbure(ArrOfDouble& store_courbure_sommets,
           if (facette_virtuelle(i_facette))
             continue;
 
-          //const long s0 = facettes_(i_facette, 0);
+          //const int s0 = facettes_(i_facette, 0);
           double moy = 0.;
-          long count =0;
-          for (long i = 0; i < 3; i++)
+          int count =0;
+          for (int i = 0; i < 3; i++)
             {
-              const long si = facettes_(i_facette, i);
+              const int si = facettes_(i_facette, i);
               if (!sommet_ligne_contact(si))
                 {
                   moy += tmp_courbure_sommets[si];
@@ -7924,15 +7924,15 @@ void Maillage_FT_Disc::pre_lissage_courbure(ArrOfDouble& store_courbure_sommets,
             }
           if (count>0)
             moy /= count;
-          for (long i = 0; i < 3; i++)
+          for (int i = 0; i < 3; i++)
             {
-              const long s = facettes_(i_facette, i);
+              const int s = facettes_(i_facette, i);
               const double surf = surface(i_facette);
               store_courbure_sommets[s] += moy*surf;
               surface_autour_sommets[s] +=surf;
             }
         }
-      for (long isom = 0; isom < nsom; isom++)
+      for (int isom = 0; isom < nsom; isom++)
         if (surface_autour_sommets[isom]>0)
           store_courbure_sommets[isom] /=surface_autour_sommets[isom];
     }
@@ -7945,14 +7945,14 @@ void Maillage_FT_Disc::pre_lissage_courbure(ArrOfDouble& store_courbure_sommets,
 //    1ere pass : On ne connait pas la courbure, on ne fait pas de correction.
 //    2eme pass (et potentiellement les suivantes) : On utilise l'approximation de la courbure
 //                                                   locale issue de la passe precedente.
-void Maillage_FT_Disc::correction_costheta(const double c, const long s0, const long facette,
+void Maillage_FT_Disc::correction_costheta(const double c, const int s0, const int facette,
                                            /* const ArrOfDouble& s0s1, const ArrOfDouble& s0s2, */
                                            double ps) const
 {
   // Soit l=norme(s0G) ou G est le cdg de la facette.
   // s0G = 1./3. * (s0s1+s0s2)
   double l2=0, r=0;
-  /*  for (long j = 0; j < Objet_U::dimension; j++)
+  /*  for (int j = 0; j < Objet_U::dimension; j++)
       {
         double tmp= (s0s1[j]+s0s2[j]);
         l2 += tmp*tmp;
@@ -7963,7 +7963,7 @@ void Maillage_FT_Disc::correction_costheta(const double c, const long s0, const 
   //const ArrOfDouble& surface = get_update_surface_facettes();
   //l2 = surface(facette);
 #if 1
-  long ii=0;
+  int ii=0;
   for (ii=0; ii<3; ii++)
     {
       if (facettes_(facette,ii) == s0)
@@ -7973,11 +7973,11 @@ void Maillage_FT_Disc::correction_costheta(const double c, const long s0, const 
 
     }
   assert(facettes_(facette,ii)==s0);
-  const long s1 = facettes_(facette,(ii+1)%3);
-  const long s2 = facettes_(facette,(ii+2)%3);
+  const int s1 = facettes_(facette,(ii+1)%3);
+  const int s2 = facettes_(facette,(ii+2)%3);
 
   ArrOfDouble som0(3),som1(3),som2(3), s0s1(3), s0s2(3);
-  for (long j=0; j<Objet_U::dimension; j++)
+  for (int j=0; j<Objet_U::dimension; j++)
     {
       som0[j] = sommets_(s0,j);
       som1[j] = sommets_(s1,j);
@@ -7988,14 +7988,14 @@ void Maillage_FT_Disc::correction_costheta(const double c, const long s0, const 
 
   /*
    double tmp1=0,tmp2=0;
-  for (long j = 0; j < Objet_U::dimension; j++)
+  for (int j = 0; j < Objet_U::dimension; j++)
     {
       tmp1 += (s0s1[j]*s0s1[j]);
       tmp2 += (s0s2[j]*s0s2[j]);
     }
   l2 = 0.5*(tmp1+tmp2);
   */
-  for (long j = 0; j < Objet_U::dimension; j++)
+  for (int j = 0; j < Objet_U::dimension; j++)
     {
       double tmp= (s0s1[j]+s0s2[j]);
       l2 += tmp*tmp;
@@ -8039,13 +8039,13 @@ void Maillage_FT_Disc::correction_costheta(const double c, const long s0, const 
 // dans la plage des angles autorises qui soit le plus proche de l'angle de
 // contact reel. C'est la premiere fois qu'on a besoin d'un angle de contact
 // reelement mesure sur le maillage (et pas fourni en CL)
-double Maillage_FT_Disc::calculer_costheta_objectif(const long s0, const long facette, const long call, const double c,
+double Maillage_FT_Disc::calculer_costheta_objectif(const int s0, const int facette, const int call, const double c,
                                                     const DoubleTabFT& tab_cos_theta, ArrOfBit& drapeau_angle_in_range) const
 {
   const Parcours_interface& parcours = refparcours_interface_.valeur();
   const DoubleTab& normale = get_update_normale_facettes();
-  const long numface0 = sommet_face_bord_[s0];
-  long j; /*
+  const int numface0 = sommet_face_bord_[s0];
+  int j; /*
     ArrOfDouble som0(3),som1(3),som2(3), s0s1(3), s0s2(3);
     for (j=0; j<Objet_U::dimension; j++)
       {
@@ -8155,13 +8155,13 @@ static void miroir(const ArrOfDouble& A, ArrOfDouble& nprime,const ArrOfDouble& 
       nprime[2] *= inv_l;
     }
 
-  const long m=A.size_array();
+  const int m=A.size_array();
   assert(m==3);
   ArrOfDouble OA(A);
   OA-=O;// OA=A-O;
   double ps=produit_scalaire(OA,nprime);
   //OAr=Ar-O=OA-2.*ps*n => Ar=A-2.*ps*n
-  for (long i=0; i<m; i++)
+  for (int i=0; i<m; i++)
     {
       Ar[i] =A[i]-2.*ps*nprime[i];
     }
@@ -8190,14 +8190,14 @@ static void normalize(ArrOfDouble& nprime)
  *
  * @param (courbure_sommets) Tableau dans lequel on veut stocker la courbure aux sommets. La valeur initiale du tableau est perdue. L'espace virtuel du tableau resultat est a jour.
  */
-void Maillage_FT_Disc::calcul_courbure_sommets(ArrOfDouble& courbure_sommets, const long call) const
+void Maillage_FT_Disc::calcul_courbure_sommets(ArrOfDouble& courbure_sommets, const int call) const
 {
   const DoubleTab& normale = get_update_normale_facettes();
   const ArrOfDouble& surface = get_update_surface_facettes();
 
-  const long nsom = nb_sommets();
-  const long dim = Objet_U::dimension;
-  const long nfaces = nb_facettes();
+  const int nsom = nb_sommets();
+  const int dim = Objet_U::dimension;
+  const int nfaces = nb_facettes();
 
 #if (defined(PATCH_HYSTERESIS_V2) || defined(PATCH_HYSTERESIS_V3))
   ArrOfBit drapeau_angle_in_range;
@@ -8241,12 +8241,12 @@ void Maillage_FT_Disc::calcul_courbure_sommets(ArrOfDouble& courbure_sommets, co
   DoubleTabFT tab_cos_theta;
   calculer_costheta_minmax(tab_cos_theta);
 
-  long i, j, facette;
+  int i, j, facette;
 
   // Cette classe sert pour promener les sommets sur le bord du domaine.
   const Parcours_interface& parcours = refparcours_interface_.valeur();
 #if TCL_MODEL
-  long flag_tcl = 0;
+  int flag_tcl = 0;
   double l_v = 0.;
   // interfacial velocity
   DoubleTab vit(nsom, dim);
@@ -8265,8 +8265,8 @@ void Maillage_FT_Disc::calcul_courbure_sommets(ArrOfDouble& courbure_sommets, co
           Cerr << "Validation and checking required in Maillage_FT_Disc::calcul_courbure_sommets" << finl;
           Process::exit();
           // Useless init to 0:
-          // for (long ii=0; ii< nsom; ii++)
-          //  for (long jj=0; jj< dim; jj++)
+          // for (int ii=0; ii< nsom; ii++)
+          //  for (int jj=0; jj< dim; jj++)
           //    vit(ii,jj) = 0.;
           eq_interfaces.get_champ_post_FT(nom_du_champ, loc, &vit); // HACK !!!! (warning, try debug to make sure it works if you want to remove it!!)
 
@@ -8285,7 +8285,7 @@ void Maillage_FT_Disc::calcul_courbure_sommets(ArrOfDouble& courbure_sommets, co
         {
           if (!bidim_axi)
             {
-              long ii;
+              int ii;
               const double surface_sur_dim = surface[facette] * inverse_dimension;
               for (ii = 0; ii < dim; ii++)
                 {
@@ -8296,14 +8296,14 @@ void Maillage_FT_Disc::calcul_courbure_sommets(ArrOfDouble& courbure_sommets, co
                 }
               for (ii = 0; ii < dim; ii++)
                 {
-                  const long sommet = facettes_(facette, ii);
+                  const int sommet = facettes_(facette, ii);
                   for (j = 0; j < dim; j++)
                     d_volume(sommet, j) += n_s[j];
                 }
               // Calcul de la differentielle de surface :
               if (dim == 2)
                 {
-                  long som[2];
+                  int som[2];
                   som[0] = facettes_(facette, 0);
                   som[1] = facettes_(facette, 1);
                   double n[2];
@@ -8318,10 +8318,10 @@ void Maillage_FT_Disc::calcul_courbure_sommets(ArrOfDouble& courbure_sommets, co
                   // Traitement des lignes de contact: ajout d'une contribution
                   // cos(theta) * differentielle de la surface de bord mouillee par
                   // la phase 0
-                  for (long i2 = 0; i2 < 2; i2++)
+                  for (int i2 = 0; i2 < 2; i2++)
                     {
-                      const long isom2 = som[i2];
-                      const long face = sommet_face_bord_[isom2];
+                      const int isom2 = som[i2];
+                      const int face = sommet_face_bord_[isom2];
                       if (face < 0) // pas une face de bord
                         continue;
 
@@ -8369,7 +8369,7 @@ void Maillage_FT_Disc::calcul_courbure_sommets(ArrOfDouble& courbure_sommets, co
                 }
               else
                 {
-                  long sommets_loc[3];
+                  int sommets_loc[3];
                   sommets_loc[0] = facettes_(facette, 0);
                   sommets_loc[1] = facettes_(facette, 1);
                   sommets_loc[2] = facettes_(facette, 2);
@@ -8384,9 +8384,9 @@ void Maillage_FT_Disc::calcul_courbure_sommets(ArrOfDouble& courbure_sommets, co
                       // s2s1 = (sommet[(i+1)%3] - sommet[(i+2)%3]) * 0.5
                       // (vecteur de norme "base du triangle * 0.5" et de direction
                       //  la hauteur du triangle)
-                      const long s0 = sommets_loc[ii];
-                      const long s1 = sommets_loc[ (ii+1)%3 ];
-                      const long s2 = sommets_loc[ (ii+2)%3 ];
+                      const int s0 = sommets_loc[ii];
+                      const int s1 = sommets_loc[ (ii+1)%3 ];
+                      const int s2 = sommets_loc[ (ii+2)%3 ];
                       ArrOfDouble s2s1(3); // GB mod double[3] to ArrOfDouble
                       s2s1[0] = sommets_(s1,0) - sommets_(s2,0);
                       s2s1[1] = sommets_(s1,1) - sommets_(s2,1);
@@ -8400,7 +8400,7 @@ void Maillage_FT_Disc::calcul_courbure_sommets(ArrOfDouble& courbure_sommets, co
 #ifdef PATCH_HYSTERESIS_V2
                       if (methode_calcul_courbure_contact_line_ == MIRROR)
                         {
-                          const long numface0 = sommet_face_bord_[s0];
+                          const int numface0 = sommet_face_bord_[s0];
                           if (numface0>=0)
                             {
                               // Le sommet s0 est sur une ligne de contact.
@@ -8502,11 +8502,11 @@ void Maillage_FT_Disc::calcul_courbure_sommets(ArrOfDouble& courbure_sommets, co
                               }
 
                               // On cherche quel type de contact on a (ponctuel ou lineique).
-                              const long numface1 = sommet_face_bord_[s1];
-                              const long numface2 = sommet_face_bord_[s2];
+                              const int numface1 = sommet_face_bord_[s1];
+                              const int numface2 = sommet_face_bord_[s2];
 
 #ifdef DEBUG_HYSTERESIS_V2
-                              const long inode = 6 ;
+                              const int inode = 6 ;
 //                          if (facette == 11)
                               if ( (ii==0) && ((s0 == inode) || (s1 == inode) || (s2 == inode))
                                    && (!(numface1 >= 0 && numface2 >= 0)))  /* pour ne pas afficher les facettes avec 3 som bords*/
@@ -8773,8 +8773,8 @@ void Maillage_FT_Disc::calcul_courbure_sommets(ArrOfDouble& courbure_sommets, co
                           // Traitement des lignes de contact: ajout d'une contribution
                           // cos(theta) * differentielle de la surface de bord mouillee par
                           // la phase 0
-                          const long numface1 = sommet_face_bord_[s1];
-                          const long numface2 = sommet_face_bord_[s2];
+                          const int numface1 = sommet_face_bord_[s1];
+                          const int numface2 = sommet_face_bord_[s2];
                           // Le segment s1s2 est une ligne de contact:
                           if (numface1 >= 0 && numface2 >= 0)
                             {
@@ -8811,8 +8811,8 @@ void Maillage_FT_Disc::calcul_courbure_sommets(ArrOfDouble& courbure_sommets, co
                           // Traitement des lignes de contact: ajout d'une contribution
                           // cos(theta) * differentielle de la surface de bord mouillee par
                           // la phase 0
-                          const long numface1 = sommet_face_bord_[s1];
-                          const long numface2 = sommet_face_bord_[s2];
+                          const int numface1 = sommet_face_bord_[s1];
+                          const int numface2 = sommet_face_bord_[s2];
                           // Le segment s1s2 est une ligne de contact:
                           if (numface1 >= 0 && numface2 >= 0)
                             {
@@ -8846,8 +8846,8 @@ void Maillage_FT_Disc::calcul_courbure_sommets(ArrOfDouble& courbure_sommets, co
               // As it is a ratio surface/volume, the angle as no effect.
               // Volume differential:
 
-              const long s1 = facettes_(facette, 0);
-              const long s2 = facettes_(facette, 1);
+              const int s1 = facettes_(facette, 0);
+              const int s2 = facettes_(facette, 1);
               const double r1 = sommets_(s1, 0);
               const double y1 = sommets_(s1, 1);
               const double r2 = sommets_(s2, 0);
@@ -8870,15 +8870,15 @@ void Maillage_FT_Disc::calcul_courbure_sommets(ArrOfDouble& courbure_sommets, co
 
               // GB 09/01/2018. Correction to account for the surface differencial
               // from the boundary face wetted by phase 0
-              long som[2];
+              int som[2];
               double r[2];
               som[0] = facettes_(facette, 0);
               som[1] = facettes_(facette, 1);
               r[0] = sommets_(s1, 0);
               r[1] = sommets_(s2, 0);
-              for (long i2 = 0; i2 < 2; i2++)
+              for (int i2 = 0; i2 < 2; i2++)
                 {
-                  const long face = sommet_face_bord_[som[i2]];
+                  const int face = sommet_face_bord_[som[i2]];
                   if (face < 0) // pas une face de bord
                     continue;
 
@@ -8891,7 +8891,7 @@ void Maillage_FT_Disc::calcul_courbure_sommets(ArrOfDouble& courbure_sommets, co
                   if ((sommet_elem_[som[i2]]>0) && flag_tcl)
                     {
                       const double t=temps_physique_;
-                      long face_loc;
+                      int face_loc;
                       const Domaine_Cl_dis_base& zcl = equation_transport().get_probleme_base().equation(0).domaine_Cl_dis().valeur();
                       const Cond_lim_base& type_cl = zcl.condition_limite_de_la_face_reelle(face,face_loc);
                       const Nom& bc_name = type_cl.frontiere_dis().le_nom();
@@ -8914,18 +8914,18 @@ void Maillage_FT_Disc::calcul_courbure_sommets(ArrOfDouble& courbure_sommets, co
                       // The other som of the facette is som[1-i2] :
                       // Cerr << " sommet-1 x= " << sommets_(som[1-i2],0) << " y= " << sommets_(som[1-i2],1) << " time_sommet= " << t << finl;
                       // if(dt != 0.) double cl_v = (sommets_(som[i2],0) - x_cl_)/dt;
-                      const long isom1 = som[1-i2];
+                      const int isom1 = som[1-i2];
                       // The second vertex of the segment should not be a contact line
                       // so we compute its tangential velocity:
 
-                      const long nb_compo = vit.dimension(1);
+                      const int nb_compo = vit.dimension(1);
                       double norm_vit_som1 = 0.;
                       double vn = 0.;
                       double v_cl = 0.;
                       double v_comp = 0.;
-                      // Component of the velocity is calculated along the direction of wall as vw = v - (v.n)n where n is the wall face normal
+                      // Component of the velocity is calculated aint the direction of wall as vw = v - (v.n)n where n is the wall face normal
                       // and v is the velocity vector of the node under consideration.
-                      for (long k=0 ; k<nb_compo ; k++)
+                      for (int k=0 ; k<nb_compo ; k++)
                         {
                           const double vk = (double) vit(isom1,k);
                           vn += vk*nface[k];
@@ -8937,7 +8937,7 @@ void Maillage_FT_Disc::calcul_courbure_sommets(ArrOfDouble& courbure_sommets, co
                       nface[0] = vn*nface[0];
                       nface[1] = vn*nface[1];
                       nface[2] = vn*nface[2];
-                      for (long k=0 ; k<nb_compo ; k++)
+                      for (int k=0 ; k<nb_compo ; k++)
                         {
                           v_comp = vit(isom1,k) - nface[k];
                           v_cl += v_comp*v_comp;
@@ -8976,7 +8976,7 @@ void Maillage_FT_Disc::calcul_courbure_sommets(ArrOfDouble& courbure_sommets, co
                       Probleme_FT_Disc_gen& pb_ft = ref_cast_non_const(Probleme_FT_Disc_gen, pb);
                       Triple_Line_Model_FT_Disc& tcl = pb_ft.tcl();
 
-                      long face_loc;
+                      int face_loc;
                       const Domaine_Cl_dis_base& zcl =
                         equation_transport ().get_probleme_base ().equation (
                           0).domaine_Cl_dis ().valeur ();
@@ -9019,8 +9019,8 @@ void Maillage_FT_Disc::calcul_courbure_sommets(ArrOfDouble& courbure_sommets, co
 #if (defined(PATCH_HYSTERESIS_V2) || defined(PATCH_HYSTERESIS_V3) )
   double norm_L2=0.;
   double norm_Linf=0.;
-  long count=0;
-  long isom_max_courb=-123456;
+  int count=0;
+  int isom_max_courb=-123456;
 #endif
 
   for (i = 0; i < nsom; i++)
@@ -9042,7 +9042,7 @@ void Maillage_FT_Disc::calcul_courbure_sommets(ArrOfDouble& courbure_sommets, co
               if (dim == 3)
                 dx[2] = d_volume(i, 2);
 
-              const long face_bord = sommet_face_bord_[i];
+              const int face_bord = sommet_face_bord_[i];
               if (face_bord >= 0)
                 parcours.projeter_vecteur_sur_face(face_bord, dx[0], dx[1], dx[2]);
 
@@ -9121,7 +9121,7 @@ void Maillage_FT_Disc::calcul_courbure_sommets(ArrOfDouble& courbure_sommets, co
           if ((call>1) && (sommet_face_bord_[i]>=0))
             {
               // Au second passage, la courbure des noeuds de la ligne de contact est :
-              const long contact_angle_inside_range = drapeau_angle_in_range.testsetbit(i);
+              const int contact_angle_inside_range = drapeau_angle_in_range.testsetbit(i);
               if (contact_angle_inside_range)
                 {
                   // o Soit fournie par une valeur lissee issue de l'interieur du domaine
@@ -9179,18 +9179,18 @@ void Maillage_FT_Disc::preparer_tableau_avant_transport(ArrOfDouble& tableau,
 {
   // Preparation de "collecter_espace_virtuel" : on annule la valeur pour tous
   // les elements virtuels:
-  long voisin, i;
+  int voisin, i;
   const Descripteur_FT& esp_virt = descripteur.espace_virtuel();
   const ArrOfInt& liste_pe_voisins = esp_virt.pe_voisins();
-  const long n_voisins = liste_pe_voisins.size_array();
+  const int n_voisins = liste_pe_voisins.size_array();
   for (voisin = 0; voisin < n_voisins; voisin++)
     {
-      const long pe_voisin = liste_pe_voisins[voisin];
+      const int pe_voisin = liste_pe_voisins[voisin];
       const ArrOfInt& elements = esp_virt.elements(pe_voisin);
-      const long n = elements.size_array();
+      const int n = elements.size_array();
       for (i = 0; i < n; i++)
         {
-          const long elem = elements[i];
+          const int elem = elements[i];
           tableau[elem] = 0.;
         }
     }
@@ -9200,18 +9200,18 @@ void Maillage_FT_Disc::preparer_tableau_avant_transport(ArrOfInt& tableau,
 {
   // Preparation de "collecter_espace_virtuel" : on annule la valeur pour tous
   // les elements virtuels:
-  long voisin, i;
+  int voisin, i;
   const Descripteur_FT& esp_virt = descripteur.espace_virtuel();
   const ArrOfInt& liste_pe_voisins = esp_virt.pe_voisins();
-  const long n_voisins = liste_pe_voisins.size_array();
+  const int n_voisins = liste_pe_voisins.size_array();
   for (voisin = 0; voisin < n_voisins; voisin++)
     {
-      const long pe_voisin = liste_pe_voisins[voisin];
+      const int pe_voisin = liste_pe_voisins[voisin];
       const ArrOfInt& elements = esp_virt.elements(pe_voisin);
-      const long n = elements.size_array();
+      const int n = elements.size_array();
       for (i = 0; i < n; i++)
         {
-          const long elem = elements[i];
+          const int elem = elements[i];
           tableau[elem] = 0;
         }
     }
@@ -9223,19 +9223,19 @@ void Maillage_FT_Disc::preparer_tableau_avant_transport(ArrOfInt& tableau,
 void Maillage_FT_Disc::preparer_tableau_avant_transport(DoubleTab& tableau,
                                                         const Desc_Structure_FT& descripteur) const
 {
-  const long dim = tableau.dimension(1);
-  long voisin, i, j;
+  const int dim = tableau.dimension(1);
+  int voisin, i, j;
   const Descripteur_FT& esp_virt = descripteur.espace_virtuel();
   const ArrOfInt& liste_pe_voisins = esp_virt.pe_voisins();
-  const long n_voisins = liste_pe_voisins.size_array();
+  const int n_voisins = liste_pe_voisins.size_array();
   for (voisin = 0; voisin < n_voisins; voisin++)
     {
-      const long pe_voisin = liste_pe_voisins[voisin];
+      const int pe_voisin = liste_pe_voisins[voisin];
       const ArrOfInt& elements = esp_virt.elements(pe_voisin);
-      const long n = elements.size_array();
+      const int n = elements.size_array();
       for (i = 0; i < n; i++)
         {
-          const long elem = elements[i];
+          const int elem = elements[i];
           for (j = 0; j < dim; j++)
             tableau(elem,j) = 0.;
         }
@@ -9246,15 +9246,15 @@ void Maillage_FT_Disc::preparer_tableau_avant_transport(DoubleTab& tableau,
  *
  */
 void Maillage_FT_Disc::update_tableau_apres_transport(ArrOfDouble& tableau,
-                                                      long new_size,
+                                                      int new_size,
                                                       const Desc_Structure_FT& descripteur) const
 {
   // Le transport des interfaces cree de nouveaux sommets/facettes en fin de tableau.
   // On doit donc augmenter la taille du tableau et determiner la valeur
   // de ces nouveaux elements.
-  const long old_size = tableau.size_array();
+  const int old_size = tableau.size_array();
   tableau.resize_array(new_size);
-  long i;
+  int i;
   for (i = old_size; i < new_size; i++)
     tableau[i] = 0.;
   // Somme sur tous les processeurs de la valeur stockee pour chaque element.
@@ -9266,15 +9266,15 @@ void Maillage_FT_Disc::update_tableau_apres_transport(ArrOfDouble& tableau,
 }
 
 void Maillage_FT_Disc::update_tableau_apres_transport(ArrOfInt& tableau,
-                                                      long new_size,
+                                                      int new_size,
                                                       const Desc_Structure_FT& descripteur) const
 {
   // Le transport des interfaces cree de nouveaux sommets/facettes en fin de tableau.
   // On doit donc augmenter la taille du tableau et determiner la valeur
   // de ces nouveaux elements.
-  const long old_size = tableau.size_array();
+  const int old_size = tableau.size_array();
   tableau.resize_array(new_size);
-  long i;
+  int i;
   for (i = old_size; i < new_size; i++)
     tableau[i] = 0;
   // Somme sur tous les processeurs de la valeur stockee pour chaque element.
@@ -9289,13 +9289,13 @@ void Maillage_FT_Disc::update_tableau_apres_transport(ArrOfInt& tableau,
  *
  */
 void Maillage_FT_Disc::update_tableau_apres_transport(DoubleTab& tableau,
-                                                      long new_size,
+                                                      int new_size,
                                                       const Desc_Structure_FT& descripteur) const
 {
-  const long old_size = tableau.dimension(0);
-  const long dim = tableau.dimension(1);
+  const int old_size = tableau.dimension(0);
+  const int dim = tableau.dimension(1);
   tableau.resize(new_size, dim);
-  long i, j;
+  int i, j;
   for (i = old_size; i < new_size; i++)
     for (j = 0; j < dim; j++)
       tableau(i,j) = 0.;
@@ -9324,7 +9324,7 @@ const Equation_base& Maillage_FT_Disc::equation_associee() const
   return equation_transport();
 }
 
-long Maillage_FT_Disc::type_statut() const
+int Maillage_FT_Disc::type_statut() const
 {
   if (statut_==RESET)
     return 0;
@@ -9364,7 +9364,7 @@ Schema_Comm_FT Maillage_FT_Disc::get_schema_comm_FT() const
 {
   return schema_comm_domaine_;
 }
-void Maillage_FT_Disc::set_is_solid_particle(long is_solid_particle)
+void Maillage_FT_Disc::set_is_solid_particle(int is_solid_particle)
 {
   is_solid_particle_=is_solid_particle;
 }

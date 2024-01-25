@@ -43,65 +43,65 @@ public:
 
   void associer_domaine_vf(const Domaine_VF& domaine_vf);
 
-  long construire_iso(const DoubleVect& valeurs_sommets,
-                      double isovaleur,
-                      Maillage_FT_Disc& maillage,
-                      DoubleVect& indicatrice_approchee,
-                      const Maillage_FT_Disc::AjoutPhase phase,
-                      long ignorer_collision = 0) const;
+  int construire_iso(const DoubleVect& valeurs_sommets,
+                     double isovaleur,
+                     Maillage_FT_Disc& maillage,
+                     DoubleVect& indicatrice_approchee,
+                     const Maillage_FT_Disc::AjoutPhase phase,
+                     int ignorer_collision = 0) const;
 
-  long construire_iso(const DoubleVect& valeurs_sommets,
-                      double isovaleur,
-                      Maillage_FT_Disc& maillage,
-                      DoubleVect& indicatrice_approchee,
-                      DoubleVect& indicatrice_face_approchee,
-                      const Maillage_FT_Disc::AjoutPhase phase,
-                      long ignorer_collision = 0) const;
+  int construire_iso(const DoubleVect& valeurs_sommets,
+                     double isovaleur,
+                     Maillage_FT_Disc& maillage,
+                     DoubleVect& indicatrice_approchee,
+                     DoubleVect& indicatrice_face_approchee,
+                     const Maillage_FT_Disc::AjoutPhase phase,
+                     int ignorer_collision = 0) const;
 
-  long construire_iso(const Nom& expression, double isovaleur,
-                      Maillage_FT_Disc& maillage,
-                      DoubleVect& indicatrice_approchee,
-                      const Maillage_FT_Disc::AjoutPhase phase,
-                      DoubleTab& eval_expression_sommets,
-                      long ignorer_collision = 0) const;
+  int construire_iso(const Nom& expression, double isovaleur,
+                     Maillage_FT_Disc& maillage,
+                     DoubleVect& indicatrice_approchee,
+                     const Maillage_FT_Disc::AjoutPhase phase,
+                     DoubleTab& eval_expression_sommets,
+                     int ignorer_collision = 0) const;
 
-  long construire_iso(const Nom& expression, double isovaleur,
-                      Maillage_FT_Disc& maillage,
-                      DoubleVect& indicatrice_approchee,
-                      DoubleVect& indicatrice_face_approchee,
-                      const Maillage_FT_Disc::AjoutPhase phase,
-                      DoubleTab& eval_expression_sommets,
-                      long ignorer_collision = 0) const; // EB
+  int construire_iso(const Nom& expression, double isovaleur,
+                     Maillage_FT_Disc& maillage,
+                     DoubleVect& indicatrice_approchee,
+                     DoubleVect& indicatrice_face_approchee,
+                     const Maillage_FT_Disc::AjoutPhase phase,
+                     DoubleTab& eval_expression_sommets,
+                     int ignorer_collision = 0) const; // EB
 
 protected:
   void remplir_data_marching_cubes(const Domaine& domaine);
 
   // Ces deux fonctions seraient mieux a leur place dans Joint ou Domaine...
   void remplir_renum_virt_loc(const Domaine& domaine);
-  void renum_sommets_dist_loc(const long pe_voisin,
+  void renum_sommets_dist_loc(const int pe_voisin,
                               ArrOfInt& num_sommets) const;
 
   void calculer_signe(const DoubleVect& valeurs_sommets,
                       const double isovaleur,
                       ArrOfBit& signe) const;
 
-  long construire_noeuds_et_facettes(const ArrOfBit& signe,
-                                     IntTab& def_noeud,
-                                     IntTab& facettes,
-                                     DoubleVect& indicatrice_approchee,
-                                     const Maillage_FT_Disc::AjoutPhase phase) const;
-  long construire_noeuds_et_facettes(const ArrOfBit& signe,
-                                     IntTab& def_noeud,
-                                     IntTab& facettes,
-                                     DoubleVect& indicatrice_approchee,
-                                     DoubleVect& indicatrice_face_approchee,
-                                     const Maillage_FT_Disc::AjoutPhase phase) const;
+  int construire_noeuds_et_facettes(const ArrOfBit& signe,
+                                    IntTab& def_noeud,
+                                    IntTab& facettes,
+                                    DoubleVect& indicatrice_approchee,
+                                    const Maillage_FT_Disc::AjoutPhase phase) const;
+  int construire_noeuds_et_facettes(const ArrOfBit& signe,
+                                    IntTab& def_noeud,
+                                    IntTab& facettes,
+                                    DoubleVect& indicatrice_approchee,
+                                    DoubleVect& indicatrice_face_approchee,
+                                    const Maillage_FT_Disc::AjoutPhase phase) const;
 
 
   void construire_noeuds_liste_faces(const ArrOfBit& signe,
                                      const IntTab& faces_sommets,
-                                     const long nb_faces_a_traiter,
-                                     const long numero_PE,
+                                     const int nb_faces_a_traiter,
+                                     const int numero_PE,
                                      IntTab& def_noeud) const;
 
   void construire_noeuds_joints(const ArrOfBit& signe,
@@ -124,18 +124,18 @@ protected:
   // *********** DEBUT
   REF(Domaine_VF) ref_domaine_vf_;
 
-  long nb_sommets_element;
+  int nb_sommets_element;
   // Definition des aretes de l'element de base eulerien
   // (exemple pour des triangles 2D {{0,1},{1,2},{2,0}}
-  long nb_aretes_element;
+  int nb_aretes_element;
   IntTabFT mcubes_def_aretes;
   // Definition des aretes des faces
-  long nb_sommets_par_face;
-  long nb_aretes_faces;
+  int nb_sommets_par_face;
+  int nb_aretes_faces;
   IntTabFT mcubes_def_aretes_faces;
   // Definition des facettes a creer en fonction du cas marching_cubes
   // voir Marching_cubes_data.h
-  long nb_sommets_facette;
+  int nb_sommets_facette;
   ArrOfIntFT mcubes_index_facettes;
   ArrOfIntFT mcubes_facettes;
   ArrOfIntFT mcubes_nb_facettes;
@@ -148,7 +148,7 @@ protected:
   // *********** FIN
 
   // Taille du tableau a la derniere construction d'une iso...
-  mutable long last_def_noeud_size;
+  mutable int last_def_noeud_size;
 
 private:
   Marching_Cubes(const Marching_Cubes&);  // Interdit !

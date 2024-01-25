@@ -42,30 +42,30 @@ public:
   Parcours_interface();
   void associer_domaine_dis(const Domaine_dis& domaine_dis);
   void associer_connectivite_frontieres(const Connectivite_frontieres& connect);
-  long calculer_face_sortie_element(const Domaine_VF& domaine_vf,
-                                    const long num_element,
-                                    double x0, double y0, double z0,
-                                    double x1, double y1, double z1,
-                                    double& pos_intersection) const;
-  long calculer_sortie_face_bord(const long face_0,
-                                 const long num_element,
-                                 double x0, double y0, double z0,
-                                 double x1, double y1, double z1,
-                                 double& x, double& y, double& z) const;
+  int calculer_face_sortie_element(const Domaine_VF& domaine_vf,
+                                   const int num_element,
+                                   double x0, double y0, double z0,
+                                   double x1, double y1, double z1,
+                                   double& pos_intersection) const;
+  int calculer_sortie_face_bord(const int face_0,
+                                const int num_element,
+                                double x0, double y0, double z0,
+                                double x1, double y1, double z1,
+                                double& x, double& y, double& z) const;
   double distance_sommet_faces(const Domaine_VF& domaine_vf,
-                               const long num_element,
+                               const int num_element,
                                double x, double y, double z) const;
 
-  double distance_sommet_faces_face(const Domaine_VF& domaine_vf, const long num_face, double x, double y, double z) const; // EB
+  double distance_sommet_faces_face(const Domaine_VF& domaine_vf, const int num_face, double x, double y, double z) const; // EB
 
   double get_erreur_geometrique() const;
-  long get_correction_parcours_thomas() const
+  int get_correction_parcours_thomas() const
   {
     return correction_parcours_thomas_ ;
   };
-  void projeter_vecteur_sur_face(const long num_face, double& x_, double& y_, double& z_) const;
+  void projeter_vecteur_sur_face(const int num_face, double& x_, double& y_, double& z_) const;
 
-  void calculer_normale_face_bord(long num_face, double x, double y, double z,
+  void calculer_normale_face_bord(int num_face, double x, double y, double z,
                                   double& nx_, double& ny_, double& nz_) const;
   void remplir_equation_plan_faces_aretes_internes(const Domaine_dis& domaine_dis); // EB
 
@@ -82,94 +82,94 @@ protected:
                                Maillage_FT_Disc& maillage,
                                ArrOfInt& echange_facettes_numfacette,
                                ArrOfInt& echange_facettes_numface,
-                               long num_facette,
-                               long face_depart, Intersections_Face_Facettes& intersections_face,
+                               int num_facette,
+                               int face_depart, Intersections_Face_Facettes& intersections_face,
                                ArrOfBit& drapeaux_faces_parcourues) const;   // EB
 
   void parcours_facette_face_y(const Domaine_VF& domaine_vf,
                                Maillage_FT_Disc& maillage,
                                ArrOfInt& echange_facettes_numfacette,
                                ArrOfInt& echange_facettes_numface,
-                               long num_facette,
-                               long face_depart, Intersections_Face_Facettes& intersections_face,
+                               int num_facette,
+                               int face_depart, Intersections_Face_Facettes& intersections_face,
                                ArrOfBit& drapeaux_faces_parcourues) const;   // EB
   void parcours_facette_face_z(const Domaine_VF& domaine_vf,
                                Maillage_FT_Disc& maillage,
                                ArrOfInt& echange_facettes_numfacette,
                                ArrOfInt& echange_facettes_numface,
-                               long num_facette,
-                               long face_depart, Intersections_Face_Facettes& intersections_face,
+                               int num_facette,
+                               int face_depart, Intersections_Face_Facettes& intersections_face,
                                ArrOfBit& drapeaux_faces_parcourues) const;   // EB
 
   void parcours_facette_arete_x(const Domaine_VF& domaine_vf,
                                 Maillage_FT_Disc& maillage,
                                 ArrOfInt& echange_facettes_numfacette,
                                 ArrOfInt& echange_facettes_numarete,
-                                long num_facette,
-                                long arete_depart, Intersections_Arete_Facettes& intersections_arete,
+                                int num_facette,
+                                int arete_depart, Intersections_Arete_Facettes& intersections_arete,
                                 ArrOfBit& drapeaux_aretes_parcourues) const;   // EB
   void parcours_facette_arete_y(const Domaine_VF& domaine_vf,
                                 Maillage_FT_Disc& maillage,
                                 ArrOfInt& echange_facettes_numfacette,
                                 ArrOfInt& echange_facettes_numarete,
-                                long num_facette,
-                                long arete_depart, Intersections_Arete_Facettes& intersections_arete,
+                                int num_facette,
+                                int arete_depart, Intersections_Arete_Facettes& intersections_arete,
                                 ArrOfBit& drapeaux_aretes_parcourues) const;   // EB
   void parcours_facette_arete_z(const Domaine_VF& domaine_vf,
                                 Maillage_FT_Disc& maillage,
                                 ArrOfInt& echange_facettes_numfacette,
                                 ArrOfInt& echange_facettes_numarete,
-                                long num_facette,
-                                long arete_depart, Intersections_Arete_Facettes& intersections_arete,
+                                int num_facette,
+                                int arete_depart, Intersections_Arete_Facettes& intersections_arete,
                                 ArrOfBit& drapeaux_aretes_parcourues) const;   // EB
   void parcours_facette(const Domaine_VF& domaine_vf,
                         Maillage_FT_Disc& maillage,
                         ArrOfInt& echange_facettes_numfacette,
                         ArrOfInt& echange_facettes_numelement,
-                        long num_facette,
-                        long element_depart) const;
+                        int num_facette,
+                        int element_depart) const;
 
-  long calcul_intersection_facelem_2D(const Domaine_VF& domaine_vf,
-                                      Maillage_FT_Disc& maillage,
-                                      long num_facette,
-                                      long num_element) const;
+  int calcul_intersection_facelem_2D(const Domaine_VF& domaine_vf,
+                                     Maillage_FT_Disc& maillage,
+                                     int num_facette,
+                                     int num_element) const;
 
-  long calcul_intersection_facelem_3D(const Domaine_VF& domaine_vf,
-                                      Maillage_FT_Disc& maillage,
-                                      long num_facette,
-                                      long num_element) const;
-  long calcul_intersection_facette_face_3D(const Domaine_VF& domaine_vf,
+  int calcul_intersection_facelem_3D(const Domaine_VF& domaine_vf,
+                                     Maillage_FT_Disc& maillage,
+                                     int num_facette,
+                                     int num_element) const;
+  int calcul_intersection_facette_face_3D(const Domaine_VF& domaine_vf,
+                                          Maillage_FT_Disc& maillage,
+                                          int num_facette,
+                                          int num_face, Intersections_Face_Facettes& intersections_face) const; // EB
+  int calcul_intersection_facette_arete_3D(const Domaine_VF& domaine_vf,
                                            Maillage_FT_Disc& maillage,
-                                           long num_facette,
-                                           long num_face, Intersections_Face_Facettes& intersections_face) const; // EB
-  long calcul_intersection_facette_arete_3D(const Domaine_VF& domaine_vf,
-                                            Maillage_FT_Disc& maillage,
-                                            long num_facette,
-                                            long num_arete, Intersections_Arete_Facettes& intersections_face) const; // EB
+                                           int num_facette,
+                                           int num_arete, Intersections_Arete_Facettes& intersections_face) const; // EB
 
   double calcul_eq_plan(const Domaine_VF& domaine_vf,
-                        const long num_element, const long num_face_element,
+                        const int num_element, const int num_face_element,
                         double& a, double& b, double& c, double& d) const;
-  double calcul_eq_plan_face(const Domaine_VF& domaine_vf, const long num_face, const long num_face_face, double& a, double& b, double& c, double& d) const; // EB
-  double calcul_eq_aretes(const Domaine_VDF& domaine_vdf, const long num_arete, const long num_face_arete, double& a, double& b, double& c, double& d) const; // EB
+  double calcul_eq_plan_face(const Domaine_VF& domaine_vf, const int num_face, const int num_face_face, double& a, double& b, double& c, double& d) const; // EB
+  double calcul_eq_aretes(const Domaine_VDF& domaine_vdf, const int num_arete, const int num_face_arete, double& a, double& b, double& c, double& d) const; // EB
 
-  double volume_rectangle(const Domaine_VF& domaine_vf, long num_element,
+  double volume_rectangle(const Domaine_VF& domaine_vf, int num_element,
                           double x0, double y0, double x1, double y1,
                           double epsilon) const;
 
   // New function to get phase-barycenter in 2D or 2D-axi calculations.
   // 3D equivalent not yet available (2020/10/26)
-  double volume_barycentre_rectangle(const Domaine_VF& domaine_vf, long num_element,
+  double volume_barycentre_rectangle(const Domaine_VF& domaine_vf, int num_element,
                                      double x0, double y0, double x1, double y1,
                                      double epsilon, double liquid_barycentre[3]) const;
 
-  double volume_triangle(const Domaine_VF& domaine_vf, long num_element,
+  double volume_triangle(const Domaine_VF& domaine_vf, int num_element,
                          double x0, double y0, double x1, double y1,
-                         long plan_coupe0, long plan_coupe1) const;
+                         int plan_coupe0, int plan_coupe1) const;
 
   double volume_tetraedre(const Domaine_VF& domaine_vf,
-                          long num_element,
-                          long num_facette,
+                          int num_element,
+                          int num_facette,
                           const Maillage_FT_Disc& maillage,
                           const DoubleTab& poly_reelles,
                           const FTd_vecteur3& centre_de_gravite,
@@ -180,21 +180,21 @@ protected:
                                     const FTd_vecteur3& centre_de_gravite_ref,
                                     double epsilon) const;
 
-  double volume_hexaedre(const Domaine_VF& domaine_vf, long num_element,
+  double volume_hexaedre(const Domaine_VF& domaine_vf, int num_element,
                          const DoubleTab& poly_reelles,
                          const FTd_vecteur3& norme,
                          const FTd_vecteur3& centre_de_gravite,
                          const ArrOfInt& polygone_plan_coupe,
                          double epsilon) const;
 // debut EB
-  double volume_hexaedre_face(const Domaine_VDF& domaine_vdf, long num_face,
+  double volume_hexaedre_face(const Domaine_VDF& domaine_vdf, int num_face,
                               const DoubleTab& poly_reelles,
                               const FTd_vecteur3& norme,
                               const FTd_vecteur3& centre_de_gravite,
                               const ArrOfInt& polygone_plan_coupe,
                               double epsilon) const;
 
-  double volume_hexaedre_arete_interne(const Domaine_VDF& domaine_vdf, long num_arete,
+  double volume_hexaedre_arete_interne(const Domaine_VDF& domaine_vdf, int num_arete,
                                        const DoubleTab& poly_reelles,
                                        const FTd_vecteur3& norme,
                                        const FTd_vecteur3& centre_de_gravite,
@@ -202,7 +202,7 @@ protected:
                                        double epsilon) const;
 // fin EB
 
-  void matrice_triangle(long num_element,
+  void matrice_triangle(int num_element,
                         FTd_vecteur2& origine,
                         FTd_matrice22& matrice,
                         double& surface) const;
@@ -218,11 +218,11 @@ protected:
   // Variables persistantes de la classe :
   REF(Domaine_VF) refdomaine_vf_;
   REF(Connectivite_frontieres) refconnect_front_;
-  long nb_faces_elem_;
-  long nb_faces_reelles_;
-  long nb_aretes_reelles_; // EB
-  long nb_elements_reels_;
-  long nb_sommets_par_face_;
+  int nb_faces_elem_;
+  int nb_faces_reelles_;
+  int nb_aretes_reelles_; // EB
+  int nb_elements_reels_;
+  int nb_sommets_par_face_;
   enum { TRIANGLE, RECTANGLE, TETRA, HEXA } type_element_;
 
   // Une tableau de taille nb_faces * 4 contenant les coefficients du
@@ -242,7 +242,7 @@ protected:
   //
   // A des fins de statistiques (voir "calcul_intersection_facelem_*"
   // et "parcourir" )
-  mutable long compteur_erreur_grossiere;
+  mutable int compteur_erreur_grossiere;
 
   // Raccourcis vers les elements et les sommets du maillage eulerien
   mutable const IntTab * domaine_elem_ptr;
@@ -270,10 +270,10 @@ protected:
 
   // Drapeau d'activation de la correction du parcours (par Thomas Fortin,
   //  pour corriger les problemes lies aux sommets qui tombent sur les faces du maillages eulerien
-  long correction_parcours_thomas_;
-  long eloigner_sommets_des_faces(Maillage_FT_Disc& maillage) const;
-  double uzawa2(const Domaine_VF& domaine_vf, const long elem,
-                double& x, double& y, double& z,  const long is_face=0) const;
+  int correction_parcours_thomas_;
+  int eloigner_sommets_des_faces(Maillage_FT_Disc& maillage) const;
+  double uzawa2(const Domaine_VF& domaine_vf, const int elem,
+                double& x, double& y, double& z,  const int is_face=0) const;
 };
 
 #endif

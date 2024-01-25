@@ -34,7 +34,7 @@
 //#define EXTENSION_TRIANGLE_POUR_CALCUL_INDIC_AVEC_CONSERVATION_FACETTE_COIN
 Implemente_instanciable_sans_constructeur(Parcours_interface,"Parcours_interface",Objet_U);
 
-static long flag_warning_code_missing=1;
+static int flag_warning_code_missing=1;
 
 const double Parcours_interface::Erreur_relative_maxi_ = 1.E-13;
 
@@ -125,9 +125,9 @@ void Parcours_interface::associer_domaine_dis(const Domaine_dis& domaine_dis)
 
   // Remplissage du tableau equations_plans_faces_
   {
-    const long nb_faces = domaine_vf.nb_faces();
-    const long dimension3 = (Objet_U::dimension == 3);
-    long i;
+    const int nb_faces = domaine_vf.nb_faces();
+    const int dimension3 = (Objet_U::dimension == 3);
+    int i;
     double a, b, c = 0., d;
     double x, y = 0., z = 0.;
     double inverse_norme;
@@ -212,9 +212,9 @@ void Parcours_interface::parcourir(Maillage_FT_Disc& maillage) const
   const Domaine_dis& domaine_dis = maillage.refdomaine_dis_.valeur();
   const Domaine_VDF& domaine_vdf = ref_cast(Domaine_VDF,domaine_dis.valeur());
   const IntVect& type_arete=domaine_vdf.type_arete();
-  static long iteration_parcourir_faces=0;
-  static long iteration_parcourir_aretes=0;
-  long calcul_precis_indic_face=0,calcul_precis_indic_arete=0;
+  static int iteration_parcourir_faces=0;
+  static int iteration_parcourir_aretes=0;
+  int calcul_precis_indic_face=0,calcul_precis_indic_arete=0;
   if (maillage.refequation_transport_.non_nul())
     {
       calcul_precis_indic_face=maillage.equation_transport().calcul_precis_indic_faces();
@@ -241,16 +241,16 @@ void Parcours_interface::parcourir(Maillage_FT_Disc& maillage) const
 
   // RAZ des intersections elements-facettes
   {
-    const long nb_elem = domaine_vf.nb_elem();
-    const long nb_facettes = maillage.facettes_.dimension(0);
+    const int nb_elem = domaine_vf.nb_elem();
+    const int nb_facettes = maillage.facettes_.dimension(0);
     maillage.intersections_elem_facettes_.reset(nb_elem, nb_facettes);
   }
 
   // debut EB
   // RAZ des intersections face-facettes
   {
-    const long nb_faces = domaine_vf.nb_faces();
-    const long nb_facettes = maillage.facettes_.dimension(0);
+    const int nb_faces = domaine_vf.nb_faces();
+    const int nb_facettes = maillage.facettes_.dimension(0);
     maillage.intersections_face_facettes_x_.reset(nb_faces, nb_facettes);
     maillage.intersections_face_facettes_y_.reset(nb_faces, nb_facettes);
     maillage.intersections_face_facettes_z_.reset(nb_faces, nb_facettes);
@@ -258,8 +258,8 @@ void Parcours_interface::parcourir(Maillage_FT_Disc& maillage) const
 
   // RAZ des intersections arete-facettes
   {
-    const long nb_aretes = domaine_vf.domaine().nb_aretes();
-    const long nb_facettes = maillage.facettes_.dimension(0);
+    const int nb_aretes = domaine_vf.domaine().nb_aretes();
+    const int nb_facettes = maillage.facettes_.dimension(0);
     maillage.intersections_arete_facettes_x_.reset(nb_aretes, nb_facettes);
     maillage.intersections_arete_facettes_y_.reset(nb_aretes, nb_facettes);
     maillage.intersections_arete_facettes_z_.reset(nb_aretes, nb_facettes);
@@ -277,7 +277,7 @@ void Parcours_interface::parcourir(Maillage_FT_Disc& maillage) const
   static ArrOfIntFT facettes_a_traiter_numelement;
 
   compteur_erreur_grossiere = 0;
-  //long iteration = 0;
+  //int iteration = 0;
   // debut EB
   // FACES
   // Face d'arrivees a envoyer aux processeurs voisins pour l'iteration
@@ -321,20 +321,20 @@ void Parcours_interface::parcourir(Maillage_FT_Disc& maillage) const
   // fin EB
 
 
-  long nb_facettes_echangees_elem = 0;
+  int nb_facettes_echangees_elem = 0;
 
   // FACES
-  long nb_facettes_echangees_x = 0;
-  long nb_facettes_echangees_y = 0;
-  long nb_facettes_echangees_z = 0;
+  int nb_facettes_echangees_x = 0;
+  int nb_facettes_echangees_y = 0;
+  int nb_facettes_echangees_z = 0;
 
   // ARETES
-  long nb_facettes_echangees_arete_x = 0;
-  long nb_facettes_echangees_arete_y = 0;
-  long nb_facettes_echangees_arete_z = 0;
+  int nb_facettes_echangees_arete_x = 0;
+  int nb_facettes_echangees_arete_y = 0;
+  int nb_facettes_echangees_arete_z = 0;
 
-  long iteration_elem = 0, iteration_x=0, iteration_y=0, iteration_z=0;
-  long iteration_arete_x=0, iteration_arete_y=0, iteration_arete_z=0;
+  int iteration_elem = 0, iteration_x=0, iteration_y=0, iteration_z=0;
+  int iteration_arete_x=0, iteration_arete_y=0, iteration_arete_z=0;
   // On est oblige de faire une boucle pour les elements et une boucle par orientation
   // sinon on converge jamais en // a cause de la boucle while et de l'echange des numfacettes/numelem/numface
   // On commence par les elements
@@ -348,13 +348,13 @@ void Parcours_interface::parcourir(Maillage_FT_Disc& maillage) const
       // on traite toutes les facettes du domaine
       if (iteration_elem == 0)
         {
-          long nb_facettes = maillage.facettes_.dimension(0);
-          for (long i = 0; i < nb_facettes; i++)
+          int nb_facettes = maillage.facettes_.dimension(0);
+          for (int i = 0; i < nb_facettes; i++)
             {
               // Le parcours commence par l'element qui contient le premier
               // sommet, si la facette m'appartient (element_depart >= 0)
-              long premier_sommet = maillage.facettes_(i,0);
-              long element_depart = maillage.sommet_elem_[premier_sommet];
+              int premier_sommet = maillage.facettes_(i,0);
+              int element_depart = maillage.sommet_elem_[premier_sommet];
               if (element_depart >= 0)
                 parcours_facette(domaine_vf, maillage,
                                  echange_facettes_numfacette,
@@ -365,11 +365,11 @@ void Parcours_interface::parcourir(Maillage_FT_Disc& maillage) const
       else
         {
           // Aux passages suivants, on traite uniquement la liste
-          long nb_facettes = facettes_a_traiter_numfacette.size_array();
-          for (long i = 0; i < nb_facettes; i++)
+          int nb_facettes = facettes_a_traiter_numfacette.size_array();
+          for (int i = 0; i < nb_facettes; i++)
             {
-              long num_facette = facettes_a_traiter_numfacette[i];
-              long element_depart = facettes_a_traiter_numelement[i];
+              int num_facette = facettes_a_traiter_numfacette[i];
+              int element_depart = facettes_a_traiter_numelement[i];
               parcours_facette(domaine_vf, maillage,
                                echange_facettes_numfacette,
                                echange_facettes_numelement,
@@ -414,13 +414,13 @@ void Parcours_interface::parcourir(Maillage_FT_Disc& maillage) const
               if (iteration_x == 0)
                 {
 
-                  long nb_facettes = maillage.facettes_.dimension(0);
-                  for (long i = 0; i < nb_facettes; i++)
+                  int nb_facettes = maillage.facettes_.dimension(0);
+                  for (int i = 0; i < nb_facettes; i++)
                     {
                       // On definit face_depart_x, face_depart_y et face_depart_z car un sommet est present dans le volume
                       // de controle de 3 faces, il faut donc appeler parcours_facette_face 3 fois
-                      long premier_sommet = maillage.facettes_(i,0);
-                      long face_depart_x = maillage.sommet_face_(premier_sommet,0);
+                      int premier_sommet = maillage.facettes_(i,0);
+                      int face_depart_x = maillage.sommet_face_(premier_sommet,0);
                       if (face_depart_x >= 0)
                         {
                           parcours_facette_face_x(domaine_vf, maillage,
@@ -434,12 +434,12 @@ void Parcours_interface::parcourir(Maillage_FT_Disc& maillage) const
                 {
                   // On definit face_depart_x, face_depart_y et face_depart_z car un sommet est present dans le volume
                   // de controle de 3 faces, il faut donc appeler parcours_facette_face 3 fois
-                  long nb_facettes = facettes_a_traiter_numfacette_x.size_array();
+                  int nb_facettes = facettes_a_traiter_numfacette_x.size_array();
 
-                  for (long i = 0; i < nb_facettes; i++)
+                  for (int i = 0; i < nb_facettes; i++)
                     {
-                      long num_facette = facettes_a_traiter_numfacette_x[i];
-                      long face_depart_x = facettes_a_traiter_numface_x[i];
+                      int num_facette = facettes_a_traiter_numfacette_x[i];
+                      int face_depart_x = facettes_a_traiter_numface_x[i];
                       if (face_depart_x >= 0 )
                         {
                           parcours_facette_face_x(domaine_vf, maillage,
@@ -474,11 +474,11 @@ void Parcours_interface::parcourir(Maillage_FT_Disc& maillage) const
 
               if (iteration_y == 0)
                 {
-                  long nb_facettes = maillage.facettes_.dimension(0);
-                  for (long i = 0; i < nb_facettes; i++)
+                  int nb_facettes = maillage.facettes_.dimension(0);
+                  for (int i = 0; i < nb_facettes; i++)
                     {
-                      long premier_sommet = maillage.facettes_(i,0);
-                      long face_depart_y = maillage.sommet_face_(premier_sommet,1);
+                      int premier_sommet = maillage.facettes_(i,0);
+                      int face_depart_y = maillage.sommet_face_(premier_sommet,1);
 
                       if (face_depart_y >= 0)
                         parcours_facette_face_y(domaine_vf, maillage,
@@ -491,11 +491,11 @@ void Parcours_interface::parcourir(Maillage_FT_Disc& maillage) const
               else
                 {
                   // Aux passages suivants, on traite uniquement la liste
-                  long nb_facettes = facettes_a_traiter_numfacette_y.size_array();
-                  for (long i = 0; i < nb_facettes; i++)
+                  int nb_facettes = facettes_a_traiter_numfacette_y.size_array();
+                  for (int i = 0; i < nb_facettes; i++)
                     {
-                      long num_facette = facettes_a_traiter_numfacette_y[i];
-                      long face_depart_y = facettes_a_traiter_numface_y[i];
+                      int num_facette = facettes_a_traiter_numfacette_y[i];
+                      int face_depart_y = facettes_a_traiter_numface_y[i];
                       if (face_depart_y >= 0 )
                         parcours_facette_face_y(domaine_vf, maillage,
                                                 echange_facettes_numfacette_y,
@@ -526,11 +526,11 @@ void Parcours_interface::parcourir(Maillage_FT_Disc& maillage) const
 
               if (iteration_z == 0)
                 {
-                  long nb_facettes = maillage.facettes_.dimension(0);
-                  for (long i = 0; i < nb_facettes; i++)
+                  int nb_facettes = maillage.facettes_.dimension(0);
+                  for (int i = 0; i < nb_facettes; i++)
                     {
-                      long premier_sommet = maillage.facettes_(i,0);
-                      long face_depart_z = maillage.sommet_face_(premier_sommet,2);
+                      int premier_sommet = maillage.facettes_(i,0);
+                      int face_depart_z = maillage.sommet_face_(premier_sommet,2);
                       if (face_depart_z >= 0 )
                         parcours_facette_face_z(domaine_vf, maillage,
                                                 echange_facettes_numfacette_z,
@@ -541,11 +541,11 @@ void Parcours_interface::parcourir(Maillage_FT_Disc& maillage) const
               else
                 {
                   // Aux passages suivants, on traite uniquement la liste
-                  long nb_facettes = facettes_a_traiter_numfacette_z.size_array();
-                  for (long i = 0; i < nb_facettes; i++)
+                  int nb_facettes = facettes_a_traiter_numfacette_z.size_array();
+                  for (int i = 0; i < nb_facettes; i++)
                     {
-                      long num_facette = facettes_a_traiter_numfacette_z[i];
-                      long face_depart_z = facettes_a_traiter_numface_z[i];
+                      int num_facette = facettes_a_traiter_numfacette_z[i];
+                      int face_depart_z = facettes_a_traiter_numface_z[i];
                       if (face_depart_z >= 0)
                         parcours_facette_face_z(domaine_vf, maillage,
                                                 echange_facettes_numfacette_z,
@@ -601,13 +601,13 @@ void Parcours_interface::parcourir(Maillage_FT_Disc& maillage) const
               if (iteration_arete_x == 0)
                 {
 
-                  long nb_facettes = maillage.facettes_.dimension(0);
-                  for (long i = 0; i < nb_facettes; i++)
+                  int nb_facettes = maillage.facettes_.dimension(0);
+                  for (int i = 0; i < nb_facettes; i++)
                     {
                       // On definit face_depart_x, face_depart_y et face_depart_z car un sommet est present dans le volume
                       // de controle de 3 faces, il faut donc appeler parcours_facette_face 3 fois
-                      long premier_sommet = maillage.facettes_(i,0);
-                      long arete_depart_x = maillage.sommet_arete_(premier_sommet,0);
+                      int premier_sommet = maillage.facettes_(i,0);
+                      int arete_depart_x = maillage.sommet_arete_(premier_sommet,0);
                       if (type_arete(arete_depart_x)!=2) continue; // on ne calcule que pour les aretes_internes
                       if (arete_depart_x >= 0)
                         {
@@ -622,12 +622,12 @@ void Parcours_interface::parcourir(Maillage_FT_Disc& maillage) const
                 {
                   // On definit face_depart_x, face_depart_y et face_depart_z car un sommet est present dans le volume
                   // de controle de 3 faces, il faut donc appeler parcours_facette_face 3 fois
-                  long nb_facettes = facettes_a_traiter_numfacette_arete_x.size_array();
+                  int nb_facettes = facettes_a_traiter_numfacette_arete_x.size_array();
 
-                  for (long i = 0; i < nb_facettes; i++)
+                  for (int i = 0; i < nb_facettes; i++)
                     {
-                      long num_facette = facettes_a_traiter_numfacette_arete_x[i];
-                      long arete_depart_x = facettes_a_traiter_numarete_x[i];
+                      int num_facette = facettes_a_traiter_numfacette_arete_x[i];
+                      int arete_depart_x = facettes_a_traiter_numarete_x[i];
                       if (type_arete(arete_depart_x)!=2) continue; // on ne calcule que pour les aretes_internes
                       if (arete_depart_x >= 0 )
                         {
@@ -643,9 +643,9 @@ void Parcours_interface::parcourir(Maillage_FT_Disc& maillage) const
               /*
               Cerr << "avant echanger_facettes_arete_x" << finl;
               Cerr << "echange_facettes_numarete_x.size_array() " << echange_facettes_numarete_x.size_array() << finl;
-              for (long i=0; i<echange_facettes_numarete_x.size_array(); i++)
+              for (int i=0; i<echange_facettes_numarete_x.size_array(); i++)
                 {
-                  long arete=echange_facettes_numarete_x(i);
+                  int arete=echange_facettes_numarete_x(i);
                   Cerr << "arete " << arete;
                   Cerr << " cg " << domaine_vf.xa(arete,0) << " " << domaine_vf.xa(arete,1) << " " << domaine_vf.xa(arete,2) << finl;
                 }
@@ -684,11 +684,11 @@ void Parcours_interface::parcourir(Maillage_FT_Disc& maillage) const
 
               if (iteration_arete_y == 0)
                 {
-                  long nb_facettes = maillage.facettes_.dimension(0);
-                  for (long i = 0; i < nb_facettes; i++)
+                  int nb_facettes = maillage.facettes_.dimension(0);
+                  for (int i = 0; i < nb_facettes; i++)
                     {
-                      long premier_sommet = maillage.facettes_(i,0);
-                      long arete_depart_y = maillage.sommet_arete_(premier_sommet,1);
+                      int premier_sommet = maillage.facettes_(i,0);
+                      int arete_depart_y = maillage.sommet_arete_(premier_sommet,1);
                       if (type_arete(arete_depart_y)!=2) continue; // on ne calcule que pour les aretes_internes
                       if (arete_depart_y >= 0)
                         parcours_facette_arete_y(domaine_vf, maillage,
@@ -700,11 +700,11 @@ void Parcours_interface::parcourir(Maillage_FT_Disc& maillage) const
               else
                 {
                   // Aux passages suivants, on traite uniquement la liste
-                  long nb_facettes = facettes_a_traiter_numfacette_arete_y.size_array();
-                  for (long i = 0; i < nb_facettes; i++)
+                  int nb_facettes = facettes_a_traiter_numfacette_arete_y.size_array();
+                  for (int i = 0; i < nb_facettes; i++)
                     {
-                      long num_facette = facettes_a_traiter_numfacette_arete_y[i];
-                      long arete_depart_y = facettes_a_traiter_numarete_y[i];
+                      int num_facette = facettes_a_traiter_numfacette_arete_y[i];
+                      int arete_depart_y = facettes_a_traiter_numarete_y[i];
                       if (type_arete(arete_depart_y)!=2) continue; // on ne calcule que pour les aretes_internes
                       if (arete_depart_y >= 0 )
                         parcours_facette_arete_y(domaine_vf, maillage,
@@ -715,9 +715,9 @@ void Parcours_interface::parcourir(Maillage_FT_Disc& maillage) const
                 }
               /*
               Cerr << "echange_facettes_numarete_y.size_array() " << echange_facettes_numarete_y.size_array() << finl;
-              for (long arete=0; arete<echange_facettes_numarete_y.size_array(); arete++)
+              for (int arete=0; arete<echange_facettes_numarete_y.size_array(); arete++)
                 {
-                  long ind_arete=echange_facettes_numarete_y(arete);
+                  int ind_arete=echange_facettes_numarete_y(arete);
                   Cerr << "arete " << ind_arete << "/" << domaine_vf.domaine().aretes_som().dimension(0) << "\t" << domaine_vf.xa(ind_arete,0) << " " << domaine_vf.xa(ind_arete,1) << " " << domaine_vf.xa(ind_arete,2) << finl;
                 }
               */
@@ -727,9 +727,9 @@ void Parcours_interface::parcourir(Maillage_FT_Disc& maillage) const
                                                  facettes_a_traiter_numarete_y);
               /*
                             Cerr << "APRES ECHANGE"<< finl;
-                            for (long arete=0; arete<facettes_a_traiter_numarete_y.size_array(); arete++)
+                            for (int arete=0; arete<facettes_a_traiter_numarete_y.size_array(); arete++)
                               {
-                                long ind_arete=facettes_a_traiter_numarete_y(arete);
+                                int ind_arete=facettes_a_traiter_numarete_y(arete);
                                 Cerr << "arete " << ind_arete  << "/" << domaine_vf.domaine().aretes_som().dimension(0) << "\t" << domaine_vf.xa(ind_arete,0) << " " << domaine_vf.xa(ind_arete,1) << " " << domaine_vf.xa(ind_arete,2) << finl;
                               }
 
@@ -763,16 +763,16 @@ void Parcours_interface::parcourir(Maillage_FT_Disc& maillage) const
 
               if (iteration_arete_z == 0)
                 {
-                  long nb_facettes = maillage.facettes_.dimension(0);
+                  int nb_facettes = maillage.facettes_.dimension(0);
                   //Cerr << "ici" << finl;
-                  for (long i = 0; i < nb_facettes; i++)
+                  for (int i = 0; i < nb_facettes; i++)
                     {
                       //Cerr << "i = " << i  << "/" <<nb_facettes << finl;
-                      long premier_sommet = maillage.facettes_(i,0);
+                      int premier_sommet = maillage.facettes_(i,0);
                       //Cerr << "premier_sommet " << premier_sommet << finl;
-                      long arete_depart_z = maillage.sommet_arete_(premier_sommet,2);
+                      int arete_depart_z = maillage.sommet_arete_(premier_sommet,2);
                       //Cerr << "arete_depart_z " << arete_depart_z << finl;
-                      long type_arete_depart=type_arete(arete_depart_z);
+                      int type_arete_depart=type_arete(arete_depart_z);
                       //Cerr << "type_arete_depart " << type_arete_depart << finl;
                       if (type_arete_depart!=2) continue; // on ne calcule que pour les aretes_internes
                       //Cerr << "i = " << i << " arete_depart " << arete_depart_z << finl;
@@ -788,11 +788,11 @@ void Parcours_interface::parcourir(Maillage_FT_Disc& maillage) const
                 {
 
                   // Aux passages suivants, on traite uniquement la liste
-                  long nb_facettes = facettes_a_traiter_numfacette_arete_z.size_array();
-                  for (long i = 0; i < nb_facettes; i++)
+                  int nb_facettes = facettes_a_traiter_numfacette_arete_z.size_array();
+                  for (int i = 0; i < nb_facettes; i++)
                     {
-                      long num_facette = facettes_a_traiter_numfacette_arete_z[i];
-                      long arete_depart_z = facettes_a_traiter_numarete_z[i];
+                      int num_facette = facettes_a_traiter_numfacette_arete_z[i];
+                      int arete_depart_z = facettes_a_traiter_numarete_z[i];
                       if (type_arete(arete_depart_z)!=2) continue; // on ne calcule que pour les aretes_internes
                       if (arete_depart_z >= 0)
                         parcours_facette_arete_z(domaine_vf, maillage,
@@ -839,8 +839,8 @@ void Parcours_interface::parcourir(Maillage_FT_Disc& maillage) const
       //amie de Maillage_FT_Disc
       // Il y a de nouveaux sommets virtuels dans le maillage (mais pas de changement de proprietaire)
       // il faut mettre a jour le tableau.
-      const long ni = maillage.sommets_.dimension(0);
-      const long nj = maillage.sommets_.dimension(1);
+      const int ni = maillage.sommets_.dimension(0);
+      const int nj = maillage.sommets_.dimension(1);
       copie_sommets_maillage.resize(ni, nj);
       maillage.desc_sommets().echange_espace_virtuel(copie_sommets_maillage);
       maillage.sommets_ = copie_sommets_maillage;
@@ -862,10 +862,10 @@ static void effacer_drapeaux_elements_parcourus(
 {
   // Remise a zero des drapeaux pour la prochaine fois
   // (efficace : on ne reinitialise que les drapeaux qui sont mis)
-  long n = liste_elements_parcourus.size_array();
-  for (long i = 0; i < n; i++)
+  int n = liste_elements_parcourus.size_array();
+  for (int i = 0; i < n; i++)
     {
-      const long element = liste_elements_parcourus[i];
+      const int element = liste_elements_parcourus[i];
       drapeaux_elements_parcourus.clearbit(element);
     }
 }
@@ -876,10 +876,10 @@ static void effacer_drapeaux_faces_parcourues(
 {
   // Remise a zero des drapeaux pour la prochaine fois
   // (efficace : on ne reinitialise que les drapeaux qui sont mis)
-  long n = liste_faces_parcourues.size_array();
-  for (long i = 0; i < n; i++)
+  int n = liste_faces_parcourues.size_array();
+  for (int i = 0; i < n; i++)
     {
-      const long face = liste_faces_parcourues[i];
+      const int face = liste_faces_parcourues[i];
       drapeaux_faces_parcourues.clearbit(face);
     }
 }
@@ -899,15 +899,15 @@ static void effacer_drapeaux_faces_parcourues(
 // Signification: on y met les coefficients du plan: normale (a,b,c) et constante d
 // Valeur de retour : signe (1. ou -1.)
 inline double Parcours_interface::calcul_eq_plan(const Domaine_VF& domaine_vf,
-                                                 const long num_element,
-                                                 const long num_face_element,
+                                                 const int num_element,
+                                                 const int num_face_element,
                                                  double& a, double& b, double& c, double& d) const
 {
   assert((&domaine_vf) == (&(refdomaine_vf_.valeur())));
   // Numero de la face i
-  const long num_face = domaine_vf.elem_faces(num_element, num_face_element);
+  const int num_face = domaine_vf.elem_faces(num_element, num_face_element);
   // Numero du premier element voisin de la face
-  const long elem_voisin = domaine_vf.face_voisins(num_face, 0);
+  const int elem_voisin = domaine_vf.face_voisins(num_face, 0);
   // Equation du plan contenant la face
   a = equations_plans_faces_(num_face, 0);
   b = equations_plans_faces_(num_face, 1);
@@ -924,12 +924,12 @@ inline double Parcours_interface::calcul_eq_plan(const Domaine_VF& domaine_vf,
 // beaucoup de doublons dans ce tableau... Il faudrait implementer un connectivite arete/num_face_arete au meme titre
 // que la connectivite element/face
 inline double Parcours_interface::calcul_eq_aretes(const Domaine_VDF& domaine_vdf,
-                                                   const long num_arete, const long num_face_arete,
+                                                   const int num_arete, const int num_face_arete,
                                                    double& a, double& b, double& c, double& d) const
 {
   // Equation du plan contenant la face
-  const long premiere_arete_interne=domaine_vdf.premiere_arete_interne();
-  const long arete=num_arete-premiere_arete_interne;
+  const int premiere_arete_interne=domaine_vdf.premiere_arete_interne();
+  const int arete=num_arete-premiere_arete_interne;
 
   a = equations_plans_faces_arete_(arete, num_face_arete, 0);
   b = equations_plans_faces_arete_(arete, num_face_arete, 1);
@@ -955,37 +955,37 @@ inline double Parcours_interface::calcul_eq_aretes(const Domaine_VDF& domaine_vd
 // Signification: on y met les coefficients du plan: normale (a,b,c) et constante d
 // Valeur de retour : signe (1. ou -1.)
 inline double Parcours_interface::calcul_eq_plan_face(const Domaine_VF& domaine_vf,
-                                                      const long num_face,
-                                                      const long num_face_face,
+                                                      const int num_face,
+                                                      const int num_face_face,
                                                       double& a, double& b, double& c, double& d) const
 {
   a = (num_face_face%dimension==0);
   b = (num_face_face%dimension==1);
   c = (num_face_face%dimension==2);
 
-  const long face_double=domaine_vf.faces_doubles()[num_face];
+  const int face_double=domaine_vf.faces_doubles()[num_face];
 
-  long face_bord0 = (domaine_vf.face_voisins(num_face,0)<0 || domaine_vf.face_voisins(num_face,0)>=domaine_vf.nb_elem()) ; // pas d'acces a l'element de gauche, bas, arriere ou face_double
-  long face_bord1 = (domaine_vf.face_voisins(num_face,1)<0 || domaine_vf.face_voisins(num_face,1)>=domaine_vf.nb_elem()); // pas d'acces a l'element de droite, haut, avant ou face double
-  long direction=(num_face_face>=dimension);
-  //const long nb_elem_reel=domaine_vf.nb_elem();
+  int face_bord0 = (domaine_vf.face_voisins(num_face,0)<0 || domaine_vf.face_voisins(num_face,0)>=domaine_vf.nb_elem()) ; // pas d'acces a l'element de gauche, bas, arriere ou face_double
+  int face_bord1 = (domaine_vf.face_voisins(num_face,1)<0 || domaine_vf.face_voisins(num_face,1)>=domaine_vf.nb_elem()); // pas d'acces a l'element de droite, haut, avant ou face double
+  int direction=(num_face_face>=dimension);
+  //const int nb_elem_reel=domaine_vf.nb_elem();
 
   if (!face_bord0 && !face_bord1 &&  !face_double)
     {
-      long elem = domaine_vf.face_voisins(num_face,direction);
+      int elem = domaine_vf.face_voisins(num_face,direction);
       if (num_face_face%dimension==domaine_vf.orientation(num_face)) d = - domaine_vf.xp(elem,num_face_face%dimension);
       else
         {
-          long face_eulerienne=domaine_vf.elem_faces(elem, num_face_face);
+          int face_eulerienne=domaine_vf.elem_faces(elem, num_face_face);
           d = - domaine_vf.xv(face_eulerienne,num_face_face%dimension);
         }
     }
   else // on est sur le volume de controle d'une face de bord ou d'une face_double
     {
-      long elem_eulerien=-1;
-      const long elem0=domaine_vf.face_voisins(num_face,0);
-      const long elem1=domaine_vf.face_voisins(num_face,1);
-      long bord=-1;
+      int elem_eulerien=-1;
+      const int elem0=domaine_vf.face_voisins(num_face,0);
+      const int elem1=domaine_vf.face_voisins(num_face,1);
+      int bord=-1;
       elem_eulerien = face_bord0 ? elem1 : elem0;
       bord = face_bord0 ? 0 : 1;
       //}
@@ -999,7 +999,7 @@ inline double Parcours_interface::calcul_eq_plan_face(const Domaine_VF& domaine_
         }
       else
         {
-          long face_eulerienne= domaine_vf.elem_faces(elem_eulerien, num_face_face);
+          int face_eulerienne= domaine_vf.elem_faces(elem_eulerien, num_face_face);
           d = - domaine_vf.xv(face_eulerienne,num_face_face%dimension);
         }
 
@@ -1018,33 +1018,33 @@ void Parcours_interface::remplir_equation_plan_faces_aretes_internes(const Domai
   const IntTab& Qdm = domaine_vdf.Qdm();
   const IntTab& Aretes_Som=domaine_vdf.domaine().aretes_som();
   const DoubleTab& coord_som=domaine_vdf.domaine().coord_sommets();
-  //const long nb_aretes=domaine.nb_aretes();
-  const long nb_elems_reels=domaine_vdf.nb_elem();
-  const long nb_aretes_internes=domaine_vdf.nb_aretes_internes();
-  const long premiere_arete_interne=domaine_vdf.premiere_arete_interne();
-  const long nb_faces_arete=2*dimension;
+  //const int nb_aretes=domaine.nb_aretes();
+  const int nb_elems_reels=domaine_vdf.nb_elem();
+  const int nb_aretes_internes=domaine_vdf.nb_aretes_internes();
+  const int premiere_arete_interne=domaine_vdf.premiere_arete_interne();
+  const int nb_faces_arete=2*dimension;
   equations_plans_faces_arete_.resize(nb_aretes_internes,nb_faces_arete,4);
   equations_plans_faces_arete_=-1;
   double a=0, b=0, c=0, d=0;
-  long arete_interne=0;
-  for (long arete=premiere_arete_interne; arete<premiere_arete_interne+nb_aretes_internes; arete++)
+  int arete_interne=0;
+  for (int arete=premiere_arete_interne; arete<premiere_arete_interne+nb_aretes_internes; arete++)
     {
-      long ori_arete=dimension-orientation_aretes(arete)-1;
+      int ori_arete=dimension-orientation_aretes(arete)-1;
 
-      long face1=Qdm(arete,0);
-      long face2=Qdm(arete,1);
-      long face3=Qdm(arete,2);
-      long face4=Qdm(arete,3);
-      long elem1,elem2,elem3,elem4;
+      int face1=Qdm(arete,0);
+      int face2=Qdm(arete,1);
+      int face3=Qdm(arete,2);
+      int face4=Qdm(arete,3);
+      int elem1,elem2,elem3,elem4;
       elem1=domaine_vdf.face_voisins(face1,0);
       elem2=domaine_vdf.face_voisins(face2,0);
       elem3=domaine_vdf.face_voisins(face1,1);
       elem4=domaine_vdf.face_voisins(face2,1);
-      long s1=Aretes_Som(arete,0);
-      long s2=Aretes_Som(arete,1);
+      int s1=Aretes_Som(arete,0);
+      int s2=Aretes_Som(arete,1);
       //Cerr << "cg_arete_interne " << domaine_vdf.xa(arete,0) << " " << domaine_vdf.xa(arete,1) << " " << domaine_vdf.xa(arete,2) << " ori_arete " << ori_arete << finl;
-      long arete_multiple=aretes_multiples(arete);
-      long le_type_arete=type_arete(arete);
+      int arete_multiple=aretes_multiples(arete);
+      int le_type_arete=type_arete(arete);
 
       /*
       if (domaine_vdf.xa(arete,0)<-2e-5 && domaine_vdf.xa(arete,0)>-3e-5 &&  domaine_vdf.xa(arete,2)==0 && domaine_vdf.xa(arete,1)<1e-5 && domaine_vdf.xa(arete,1)>-1e-5 )
@@ -1052,13 +1052,13 @@ void Parcours_interface::remplir_equation_plan_faces_aretes_internes(const Domai
           Cerr << "ori_arete " << ori_arete << " arete_multiple " << arete_multiple << " le_type_arete " << le_type_arete << finl;
         }
       */
-      for (long face=0; face<nb_faces_arete; face++)
+      for (int face=0; face<nb_faces_arete; face++)
         {
           a = (face%dimension==0);
           b = (face%dimension==1);
           c = (face%dimension==2);
-          long dir=(face>=dimension);
-          long ori_face=face%dimension;
+          int dir=(face>=dimension);
+          int ori_face=face%dimension;
 
           if (le_type_arete==2 && arete_multiple==0)// arete interne pas de joint,
             {
@@ -1068,17 +1068,17 @@ void Parcours_interface::remplir_equation_plan_faces_aretes_internes(const Domai
                     {
                       face1=Qdm(arete,0);
                       elem1=domaine_vdf.face_voisins(face1,0);
-                      long la_face=domaine_vdf.elem_faces(elem1,ori_arete+dir*dimension);
+                      int la_face=domaine_vdf.elem_faces(elem1,ori_arete+dir*dimension);
                       d= -domaine_vdf.xv(la_face,ori_arete);
                     }
                   else if (face%dimension==1)
                     {
-                      long la_face= !dir ? Qdm(arete,0) : Qdm(arete,1);
+                      int la_face= !dir ? Qdm(arete,0) : Qdm(arete,1);
                       d= -domaine_vdf.xv(la_face,ori_face);
                     }
                   else if (face%dimension==2)
                     {
-                      long la_face=!dir ? Qdm(arete,2) : Qdm(arete,3);
+                      int la_face=!dir ? Qdm(arete,2) : Qdm(arete,3);
                       d= -domaine_vdf.xv(la_face,ori_face);
                     }
                 }
@@ -1088,19 +1088,19 @@ void Parcours_interface::remplir_equation_plan_faces_aretes_internes(const Domai
 
                   if (face%dimension==0)
                     {
-                      long la_face= !dir ? Qdm(arete,0) : Qdm(arete,1);
+                      int la_face= !dir ? Qdm(arete,0) : Qdm(arete,1);
                       d= -domaine_vdf.xv(la_face,ori_face);
                     }
                   else if (face%dimension==ori_arete)
                     {
                       face1=Qdm(arete,0);
                       elem1=domaine_vdf.face_voisins(face1,0);
-                      long la_face=domaine_vdf.elem_faces(elem1,ori_arete+dir*dimension);
+                      int la_face=domaine_vdf.elem_faces(elem1,ori_arete+dir*dimension);
                       d= -domaine_vdf.xv(la_face,ori_arete);
                     }
                   else if (face%dimension==2)
                     {
-                      long la_face= !dir ? Qdm(arete,2) : Qdm(arete,3);
+                      int la_face= !dir ? Qdm(arete,2) : Qdm(arete,3);
                       d= -domaine_vdf.xv(la_face,ori_face);
                     }
                 }
@@ -1108,19 +1108,19 @@ void Parcours_interface::remplir_equation_plan_faces_aretes_internes(const Domai
                 {
                   if (face%dimension==0)
                     {
-                      long la_face=(face<dimension) ? Qdm(arete,0) : Qdm(arete,1);
+                      int la_face=(face<dimension) ? Qdm(arete,0) : Qdm(arete,1);
                       d= -domaine_vdf.xv(la_face,ori_face);
                     }
                   else if (face%dimension==1)
                     {
-                      long la_face=(face<dimension) ? Qdm(arete,2) : Qdm(arete,3);
+                      int la_face=(face<dimension) ? Qdm(arete,2) : Qdm(arete,3);
                       d= -domaine_vdf.xv(la_face,ori_face);
                     }
                   else if (face%dimension==ori_arete)
                     {
                       face1=Qdm(arete,0);
                       elem1=domaine_vdf.face_voisins(face1,0);
-                      long la_face=domaine_vdf.elem_faces(elem1,ori_arete+dir*dimension);
+                      int la_face=domaine_vdf.elem_faces(elem1,ori_arete+dir*dimension);
                       d= -domaine_vdf.xv(la_face,ori_arete);
                     }
                 }
@@ -1132,7 +1132,7 @@ void Parcours_interface::remplir_equation_plan_faces_aretes_internes(const Domai
                 {
                   if (face%dimension==0)
                     {
-                      long sommet=(face<dimension) ? s1 : s2;
+                      int sommet=(face<dimension) ? s1 : s2;
                       d=-coord_som(sommet,0);
                       //continue;
                     }
@@ -1245,7 +1245,7 @@ void Parcours_interface::remplir_equation_plan_faces_aretes_internes(const Domai
                 {
                   if (face%dimension==1)
                     {
-                      long sommet=(face<dimension) ? s1 : s2;
+                      int sommet=(face<dimension) ? s1 : s2;
                       d=-coord_som(sommet,1);
                       //continue;
                     }
@@ -1358,7 +1358,7 @@ void Parcours_interface::remplir_equation_plan_faces_aretes_internes(const Domai
                 {
                   if (face%dimension==2)
                     {
-                      long sommet=(face<dimension) ? s1 : s2;
+                      int sommet=(face<dimension) ? s1 : s2;
                       d=-coord_som(sommet,2);
                       // continue;
                     }
@@ -1489,10 +1489,10 @@ void Parcours_interface::parcours_facette(const Domaine_VF& domaine_vf,
                                           Maillage_FT_Disc& maillage,
                                           ArrOfInt& echange_facettes_numfacette,
                                           ArrOfInt& echange_facettes_numelement,
-                                          long num_facette,
-                                          long element_depart) const
+                                          int num_facette,
+                                          int element_depart) const
 {
-  const long dimension3 = (Objet_U::dimension == 3);
+  const int dimension3 = (Objet_U::dimension == 3);
 
   Intersections_Elem_Facettes& intersections =
     maillage.intersections_elem_facettes_;
@@ -1507,10 +1507,10 @@ void Parcours_interface::parcours_facette(const Domaine_VF& domaine_vf,
   {
     intersections.get_liste_elements_traverses(num_facette,
                                                liste_elements_parcourus);
-    long n = liste_elements_parcourus.size_array();
-    for (long i = 0; i < n; i++)
+    int n = liste_elements_parcourus.size_array();
+    for (int i = 0; i < n; i++)
       {
-        const long element = liste_elements_parcourus[i];
+        const int element = liste_elements_parcourus[i];
         drapeaux_elements_parcourus_.setbit(element);
       }
   }
@@ -1533,16 +1533,16 @@ void Parcours_interface::parcours_facette(const Domaine_VF& domaine_vf,
   do
     {
       new_elements_a_traiter.resize_array(0);
-      const long n = elements_a_traiter.size_array();
+      const int n = elements_a_traiter.size_array();
 
       // Boucle sur les elements du front
       // ************************************************
-      for (long i = 0; i < n; i++)
+      for (int i = 0; i < n; i++)
         {
-          const long element = elements_a_traiter[i];
+          const int element = elements_a_traiter[i];
 
           // Calcul de l'intersection facette_element
-          long code_retour;
+          int code_retour;
           if (dimension3)
             code_retour = calcul_intersection_facelem_3D(domaine_vf, maillage,
                                                          num_facette, element);
@@ -1557,19 +1557,19 @@ void Parcours_interface::parcours_facette(const Domaine_VF& domaine_vf,
               Journal() << "code_retour<0" << finl;
               continue;
             }
-          for (long j = 0; j < nb_faces_elem_; j++)
+          for (int j = 0; j < nb_faces_elem_; j++)
             {
-              const long masque = 1 << j;
+              const int masque = 1 << j;
 
               // La facette traverse-t-elle la face j ?
               if ((code_retour & masque) == 0)
                 continue;
 
               // Numero de l'element voisin
-              const long num_face = domaine_vf.elem_faces(element, j);
-              const long elem_voisin = domaine_vf.face_voisins(num_face, 0)
-                                       + domaine_vf.face_voisins(num_face, 1)
-                                       - element;
+              const int num_face = domaine_vf.elem_faces(element, j);
+              const int elem_voisin = domaine_vf.face_voisins(num_face, 0)
+                                      + domaine_vf.face_voisins(num_face, 1)
+                                      - element;
 
               // S'il n'y a pas de voisin, on est au bord du domaine
               if (elem_voisin < 0)
@@ -1615,13 +1615,13 @@ void Parcours_interface::parcours_facette_face_x(const Domaine_VF& domaine_vf,
                                                  Maillage_FT_Disc& maillage,
                                                  ArrOfInt& echange_facettes_numfacette,
                                                  ArrOfInt& echange_facettes_numface,
-                                                 long num_facette,
-                                                 long face_depart, Intersections_Face_Facettes& intersections_face,
+                                                 int num_facette,
+                                                 int face_depart, Intersections_Face_Facettes& intersections_face,
                                                  ArrOfBit& drapeaux_faces_parcourues) const
 {
 
-  const long ori=0;
-  const long dimension3 = (Objet_U::dimension == 3);
+  const int ori=0;
+  const int dimension3 = (Objet_U::dimension == 3);
 
   static ArrOfIntFT liste_faces_parcourues_x;
   static ArrOfIntFT faces_a_traiter_x;
@@ -1637,10 +1637,10 @@ void Parcours_interface::parcours_facette_face_x(const Domaine_VF& domaine_vf,
   {
     intersections_face.get_liste_faces_traversees(num_facette,
                                                   liste_faces_parcourues_x);
-    long n = liste_faces_parcourues_x.size_array();
-    for (long i = 0; i < n; i++)
+    int n = liste_faces_parcourues_x.size_array();
+    for (int i = 0; i < n; i++)
       {
-        const long face = liste_faces_parcourues_x[i];
+        const int face = liste_faces_parcourues_x[i];
         drapeaux_faces_parcourues.setbit(face);
       }
   }
@@ -1662,17 +1662,17 @@ void Parcours_interface::parcours_facette_face_x(const Domaine_VF& domaine_vf,
   do
     {
       new_faces_a_traiter_x.resize_array(0);
-      const long n = faces_a_traiter_x.size_array();
+      const int n = faces_a_traiter_x.size_array();
 
       // Boucle sur les faces du front
       // ************************************************
-      for (long i = 0; i < n; i++)
+      for (int i = 0; i < n; i++)
         {
-          const long face = faces_a_traiter_x[i];
+          const int face = faces_a_traiter_x[i];
 
-          const long face_double = faces_doubles(face);
+          const int face_double = faces_doubles(face);
           // Calcul de l'intersection facette_face
-          long code_retour=0;
+          int code_retour=0;
           if (dimension3)
             code_retour = calcul_intersection_facette_face_3D(domaine_vf, maillage,
                                                               num_facette, face, intersections_face);
@@ -1689,21 +1689,21 @@ void Parcours_interface::parcours_facette_face_x(const Domaine_VF& domaine_vf,
               //Journal() << "code_retour<0 parcours face x" << finl;
               continue;
             }
-          for (long j = 0; j < nb_faces_elem_; j++) // on a aussi nb_faces_elem_ faces pour le volume de controle des faces
+          for (int j = 0; j < nb_faces_elem_; j++) // on a aussi nb_faces_elem_ faces pour le volume de controle des faces
             {
-              const long masque = 1 << j;
+              const int masque = 1 << j;
 
               // La facette traverse-t-elle la face j ?
               if ((code_retour & masque) == 0)
                 continue;
 
               // On cherche l'element voisin
-              const long direction = (j>=dimension);
-              const long elem0=domaine_vf.face_voisins(face,0);
-              const long elem1=domaine_vf.face_voisins(face,1);
+              const int direction = (j>=dimension);
+              const int elem0=domaine_vf.face_voisins(face,0);
+              const int elem1=domaine_vf.face_voisins(face,1);
 
-              long num_elem;
-              long face_voisine;
+              int num_elem;
+              int face_voisine;
 
               if (j%dimension==ori)
                 {
@@ -1714,8 +1714,8 @@ void Parcours_interface::parcours_facette_face_x(const Domaine_VF& domaine_vf,
                 }
               else
                 {
-                  const long elem_2 = (elem0>=0) ? domaine_vf.face_voisins(domaine_vf.elem_faces(elem0,j),direction) : -1;
-                  const long elem_3 = (elem1>=0) ? domaine_vf.face_voisins(domaine_vf.elem_faces(elem1,j),direction) : -1;
+                  const int elem_2 = (elem0>=0) ? domaine_vf.face_voisins(domaine_vf.elem_faces(elem0,j),direction) : -1;
+                  const int elem_3 = (elem1>=0) ? domaine_vf.face_voisins(domaine_vf.elem_faces(elem1,j),direction) : -1;
                   num_elem = std::max(elem_2,elem_3);
                   // S'il n'y a pas de voisin, on est au bord du domaine
                   if (num_elem < 0)
@@ -1734,7 +1734,7 @@ void Parcours_interface::parcours_facette_face_x(const Domaine_VF& domaine_vf,
                   face_voisine=face;
                 }
 
-              const long face_voisine_double = (faces_doubles_virt_pe_num(face_voisine,0)>0);
+              const int face_voisine_double = (faces_doubles_virt_pe_num(face_voisine,0)>0);
 
               if (face_voisine < nb_faces_reelles_ )
                 {
@@ -1749,7 +1749,7 @@ void Parcours_interface::parcours_facette_face_x(const Domaine_VF& domaine_vf,
                     }
                 }
 
-              const long face_a_echanger=(elem0 >= domaine_vf.nb_elem() && j==ori) || (elem1 >= domaine_vf.nb_elem() && j==ori+dimension);
+              const int face_a_echanger=(elem0 >= domaine_vf.nb_elem() && j==ori) || (elem1 >= domaine_vf.nb_elem() && j==ori+dimension);
               if (face_voisine >= nb_faces_reelles_ || (domaine_vf.faces_doubles()(face)&&face_voisine<nb_faces_reelles_&&face_a_echanger))
                 {
                   // Si le voisin est une face virtuelle, il faut transmettre
@@ -1785,13 +1785,13 @@ void Parcours_interface::parcours_facette_face_y(const Domaine_VF& domaine_vf,
                                                  Maillage_FT_Disc& maillage,
                                                  ArrOfInt& echange_facettes_numfacette,
                                                  ArrOfInt& echange_facettes_numface,
-                                                 long num_facette,
-                                                 long face_depart, Intersections_Face_Facettes& intersections_face,
+                                                 int num_facette,
+                                                 int face_depart, Intersections_Face_Facettes& intersections_face,
                                                  ArrOfBit& drapeaux_faces_parcourues) const
 {
 
-  const long ori=1;
-  const long dimension3 = (Objet_U::dimension == 3);
+  const int ori=1;
+  const int dimension3 = (Objet_U::dimension == 3);
 
   static ArrOfIntFT liste_faces_parcourues_y;
   static ArrOfIntFT faces_a_traiter_y;
@@ -1806,10 +1806,10 @@ void Parcours_interface::parcours_facette_face_y(const Domaine_VF& domaine_vf,
   {
     intersections_face.get_liste_faces_traversees(num_facette,
                                                   liste_faces_parcourues_y);
-    long n = liste_faces_parcourues_y.size_array();
-    for (long i = 0; i < n; i++)
+    int n = liste_faces_parcourues_y.size_array();
+    for (int i = 0; i < n; i++)
       {
-        const long face = liste_faces_parcourues_y[i];
+        const int face = liste_faces_parcourues_y[i];
         drapeaux_faces_parcourues.setbit(face);
       }
   }
@@ -1831,18 +1831,18 @@ void Parcours_interface::parcours_facette_face_y(const Domaine_VF& domaine_vf,
   do
     {
       new_faces_a_traiter_y.resize_array(0);
-      const long n = faces_a_traiter_y.size_array();
+      const int n = faces_a_traiter_y.size_array();
 
       // Boucle sur les faces du front
       // ************************************************
-      for (long i = 0; i < n; i++)
+      for (int i = 0; i < n; i++)
         {
 
-          const long face = faces_a_traiter_y[i];
+          const int face = faces_a_traiter_y[i];
 
-          const long face_double = faces_doubles(face);
+          const int face_double = faces_doubles(face);
           // Calcul de l'intersection facette_face
-          long code_retour=0;
+          int code_retour=0;
           if (dimension3)
             code_retour = calcul_intersection_facette_face_3D(domaine_vf, maillage,
                                                               num_facette, face, intersections_face);
@@ -1860,21 +1860,21 @@ void Parcours_interface::parcours_facette_face_y(const Domaine_VF& domaine_vf,
               continue;
             }
 
-          for (long j = 0; j < nb_faces_elem_; j++) // on a aussi nb_faces_elem_ faces pour le volume de controle des faces
+          for (int j = 0; j < nb_faces_elem_; j++) // on a aussi nb_faces_elem_ faces pour le volume de controle des faces
             {
-              const long masque = 1 << j;
+              const int masque = 1 << j;
 
               // La facette traverse-t-elle la face j ?
               if ((code_retour & masque) == 0)
                 continue;
 
               // On cherche l'element voisin
-              const long direction = (j>=dimension);
-              const long elem0=domaine_vf.face_voisins(face,0);
-              const long elem1=domaine_vf.face_voisins(face,1);
+              const int direction = (j>=dimension);
+              const int elem0=domaine_vf.face_voisins(face,0);
+              const int elem1=domaine_vf.face_voisins(face,1);
 
-              long num_elem;
-              long face_voisine;
+              int num_elem;
+              int face_voisine;
 
               if (j%dimension==ori)
                 {
@@ -1885,8 +1885,8 @@ void Parcours_interface::parcours_facette_face_y(const Domaine_VF& domaine_vf,
                 }
               else
                 {
-                  const long elem_2 = (elem0>0) ? domaine_vf.face_voisins(domaine_vf.elem_faces(elem0,j),direction) : -1;
-                  const long elem_3 = (elem1>0) ? domaine_vf.face_voisins(domaine_vf.elem_faces(elem1,j),direction) : -1;
+                  const int elem_2 = (elem0>0) ? domaine_vf.face_voisins(domaine_vf.elem_faces(elem0,j),direction) : -1;
+                  const int elem_3 = (elem1>0) ? domaine_vf.face_voisins(domaine_vf.elem_faces(elem1,j),direction) : -1;
                   num_elem = std::max(elem_2,elem_3);
                   // S'il n'y a pas de voisin, on est au bord du domaine
                   if (num_elem < 0)
@@ -1902,7 +1902,7 @@ void Parcours_interface::parcours_facette_face_y(const Domaine_VF& domaine_vf,
                 {
                   face_voisine=face;
                 }
-              const long face_voisine_double = (faces_doubles_virt_pe_num(face_voisine,0)>0);
+              const int face_voisine_double = (faces_doubles_virt_pe_num(face_voisine,0)>0);
 
               if (face_voisine < nb_faces_reelles_ )
                 {
@@ -1916,7 +1916,7 @@ void Parcours_interface::parcours_facette_face_y(const Domaine_VF& domaine_vf,
                       new_faces_a_traiter_y.append_array(face_voisine);
                     }
                 }
-              const long face_a_echanger=(elem0 >= domaine_vf.nb_elem() && j==ori) || (elem1 >= domaine_vf.nb_elem() && j==ori+dimension);
+              const int face_a_echanger=(elem0 >= domaine_vf.nb_elem() && j==ori) || (elem1 >= domaine_vf.nb_elem() && j==ori+dimension);
               if (face_voisine >= nb_faces_reelles_ || (domaine_vf.faces_doubles()(face_voisine)&&face_voisine<nb_faces_reelles_&&face_a_echanger))
                 {
                   // Si le voisin est une face virtuelle, il faut transmettre
@@ -1954,12 +1954,12 @@ void Parcours_interface::parcours_facette_face_z(const Domaine_VF& domaine_vf,
                                                  Maillage_FT_Disc& maillage,
                                                  ArrOfInt& echange_facettes_numfacette,
                                                  ArrOfInt& echange_facettes_numface,
-                                                 long num_facette,
-                                                 long face_depart, Intersections_Face_Facettes& intersections_face,
+                                                 int num_facette,
+                                                 int face_depart, Intersections_Face_Facettes& intersections_face,
                                                  ArrOfBit& drapeaux_faces_parcourues) const
 {
-  const long ori=2;
-  const long dimension3 = (Objet_U::dimension == 3);
+  const int ori=2;
+  const int dimension3 = (Objet_U::dimension == 3);
 
   static ArrOfIntFT liste_faces_parcourues_z;
   static ArrOfIntFT faces_a_traiter_z;
@@ -1974,10 +1974,10 @@ void Parcours_interface::parcours_facette_face_z(const Domaine_VF& domaine_vf,
   {
     intersections_face.get_liste_faces_traversees(num_facette,
                                                   liste_faces_parcourues_z);
-    long n = liste_faces_parcourues_z.size_array();
-    for (long i = 0; i < n; i++)
+    int n = liste_faces_parcourues_z.size_array();
+    for (int i = 0; i < n; i++)
       {
-        const long face = liste_faces_parcourues_z[i];
+        const int face = liste_faces_parcourues_z[i];
         drapeaux_faces_parcourues.setbit(face);
       }
   }
@@ -1999,17 +1999,17 @@ void Parcours_interface::parcours_facette_face_z(const Domaine_VF& domaine_vf,
   do
     {
       new_faces_a_traiter_z.resize_array(0);
-      const long n = faces_a_traiter_z.size_array();
+      const int n = faces_a_traiter_z.size_array();
 
       // Boucle sur les faces du front
       // ************************************************
-      for (long i = 0; i < n; i++)
+      for (int i = 0; i < n; i++)
         {
-          const long face = faces_a_traiter_z[i];
+          const int face = faces_a_traiter_z[i];
 
-          const long face_double = faces_doubles(face) && face<domaine_vf.nb_faces();
+          const int face_double = faces_doubles(face) && face<domaine_vf.nb_faces();
           // Calcul de l'intersection facette_face
-          long code_retour=0;
+          int code_retour=0;
           if (dimension3)
             code_retour = calcul_intersection_facette_face_3D(domaine_vf, maillage,
                                                               num_facette, face, intersections_face);
@@ -2025,21 +2025,21 @@ void Parcours_interface::parcours_facette_face_z(const Domaine_VF& domaine_vf,
               //Journal() << "code_retour<0 parcours face z" << finl;
               continue;
             }
-          for (long j = 0; j < nb_faces_elem_; j++) // on a aussi nb_faces_elem_ faces pour le volume de controle des faces
+          for (int j = 0; j < nb_faces_elem_; j++) // on a aussi nb_faces_elem_ faces pour le volume de controle des faces
             {
-              const long masque = 1 << j;
+              const int masque = 1 << j;
 
               // La facette traverse-t-elle la face j ?
               if ((code_retour & masque) == 0)
                 continue;
 
               // On cherche l'element voisin
-              const long direction = (j>=dimension);
-              const long elem0=domaine_vf.face_voisins(face,0);
-              const long elem1=domaine_vf.face_voisins(face,1);
+              const int direction = (j>=dimension);
+              const int elem0=domaine_vf.face_voisins(face,0);
+              const int elem1=domaine_vf.face_voisins(face,1);
 
-              long num_elem;
-              long face_voisine;
+              int num_elem;
+              int face_voisine;
 
               if (j%dimension==ori)
                 {
@@ -2050,8 +2050,8 @@ void Parcours_interface::parcours_facette_face_z(const Domaine_VF& domaine_vf,
                 }
               else
                 {
-                  const long elem_2 = (elem0>0) ? domaine_vf.face_voisins(domaine_vf.elem_faces(elem0,j),direction) : -1;
-                  const long elem_3 = (elem1>0) ? domaine_vf.face_voisins(domaine_vf.elem_faces(elem1,j),direction) : -1;
+                  const int elem_2 = (elem0>0) ? domaine_vf.face_voisins(domaine_vf.elem_faces(elem0,j),direction) : -1;
+                  const int elem_3 = (elem1>0) ? domaine_vf.face_voisins(domaine_vf.elem_faces(elem1,j),direction) : -1;
                   num_elem = std::max(elem_2,elem_3);
                   // S'il n'y a pas de voisin, on est au bord du domaine
                   if (num_elem < 0)
@@ -2068,7 +2068,7 @@ void Parcours_interface::parcours_facette_face_z(const Domaine_VF& domaine_vf,
                   face_voisine=face;
                 }
 
-              const long face_voisine_double = (faces_doubles_virt_pe_num(face_voisine,0)>0);
+              const int face_voisine_double = (faces_doubles_virt_pe_num(face_voisine,0)>0);
 
               if (face_voisine < nb_faces_reelles_ )
                 {
@@ -2082,7 +2082,7 @@ void Parcours_interface::parcours_facette_face_z(const Domaine_VF& domaine_vf,
                       new_faces_a_traiter_z.append_array(face_voisine);
                     }
                 }
-              const long face_a_echanger=(elem0 >= domaine_vf.nb_elem() && j==ori) || (elem1 >= domaine_vf.nb_elem() && j==ori+dimension); // si face_voisine=face alors on l'envoie a l'autre proc proprietaire
+              const int face_a_echanger=(elem0 >= domaine_vf.nb_elem() && j==ori) || (elem1 >= domaine_vf.nb_elem() && j==ori+dimension); // si face_voisine=face alors on l'envoie a l'autre proc proprietaire
               if (face_voisine >= nb_faces_reelles_ || (domaine_vf.faces_doubles()(face_voisine)&&face_voisine<nb_faces_reelles_&&face_a_echanger))
                 {
                   // Si le voisin est une face virtuelle, il faut transmettre
@@ -2119,12 +2119,12 @@ void Parcours_interface::parcours_facette_arete_x(const Domaine_VF& domaine_vf,
                                                   Maillage_FT_Disc& maillage,
                                                   ArrOfInt& echange_facettes_numfacette,
                                                   ArrOfInt& echange_facettes_numarete,
-                                                  long num_facette,
-                                                  long arete_depart, Intersections_Arete_Facettes& intersections_arete,
+                                                  int num_facette,
+                                                  int arete_depart, Intersections_Arete_Facettes& intersections_arete,
                                                   ArrOfBit& drapeaux_aretes_parcourues) const
 {
-  const long ori_arete=0;
-  const long dimension3 = (Objet_U::dimension == 3);
+  const int ori_arete=0;
+  const int dimension3 = (Objet_U::dimension == 3);
 
   static ArrOfIntFT liste_aretes_parcourues_arete_x;
   static ArrOfIntFT arete_a_traiter_arete_x;
@@ -2147,10 +2147,10 @@ void Parcours_interface::parcours_facette_arete_x(const Domaine_VF& domaine_vf,
   {
     intersections_arete.get_liste_aretes_traversees(num_facette,
                                                     liste_aretes_parcourues_arete_x);
-    long n = liste_aretes_parcourues_arete_x.size_array();
-    for (long i = 0; i < n; i++)
+    int n = liste_aretes_parcourues_arete_x.size_array();
+    for (int i = 0; i < n; i++)
       {
-        const long face = liste_aretes_parcourues_arete_x[i];
+        const int face = liste_aretes_parcourues_arete_x[i];
         drapeaux_aretes_parcourues.setbit(face);
       }
   }
@@ -2173,19 +2173,19 @@ void Parcours_interface::parcours_facette_arete_x(const Domaine_VF& domaine_vf,
   do
     {
       new_aretes_a_traiter_arete_x.resize_array(0);
-      const long n = arete_a_traiter_arete_x.size_array();
+      const int n = arete_a_traiter_arete_x.size_array();
 
       // Boucle sur les aretes
       // ************************************************
-      for (long i = 0; i < n; i++)
+      for (int i = 0; i < n; i++)
         {
-          const long arete = arete_a_traiter_arete_x[i];
+          const int arete = arete_a_traiter_arete_x[i];
           if (type_arete(arete)!=2) continue; // on ne calcule que pour les aretes_internes
 
-          const long arete_multiple=(aretes_multiples(arete)>0);
+          const int arete_multiple=(aretes_multiples(arete)>0);
 
           // Calcul de l'intersection facette_face
-          long code_retour=0;
+          int code_retour=0;
           if (dimension3)
             code_retour = calcul_intersection_facette_arete_3D(domaine_vf, maillage,
                                                                num_facette, arete, intersections_arete); // ne fonctionne que si l'arete est interne
@@ -2203,33 +2203,33 @@ void Parcours_interface::parcours_facette_arete_x(const Domaine_VF& domaine_vf,
               continue;
             }
 
-          long face1=Qdm(arete,0);
-          long face2=Qdm(arete,1);
+          int face1=Qdm(arete,0);
+          int face2=Qdm(arete,1);
 
-          long elem1=domaine_vf.face_voisins(face1,0);
-          long elem2=domaine_vf.face_voisins(face2,0);
-          long elem3=domaine_vf.face_voisins(face1,1);
-          long elem4=domaine_vf.face_voisins(face2,1);
+          int elem1=domaine_vf.face_voisins(face1,0);
+          int elem2=domaine_vf.face_voisins(face2,0);
+          int elem3=domaine_vf.face_voisins(face1,1);
+          int elem4=domaine_vf.face_voisins(face2,1);
 
-          long face1_av=domaine_vf.elem_faces(elem1, ori_arete+dimension);
-          long face1_arr=domaine_vf.elem_faces(elem1, ori_arete);
+          int face1_av=domaine_vf.elem_faces(elem1, ori_arete+dimension);
+          int face1_arr=domaine_vf.elem_faces(elem1, ori_arete);
 
-          long elem_av=domaine_vf.face_voisins(face1_av,1);
-          long elem_arr=domaine_vf.face_voisins(face1_arr,0);
+          int elem_av=domaine_vf.face_voisins(face1_av,1);
+          int elem_arr=domaine_vf.face_voisins(face1_arr,0);
 
 
-          for (long j = 0; j < nb_faces_elem_; j++) // on a aussi nb_faces_elem_ faces pour le volume de controle des faces
+          for (int j = 0; j < nb_faces_elem_; j++) // on a aussi nb_faces_elem_ faces pour le volume de controle des faces
             {
-              const long masque = 1 << j;
+              const int masque = 1 << j;
 
               // La facette traverse-t-elle la face j ?
               if ((code_retour & masque) == 0)
                 continue;
 
               // On cherche l'element voisin
-              //const long direction = (j>=dimension);
+              //const int direction = (j>=dimension);
 
-              long arete_voisine;
+              int arete_voisine;
 
               if (j==ori_arete) arete_voisine= (elem_arr>=0) ? Elem_Aretes(elem_arr,orientation_arete(arete)) : -1; // voir numerotation Aretes dans Hexaedre.cpp
               else if (j==ori_arete+dimension) arete_voisine=(elem_av>=0) ? Elem_Aretes(elem_av,orientation_arete(arete)):-1;
@@ -2239,7 +2239,7 @@ void Parcours_interface::parcours_facette_arete_x(const Domaine_VF& domaine_vf,
               else arete_voisine=(elem3>=0) ? Elem_Aretes(elem3,2) : -1;
 
               //if (arete_voisine>=nb_aretes_reelles_) Cerr << "coucou" << finl;
-              long arete_a_echanger=0; // Si une arete voisine est multiple, alors on l'envoie a tous les procs
+              int arete_a_echanger=0; // Si une arete voisine est multiple, alors on l'envoie a tous les procs
               if (arete_multiple)
                 {
                   if ((elem2>=nb_elements_reels_ && elem4>=nb_elements_reels_) && j==1+dimension) arete_voisine=arete,arete_a_echanger=1;
@@ -2269,7 +2269,7 @@ void Parcours_interface::parcours_facette_arete_x(const Domaine_VF& domaine_vf,
                 }
               if (arete_voisine >= nb_aretes_reelles_  || arete_a_echanger)
                 {
-                  long arete_mult=aretes_multiples(arete_voisine);
+                  int arete_mult=aretes_multiples(arete_voisine);
                   if (arete_mult<=1)
                     {
                       echange_facettes_numfacette.append_array(num_facette);
@@ -2309,13 +2309,13 @@ void Parcours_interface::parcours_facette_arete_y(const Domaine_VF& domaine_vf,
                                                   Maillage_FT_Disc& maillage,
                                                   ArrOfInt& echange_facettes_numfacette,
                                                   ArrOfInt& echange_facettes_numarete,
-                                                  long num_facette,
-                                                  long arete_depart, Intersections_Arete_Facettes& intersections_arete,
+                                                  int num_facette,
+                                                  int arete_depart, Intersections_Arete_Facettes& intersections_arete,
                                                   ArrOfBit& drapeaux_aretes_parcourues) const
 {
 
-  const long ori_arete=1;
-  const long dimension3 = (Objet_U::dimension == 3);
+  const int ori_arete=1;
+  const int dimension3 = (Objet_U::dimension == 3);
 
   static ArrOfIntFT liste_aretes_parcourues_arete_y;
   static ArrOfIntFT arete_a_traiter_arete_y;
@@ -2338,10 +2338,10 @@ void Parcours_interface::parcours_facette_arete_y(const Domaine_VF& domaine_vf,
   {
     intersections_arete.get_liste_aretes_traversees(num_facette,
                                                     liste_aretes_parcourues_arete_y);
-    long n = liste_aretes_parcourues_arete_y.size_array();
-    for (long i = 0; i < n; i++)
+    int n = liste_aretes_parcourues_arete_y.size_array();
+    for (int i = 0; i < n; i++)
       {
-        const long face = liste_aretes_parcourues_arete_y[i];
+        const int face = liste_aretes_parcourues_arete_y[i];
         drapeaux_aretes_parcourues.setbit(face);
       }
   }
@@ -2364,24 +2364,24 @@ void Parcours_interface::parcours_facette_arete_y(const Domaine_VF& domaine_vf,
   do
     {
       new_aretes_a_traiter_arete_y.resize_array(0);
-      const long n = arete_a_traiter_arete_y.size_array();
+      const int n = arete_a_traiter_arete_y.size_array();
 
       // Boucle sur les aretes
       // ************************************************
-      for (long i = 0; i < n; i++)
+      for (int i = 0; i < n; i++)
         {
-          const long arete = arete_a_traiter_arete_y[i];
+          const int arete = arete_a_traiter_arete_y[i];
 
 
 
           if (type_arete(arete)!=2) continue; // on ne calcule que pour les aretes_internes
 
-          const long arete_multiple=(aretes_multiples(arete)>0);
+          const int arete_multiple=(aretes_multiples(arete)>0);
           /* if (domaine_vf.xa(arete,0)<-2e-5 && domaine_vf.xa(arete,0)>-3e-5 &&  domaine_vf.xa(arete,2)==0 && domaine_vf.xa(arete,1)<1e-5 && domaine_vf.xa(arete,1)>-1e-5 ) Cerr << "arete_multiple " <<  arete_multiple << "cg " << domaine_vf.xa(arete,0)
                  << " " << domaine_vf.xa(arete,1) << " " << domaine_vf.xa(arete,2) << " facette " << maillage.cg_fa7_(num_facette,0) << " " <<  maillage.cg_fa7_(num_facette,1) << " " << maillage.cg_fa7_(num_facette,2) << finl;
            */
           // Calcul de l'intersection facette_face
-          long code_retour=0;
+          int code_retour=0;
           if (dimension3)
             code_retour = calcul_intersection_facette_arete_3D(domaine_vf, maillage,
                                                                num_facette, arete, intersections_arete); // ne fonctionne que si l'arete est interne
@@ -2399,33 +2399,33 @@ void Parcours_interface::parcours_facette_arete_y(const Domaine_VF& domaine_vf,
               continue;
             }
 
-          long face1=Qdm(arete,0);
-          long face2=Qdm(arete,1);
+          int face1=Qdm(arete,0);
+          int face2=Qdm(arete,1);
 
-          long elem1=domaine_vf.face_voisins(face1,0);
-          long elem2=domaine_vf.face_voisins(face2,0);
-          long elem3=domaine_vf.face_voisins(face1,1);
-          long elem4=domaine_vf.face_voisins(face2,1);
+          int elem1=domaine_vf.face_voisins(face1,0);
+          int elem2=domaine_vf.face_voisins(face2,0);
+          int elem3=domaine_vf.face_voisins(face1,1);
+          int elem4=domaine_vf.face_voisins(face2,1);
 
-          long face1_av=domaine_vf.elem_faces(elem1, ori_arete+dimension);
-          long face1_arr=domaine_vf.elem_faces(elem1, ori_arete);
+          int face1_av=domaine_vf.elem_faces(elem1, ori_arete+dimension);
+          int face1_arr=domaine_vf.elem_faces(elem1, ori_arete);
 
-          long elem_av=domaine_vf.face_voisins(face1_av,1);
-          long elem_arr=domaine_vf.face_voisins(face1_arr,0);
+          int elem_av=domaine_vf.face_voisins(face1_av,1);
+          int elem_arr=domaine_vf.face_voisins(face1_arr,0);
 
 
-          for (long j = 0; j < nb_faces_elem_; j++) // on a aussi nb_faces_elem_ faces pour le volume de controle des faces
+          for (int j = 0; j < nb_faces_elem_; j++) // on a aussi nb_faces_elem_ faces pour le volume de controle des faces
             {
-              const long masque = 1 << j;
+              const int masque = 1 << j;
 
               // La facette traverse-t-elle la face j ?
               if ((code_retour & masque) == 0)
                 continue;
 
               // On cherche l'element voisin
-              //const long direction = (j>=dimension);
+              //const int direction = (j>=dimension);
 
-              long arete_voisine=-1;
+              int arete_voisine=-1;
 
               if (j==ori_arete) arete_voisine= (elem_arr>=0) ? Elem_Aretes(elem_arr,orientation_arete(arete)) : -1; // voir numerotation Aretes dans Hexaedre.cpp
               else if (j==ori_arete+dimension) arete_voisine= (elem_av>=0) ? Elem_Aretes(elem_av,orientation_arete(arete)) : -1;
@@ -2435,7 +2435,7 @@ void Parcours_interface::parcours_facette_arete_y(const Domaine_VF& domaine_vf,
               else if (j==2) arete_voisine=(elem1>=0) ? Elem_Aretes(elem1,7):-1;
               else arete_voisine=(elem3>=0) ? Elem_Aretes(elem3,1):-1;
 
-              long arete_a_echanger=0;
+              int arete_a_echanger=0;
               if (arete_multiple)
                 {
                   if ((elem2>=nb_elements_reels_ && elem4>=nb_elements_reels_) && j==0+dimension) arete_voisine=arete,arete_a_echanger=1;
@@ -2465,7 +2465,7 @@ void Parcours_interface::parcours_facette_arete_y(const Domaine_VF& domaine_vf,
                 }
               if (arete_voisine >= nb_aretes_reelles_ || arete_a_echanger)
                 {
-                  long arete_mult=aretes_multiples(arete_voisine);
+                  int arete_mult=aretes_multiples(arete_voisine);
 
                   if (arete_mult<=1)
                     {
@@ -2506,12 +2506,12 @@ void Parcours_interface::parcours_facette_arete_z(const Domaine_VF& domaine_vf,
                                                   Maillage_FT_Disc& maillage,
                                                   ArrOfInt& echange_facettes_numfacette,
                                                   ArrOfInt& echange_facettes_numarete,
-                                                  long num_facette,
-                                                  long arete_depart, Intersections_Arete_Facettes& intersections_arete,
+                                                  int num_facette,
+                                                  int arete_depart, Intersections_Arete_Facettes& intersections_arete,
                                                   ArrOfBit& drapeaux_aretes_parcourues) const
 {
-  const long ori_arete=2;
-  const long dimension3 = (Objet_U::dimension == 3);
+  const int ori_arete=2;
+  const int dimension3 = (Objet_U::dimension == 3);
 
   static ArrOfIntFT liste_aretes_parcourues_arete_z;
   static ArrOfIntFT arete_a_traiter_arete_z;
@@ -2535,10 +2535,10 @@ void Parcours_interface::parcours_facette_arete_z(const Domaine_VF& domaine_vf,
   {
     intersections_arete.get_liste_aretes_traversees(num_facette,
                                                     liste_aretes_parcourues_arete_z);
-    long n = liste_aretes_parcourues_arete_z.size_array();
-    for (long i = 0; i < n; i++)
+    int n = liste_aretes_parcourues_arete_z.size_array();
+    for (int i = 0; i < n; i++)
       {
-        const long face = liste_aretes_parcourues_arete_z[i];
+        const int face = liste_aretes_parcourues_arete_z[i];
         drapeaux_aretes_parcourues.setbit(face);
       }
   }
@@ -2561,19 +2561,19 @@ void Parcours_interface::parcours_facette_arete_z(const Domaine_VF& domaine_vf,
   do
     {
       new_aretes_a_traiter_arete_z.resize_array(0);
-      const long n = arete_a_traiter_arete_z.size_array();
+      const int n = arete_a_traiter_arete_z.size_array();
 
       // Boucle sur les aretes
       // ************************************************
-      for (long i = 0; i < n; i++)
+      for (int i = 0; i < n; i++)
         {
-          const long arete = arete_a_traiter_arete_z[i];
+          const int arete = arete_a_traiter_arete_z[i];
           if (type_arete(arete)!=2) continue; // on ne calcule que pour les aretes_internes
 
-          const long arete_multiple=(aretes_multiples(arete)>0);
+          const int arete_multiple=(aretes_multiples(arete)>0);
 
           // Calcul de l'intersection facette_face
-          long code_retour=0;
+          int code_retour=0;
           if (dimension3)
             code_retour = calcul_intersection_facette_arete_3D(domaine_vf, maillage,
                                                                num_facette, arete, intersections_arete); // ne fonctionne que si l'arete est interne
@@ -2591,31 +2591,31 @@ void Parcours_interface::parcours_facette_arete_z(const Domaine_VF& domaine_vf,
               continue;
             }
 
-          long face1=Qdm(arete,0);
-          long face2=Qdm(arete,1);
+          int face1=Qdm(arete,0);
+          int face2=Qdm(arete,1);
 
-          long elem1=domaine_vf.face_voisins(face1,0);
-          long elem2=domaine_vf.face_voisins(face2,0);
-          long elem3=domaine_vf.face_voisins(face1,1);
-          long elem4=domaine_vf.face_voisins(face2,1);
+          int elem1=domaine_vf.face_voisins(face1,0);
+          int elem2=domaine_vf.face_voisins(face2,0);
+          int elem3=domaine_vf.face_voisins(face1,1);
+          int elem4=domaine_vf.face_voisins(face2,1);
 
-          long face1_av=domaine_vf.elem_faces(elem1, ori_arete+dimension);
-          long face1_arr=domaine_vf.elem_faces(elem1, ori_arete);
+          int face1_av=domaine_vf.elem_faces(elem1, ori_arete+dimension);
+          int face1_arr=domaine_vf.elem_faces(elem1, ori_arete);
 
-          long elem_av=domaine_vf.face_voisins(face1_av,1);
-          long elem_arr=domaine_vf.face_voisins(face1_arr,0);
+          int elem_av=domaine_vf.face_voisins(face1_av,1);
+          int elem_arr=domaine_vf.face_voisins(face1_arr,0);
 
 
-          for (long j = 0; j < nb_faces_elem_; j++) // on a aussi nb_faces_elem_ faces pour le volume de controle des faces
+          for (int j = 0; j < nb_faces_elem_; j++) // on a aussi nb_faces_elem_ faces pour le volume de controle des faces
             {
-              const long masque = 1 << j;
+              const int masque = 1 << j;
 
               // La facette traverse-t-elle la face j ?
               if ((code_retour & masque) == 0)
                 continue;
 
               // On cherche l'element voisin
-              long arete_voisine;
+              int arete_voisine;
               if (j==ori_arete) arete_voisine=  (elem_arr>=0) ? Elem_Aretes(elem_arr,orientation_arete(arete)) : -1; // voir numerotation Aretes dans Hexaedre.cpp
               else if (j==ori_arete+dimension) arete_voisine = (elem_av>=0) ? Elem_Aretes(elem_av,orientation_arete(arete)):-1;
               else if (j==0) arete_voisine=(elem1>=0) ? Elem_Aretes(elem1,9) : -1; // voir numerotation Aretes dans Hexaedre.cpp
@@ -2623,7 +2623,7 @@ void Parcours_interface::parcours_facette_arete_z(const Domaine_VF& domaine_vf,
               else if (j==1) arete_voisine=(elem1>=0) ? Elem_Aretes(elem1,6) : -1;
               else arete_voisine=(elem3>=0) ? Elem_Aretes(elem3,0) : -1;
 
-              long arete_a_echanger=0;
+              int arete_a_echanger=0;
               if (arete_multiple)
                 {
                   if ((elem2>=nb_elements_reels_ && elem4>=nb_elements_reels_) && j==0+dimension) arete_voisine=arete,arete_a_echanger=1;
@@ -2653,7 +2653,7 @@ void Parcours_interface::parcours_facette_arete_z(const Domaine_VF& domaine_vf,
                 }
               if (arete_voisine >= nb_aretes_reelles_ || arete_a_echanger)
                 {
-                  long arete_mult=aretes_multiples(arete_voisine);
+                  int arete_mult=aretes_multiples(arete_voisine);
                   if (arete_mult<=1)
                     {
                       echange_facettes_numfacette.append_array(num_facette);
@@ -2700,15 +2700,15 @@ void Parcours_interface::parcours_facette_arete_z(const Domaine_VF& domaine_vf,
 //        qui coupent la facette (bit 0 : premiere face de l'element,
 //        bit 1 : deuxieme face, etc...)
 
-long Parcours_interface::calcul_intersection_facelem_2D(
+int Parcours_interface::calcul_intersection_facelem_2D(
   const Domaine_VF& domaine_vf,
   Maillage_FT_Disc& maillage,
-  long num_facette, long num_element) const
+  int num_facette, int num_element) const
 {
   assert(Objet_U::dimension == 2);
 
-  const long sommet0 = maillage.facettes_(num_facette, 0);
-  const long sommet1 = maillage.facettes_(num_facette, 1);
+  const int sommet0 = maillage.facettes_(num_facette, 0);
+  const int sommet1 = maillage.facettes_(num_facette, 1);
   // Extremites du segment.
   double x0 = maillage.sommets_(sommet0, 0);
   double y0 = maillage.sommets_(sommet0, 1);
@@ -2745,14 +2745,14 @@ long Parcours_interface::calcul_intersection_facelem_2D(
 
   // Numero de la face qui genere l'extremite de l'intersection
   // (-1 -> pas d'intersection avec le bord de l'element)
-  long plan_coupe0 = -1;
-  long plan_coupe1 = -1;
+  int plan_coupe0 = -1;
+  int plan_coupe1 = -1;
 
   // *********************************************************************
   // *********************************************************************
   // Calcul de l'intersection de la facette avec les plans qui
   // definissent l'element
-  for (long num_plan = 0; num_plan < nb_faces_elem_; num_plan++)
+  for (int num_plan = 0; num_plan < nb_faces_elem_; num_plan++)
     {
       // Coefficients de la fonction qui definit le plan (c est nul en 2D).
       double a, b, c, d;
@@ -2763,8 +2763,8 @@ long Parcours_interface::calcul_intersection_facelem_2D(
       // Calcul de la fonction aux extremites du segment tronque.
       const double f0 = f_0 * u0 + f_1 * (1. - u0);
       const double f1 = f_0 * u1 + f_1 * (1. - u1);
-      const long s0_dehors = inf_strict(f0,Zero) ? 1 : 0;
-      const long s1_dehors = inf_strict(f1,Zero) ? 1 : 0;
+      const int s0_dehors = inf_strict(f0,Zero) ? 1 : 0;
+      const int s1_dehors = inf_strict(f1,Zero) ? 1 : 0;
 
       if (s0_dehors + s1_dehors == 1)
         {
@@ -2854,7 +2854,7 @@ long Parcours_interface::calcul_intersection_facelem_2D(
                                                             1. - u_centre,
                                                             0.);
   // Calcul du code retour
-  long code_retour = 0;
+  int code_retour = 0;
   if (plan_coupe0 >= 0)
     code_retour |= 1 << plan_coupe0;
   if (plan_coupe1 >= 0)
@@ -2886,7 +2886,7 @@ long Parcours_interface::calcul_intersection_facelem_2D(
 //                                           laquelle se trouve l'extremite.
 
 inline double Parcours_interface::volume_rectangle(const Domaine_VF& domaine_vf,
-                                                   long num_element,
+                                                   int num_element,
                                                    double x0, double y0,
                                                    double x1, double y1,
                                                    double epsilon) const
@@ -2895,14 +2895,14 @@ inline double Parcours_interface::volume_rectangle(const Domaine_VF& domaine_vf,
   const double un_tiers = 1. / 3.;
 
   // Conventions TRUST VDF :
-  static const long NUM_FACE_GAUCHE = 0;
-  static const long NUM_FACE_BAS = 1;
-  static const long NUM_FACE_HAUT = 3;
-  static const long NUM_FACE_DROITE = 2;
-  long face_bas = domaine_vf.elem_faces(num_element, NUM_FACE_BAS);
-  long face_gauche = domaine_vf.elem_faces(num_element, NUM_FACE_GAUCHE);
-  long face_droite = domaine_vf.elem_faces(num_element, NUM_FACE_DROITE);
-  long face_haut = domaine_vf.elem_faces(num_element, NUM_FACE_HAUT);
+  static const int NUM_FACE_GAUCHE = 0;
+  static const int NUM_FACE_BAS = 1;
+  static const int NUM_FACE_HAUT = 3;
+  static const int NUM_FACE_DROITE = 2;
+  int face_bas = domaine_vf.elem_faces(num_element, NUM_FACE_BAS);
+  int face_gauche = domaine_vf.elem_faces(num_element, NUM_FACE_GAUCHE);
+  int face_droite = domaine_vf.elem_faces(num_element, NUM_FACE_DROITE);
+  int face_haut = domaine_vf.elem_faces(num_element, NUM_FACE_HAUT);
   double y_bas = domaine_vf.xv(face_bas, 1);
   double x_gauche = domaine_vf.xv(face_gauche, 0);
   double x_droite = domaine_vf.xv(face_droite, 0);
@@ -2965,7 +2965,7 @@ inline double Parcours_interface::volume_rectangle(const Domaine_VF& domaine_vf,
 // Comme volume_rectangle, cette methode calcul le barycentre
 // It is identical to volume, but with multiplication by x or y when needed to obtain the barycenter...
 double Parcours_interface::volume_barycentre_rectangle(const Domaine_VF& domaine_vf,
-                                                       long num_element,
+                                                       int num_element,
                                                        double x0, double y0,
                                                        double x1, double y1,
                                                        double epsilon,
@@ -2975,14 +2975,14 @@ double Parcours_interface::volume_barycentre_rectangle(const Domaine_VF& domaine
   const double un_tiers = 1. / 3.;
 
   // Conventions TRUST VDF :
-  static const long NUM_FACE_GAUCHE = 0;
-  static const long NUM_FACE_BAS = 1;
-  static const long NUM_FACE_HAUT = 3;
-  static const long NUM_FACE_DROITE = 2;
-  long face_bas = domaine_vf.elem_faces(num_element, NUM_FACE_BAS);
-  long face_gauche = domaine_vf.elem_faces(num_element, NUM_FACE_GAUCHE);
-  long face_droite = domaine_vf.elem_faces(num_element, NUM_FACE_DROITE);
-  long face_haut = domaine_vf.elem_faces(num_element, NUM_FACE_HAUT);
+  static const int NUM_FACE_GAUCHE = 0;
+  static const int NUM_FACE_BAS = 1;
+  static const int NUM_FACE_HAUT = 3;
+  static const int NUM_FACE_DROITE = 2;
+  int face_bas = domaine_vf.elem_faces(num_element, NUM_FACE_BAS);
+  int face_gauche = domaine_vf.elem_faces(num_element, NUM_FACE_GAUCHE);
+  int face_droite = domaine_vf.elem_faces(num_element, NUM_FACE_DROITE);
+  int face_haut = domaine_vf.elem_faces(num_element, NUM_FACE_HAUT);
   double y_bas = domaine_vf.xv(face_bas, 1);
   double x_gauche = domaine_vf.xv(face_gauche, 0);
   double x_droite = domaine_vf.xv(face_droite, 0);
@@ -3076,7 +3076,7 @@ double Parcours_interface::volume_barycentre_rectangle(const Domaine_VF& domaine
     }
 
   if ((v+v2)>DMINFLOAT)
-    for (long i=0; i<2; i++)
+    for (int i=0; i<2; i++)
       bary[i] = (bary[i]*v + bary2[i]*v2) / (v+v2);
 
   bary[2] = 0.; // In 2D, nothing on z.
@@ -3092,14 +3092,14 @@ double Parcours_interface::volume_barycentre_rectangle(const Domaine_VF& domaine
 }
 
 // Description:
-inline void Parcours_interface::matrice_triangle(long num_element,
+inline void Parcours_interface::matrice_triangle(int num_element,
                                                  FTd_vecteur2& origine,
                                                  FTd_matrice22& matrice,
                                                  double& surface) const
 {
-  const long s0 = (*domaine_elem_ptr)(num_element,0);
-  const long s1 = (*domaine_elem_ptr)(num_element,1);
-  const long s2 = (*domaine_elem_ptr)(num_element,2);
+  const int s0 = (*domaine_elem_ptr)(num_element,0);
+  const int s1 = (*domaine_elem_ptr)(num_element,1);
+  const int s2 = (*domaine_elem_ptr)(num_element,2);
   const double x0 = (*domaine_sommets_ptr)(s0, 0);
   const double y0 = (*domaine_sommets_ptr)(s0, 1);
   origine[0] = x0;
@@ -3163,15 +3163,15 @@ inline void Parcours_interface::transformation_2d(const FTd_vecteur2& origine,
  *
  */
 inline double Parcours_interface::volume_triangle(const Domaine_VF& domaine_vf,
-                                                  long num_element,
+                                                  int num_element,
                                                   double x0, double y0,
                                                   double x1, double y1,
-                                                  long plan_coupe0,
-                                                  long plan_coupe1) const
+                                                  int plan_coupe0,
+                                                  int plan_coupe1) const
 {
   assert(!bidim_axi); // Pas prevu pour l'instant
 
-  static const long FACE_ZERO = 0; // Numero de la face opposee au sommet zero
+  static const int FACE_ZERO = 0; // Numero de la face opposee au sommet zero
   double origine[2];
   double matrice[2][2];
   double surface_triangle;
@@ -3211,15 +3211,15 @@ inline double Parcours_interface::volume_triangle(const Domaine_VF& domaine_vf,
  * @param (maillage) description du maillage de l'interface
  * @param (num_facette) indice de la facette intersectant
  * @param (num_element) indice de l'element intersecte
- * @return (long) 1 si ok, 0 si ??.
+ * @return (int) 1 si ok, 0 si ??.
  */
-long Parcours_interface::calcul_intersection_facelem_3D(
+int Parcours_interface::calcul_intersection_facelem_3D(
   const Domaine_VF& domaine_vf,
   Maillage_FT_Disc& maillage,
-  long num_facette, long num_element) const
+  int num_facette, int num_element) const
 {
   assert(Objet_U::dimension == 3);
-  long i,k;
+  int i,k;
 
   // Polygone d'intersection entre la facette et l'element.
   // On l'initialise avec la facette en entier.
@@ -3241,15 +3241,15 @@ long Parcours_interface::calcul_intersection_facelem_3D(
   poly_(2,1) = 0.;
   poly_(2,2) = 1.;
   double coord_som[3][3];
-  const long sommets[3] = { maillage.facettes_(num_facette, 0),
-                            maillage.facettes_(num_facette, 1),
-                            maillage.facettes_(num_facette, 2)
-                          };
+  const int sommets[3] = { maillage.facettes_(num_facette, 0),
+                           maillage.facettes_(num_facette, 1),
+                           maillage.facettes_(num_facette, 2)
+                         };
   {
-    for (long ii = 0; ii < 3; ii++)
+    for (int ii = 0; ii < 3; ii++)
       {
-        long s = sommets[ii];
-        for (long j = 0; j < 3; j++)
+        int s = sommets[ii];
+        for (int j = 0; j < 3; j++)
           {
             coord_som[ii][j] = maillage.sommets_(s, j);
           }
@@ -3258,7 +3258,7 @@ long Parcours_interface::calcul_intersection_facelem_3D(
   // Extension du triangle si deux sommets au bord
   {
     const double fact_mult = 1.;
-    long isom,isom_s,isom_ss, kk;
+    int isom,isom_s,isom_ss, kk;
     for (isom=0 ; isom<3 ; isom++)
       {
         isom_s = (isom+1)%3;
@@ -3293,11 +3293,11 @@ long Parcours_interface::calcul_intersection_facelem_3D(
   // *********************************************************************
   // Calcul de l'intersection du polygone avec les plans qui
   // definissent l'element
-  for (long num_plan = 0; num_plan < nb_faces_elem_; num_plan++)
+  for (int num_plan = 0; num_plan < nb_faces_elem_; num_plan++)
     {
       new_poly_.resize(0,3);
       new_poly_plan_coupe_.resize_array(0);
-      long n = 0;
+      int n = 0;
       // Coefficients de la fonction qui definit le plan
       // "fonction plan" (x,y,z) = a*x + b*y + c*d + d
       double a, b, c, d;
@@ -3308,18 +3308,18 @@ long Parcours_interface::calcul_intersection_facelem_3D(
       const double f2 = (a * coord_som[2][0] + b * coord_som[2][1] + c * coord_som[2][2] + d) * signe;
 
       // Recherche des points du polygone qui sont dans le demi-espace
-      const long nb_sommets_poly = poly_.dimension(0);
+      const int nb_sommets_poly = poly_.dimension(0);
       i = nb_sommets_poly - 1; // Le dernier sommet du polygone
       double u = poly_(i,0);
       double v = poly_(i,1);
       double w = poly_(i,2);
       // Calcul de la "fonction plan" au sommet du polygone
       double f = f0 * u + f1 * v + f2 * w;
-      long sommet_dehors = inf_strict(f,Zero) ? 1 : 0;
+      int sommet_dehors = inf_strict(f,Zero) ? 1 : 0;
 
       for (i = 0; i < nb_sommets_poly; i++)
         {
-          long sommet_precedent_dehors = sommet_dehors;
+          int sommet_precedent_dehors = sommet_dehors;
           double u_prec = u;
           double v_prec = v;
           double f_prec = f;
@@ -3348,7 +3348,7 @@ long Parcours_interface::calcul_intersection_facelem_3D(
               new_poly_(n,1) = new_v;
               new_poly_(n,2) = new_w;
               n++;
-              const long num_plan_coupe = sommet_dehors ? polygone_plan_coupe_[i] : num_plan;
+              const int num_plan_coupe = sommet_dehors ? polygone_plan_coupe_[i] : num_plan;
               new_poly_plan_coupe_.append_array(num_plan_coupe);
             }
           if (! sommet_dehors)
@@ -3359,7 +3359,7 @@ long Parcours_interface::calcul_intersection_facelem_3D(
               new_poly_(n,1) = v;
               new_poly_(n,2) = w;
               n++;
-              const long num_plan_coupe = polygone_plan_coupe_[i];
+              const int num_plan_coupe = polygone_plan_coupe_[i];
               new_poly_plan_coupe_.append_array(num_plan_coupe);
             }
         }
@@ -3373,7 +3373,7 @@ long Parcours_interface::calcul_intersection_facelem_3D(
       polygone_plan_coupe_ = new_poly_plan_coupe_;
     }
   // *********************************************************************
-  const long nb_sommets_poly = poly_.dimension(0);
+  const int nb_sommets_poly = poly_.dimension(0);
   // Calcul du centre de gravite et de la surface de l'intersection
   double volume = 0.;
   double surface = 0.;
@@ -3457,7 +3457,7 @@ long Parcours_interface::calcul_intersection_facelem_3D(
       //calcul des coordonnees reelles du centre de gravite
       FTd_vecteur3 centre_de_gravite;
       {
-        for (long ii = 0; ii < 3; ii++)
+        for (int ii = 0; ii < 3; ii++)
           {
             centre_de_gravite[ii] =
               u_centre * coord_som[0][ii]
@@ -3538,11 +3538,11 @@ long Parcours_interface::calcul_intersection_facelem_3D(
                                                                 0., 0., 0.);
     }
 
-  long code_retour = 0;
+  int code_retour = 0;
   {
     for (i = 0; i < nb_sommets_poly; i++)
       {
-        const long plan_coupe = polygone_plan_coupe_[i];
+        const int plan_coupe = polygone_plan_coupe_[i];
         if (plan_coupe >= 0)
           code_retour |= 1 << plan_coupe;
       }
@@ -3580,13 +3580,13 @@ long Parcours_interface::calcul_intersection_facelem_3D(
 // Exception:
 // Effets de bord:
 // Postcondition:
-long Parcours_interface::calcul_intersection_facette_face_3D(const Domaine_VF& domaine_vf,
-                                                             Maillage_FT_Disc& maillage,
-                                                             long num_facette,
-                                                             long num_face, Intersections_Face_Facettes& intersections_face) const
+int Parcours_interface::calcul_intersection_facette_face_3D(const Domaine_VF& domaine_vf,
+                                                            Maillage_FT_Disc& maillage,
+                                                            int num_facette,
+                                                            int num_face, Intersections_Face_Facettes& intersections_face) const
 {
   assert(Objet_U::dimension == 3);
-  long i,k;
+  int i,k;
 
   // Polygone d'intersection entre la facette et la face
   // On l'initialise avec la facette en entier.
@@ -3608,15 +3608,15 @@ long Parcours_interface::calcul_intersection_facette_face_3D(const Domaine_VF& d
   poly_(2,1) = 0.;
   poly_(2,2) = 1.;
   double coord_som[3][3];
-  const long sommets[3] = { maillage.facettes_(num_facette, 0),
-                            maillage.facettes_(num_facette, 1),
-                            maillage.facettes_(num_facette, 2)
-                          };
+  const int sommets[3] = { maillage.facettes_(num_facette, 0),
+                           maillage.facettes_(num_facette, 1),
+                           maillage.facettes_(num_facette, 2)
+                         };
   {
-    for (long ii = 0; ii < 3; ii++)
+    for (int ii = 0; ii < 3; ii++)
       {
-        long s = sommets[ii];
-        for (long j = 0; j < 3; j++)
+        int s = sommets[ii];
+        for (int j = 0; j < 3; j++)
           {
             coord_som[ii][j] = maillage.sommets_(s, j);
           }
@@ -3625,7 +3625,7 @@ long Parcours_interface::calcul_intersection_facette_face_3D(const Domaine_VF& d
   // Extension du triangle si deux sommets au bord
   {
     const double fact_mult = 1.;
-    long isom,isom_s,isom_ss, kk;
+    int isom,isom_s,isom_ss, kk;
     for (isom=0 ; isom<3 ; isom++)
       {
         isom_s = (isom+1)%3;
@@ -3663,11 +3663,11 @@ long Parcours_interface::calcul_intersection_facette_face_3D(const Domaine_VF& d
   // definissent la face
   Domaine_dis& domaine_dis = maillage.refdomaine_dis_.valeur();
   Domaine_VDF& domaine_vdf = ref_cast(Domaine_VDF,domaine_dis.valeur());
-  for (long num_plan=0; num_plan<nb_faces_elem_; num_plan++) // tout comme les elements, les faces euleriennes ont 6 faces decrivant leur volume de controle
+  for (int num_plan=0; num_plan<nb_faces_elem_; num_plan++) // tout comme les elements, les faces euleriennes ont 6 faces decrivant leur volume de controle
     {
       new_poly_.resize(0,3);
       new_poly_plan_coupe_.resize_array(0);
-      long n = 0;
+      int n = 0;
       // Coefficients de la fonction qui definit le plan
       double a,b,c,d;
       double signe = calcul_eq_plan_face(domaine_vf, num_face, num_plan, a, b, c, d);
@@ -3680,18 +3680,18 @@ long Parcours_interface::calcul_intersection_facette_face_3D(const Domaine_VF& d
       const double f2 = (a * coord_som[2][0] + b * coord_som[2][1] + c * coord_som[2][2] + d) * signe;
 
       // Recherche des points du polygone qui sont dans le demi-espace
-      const long nb_sommets_poly = poly_.dimension(0);
+      const int nb_sommets_poly = poly_.dimension(0);
       i = nb_sommets_poly - 1; // Le dernier sommet du polygone
       double u = poly_(i,0);
       double v = poly_(i,1);
       double w = poly_(i,2);
       // Calcul de la "fonction plan" au sommet du polygone
       double f = f0 * u + f1 * v + f2 * w;
-      long sommet_dehors = inf_strict(f,Zero) ? 1 : 0;
+      int sommet_dehors = inf_strict(f,Zero) ? 1 : 0;
 
       for (i = 0; i < nb_sommets_poly; i++)
         {
-          long sommet_precedent_dehors = sommet_dehors;
+          int sommet_precedent_dehors = sommet_dehors;
           double u_prec = u;
           double v_prec = v;
           double f_prec = f;
@@ -3720,7 +3720,7 @@ long Parcours_interface::calcul_intersection_facette_face_3D(const Domaine_VF& d
               new_poly_(n,1) = new_v;
               new_poly_(n,2) = new_w;
               n++;
-              const long num_plan_coupe = sommet_dehors ? polygone_plan_coupe_[i] : num_plan;
+              const int num_plan_coupe = sommet_dehors ? polygone_plan_coupe_[i] : num_plan;
               new_poly_plan_coupe_.append_array(num_plan_coupe);
             }
           if (! sommet_dehors)
@@ -3731,7 +3731,7 @@ long Parcours_interface::calcul_intersection_facette_face_3D(const Domaine_VF& d
               new_poly_(n,1) = v;
               new_poly_(n,2) = w;
               n++;
-              const long num_plan_coupe = polygone_plan_coupe_[i];
+              const int num_plan_coupe = polygone_plan_coupe_[i];
               new_poly_plan_coupe_.append_array(num_plan_coupe);
             }
         }
@@ -3745,7 +3745,7 @@ long Parcours_interface::calcul_intersection_facette_face_3D(const Domaine_VF& d
       polygone_plan_coupe_ = new_poly_plan_coupe_;
     }
   // *********************************************************************
-  const long nb_sommets_poly = poly_.dimension(0);
+  const int nb_sommets_poly = poly_.dimension(0);
   // Calcul du centre de gravite et de la surface de l'intersection
   double volume = 0.;
   double surface = 0.;
@@ -3830,7 +3830,7 @@ long Parcours_interface::calcul_intersection_facette_face_3D(const Domaine_VF& d
       //calcul des coordonnees reelles du centre de gravite
       FTd_vecteur3 centre_de_gravite;
       {
-        for (long ii = 0; ii < 3; ii++)
+        for (int ii = 0; ii < 3; ii++)
           {
             centre_de_gravite[ii] =
               u_centre * coord_som[0][ii]
@@ -3894,11 +3894,11 @@ long Parcours_interface::calcul_intersection_facette_face_3D(const Domaine_VF& d
                                              0., 0., 0.);
     }
 
-  long code_retour = 0;
+  int code_retour = 0;
   {
     for (i = 0; i < nb_sommets_poly; i++)
       {
-        const long plan_coupe = polygone_plan_coupe_[i];
+        const int plan_coupe = polygone_plan_coupe_[i];
         if (plan_coupe >= 0)
           code_retour |= 1 << plan_coupe;
       }
@@ -3907,13 +3907,13 @@ long Parcours_interface::calcul_intersection_facette_face_3D(const Domaine_VF& d
   return code_retour;
 }
 
-long Parcours_interface::calcul_intersection_facette_arete_3D(const Domaine_VF& domaine_vf,
-                                                              Maillage_FT_Disc& maillage,
-                                                              long num_facette,
-                                                              long num_arete, Intersections_Arete_Facettes& intersections_arete) const
+int Parcours_interface::calcul_intersection_facette_arete_3D(const Domaine_VF& domaine_vf,
+                                                             Maillage_FT_Disc& maillage,
+                                                             int num_facette,
+                                                             int num_arete, Intersections_Arete_Facettes& intersections_arete) const
 {
   assert(Objet_U::dimension == 3);
-  long i,k;
+  int i,k;
 
   // Polygone d'intersection entre la facette et la face
   // On l'initialise avec la facette en entier.
@@ -3935,15 +3935,15 @@ long Parcours_interface::calcul_intersection_facette_arete_3D(const Domaine_VF& 
   poly_(2,1) = 0.;
   poly_(2,2) = 1.;
   double coord_som[3][3];
-  const long sommets[3] = { maillage.facettes_(num_facette, 0),
-                            maillage.facettes_(num_facette, 1),
-                            maillage.facettes_(num_facette, 2)
-                          };
+  const int sommets[3] = { maillage.facettes_(num_facette, 0),
+                           maillage.facettes_(num_facette, 1),
+                           maillage.facettes_(num_facette, 2)
+                         };
   {
-    for (long ii = 0; ii < 3; ii++)
+    for (int ii = 0; ii < 3; ii++)
       {
-        long s = sommets[ii];
-        for (long j = 0; j < 3; j++)
+        int s = sommets[ii];
+        for (int j = 0; j < 3; j++)
           {
             coord_som[ii][j] = maillage.sommets_(s, j);
           }
@@ -3952,7 +3952,7 @@ long Parcours_interface::calcul_intersection_facette_arete_3D(const Domaine_VF& 
   // Extension du triangle si deux sommets au bord
   {
     const double fact_mult = 1.;
-    long isom,isom_s,isom_ss, kk;
+    int isom,isom_s,isom_ss, kk;
     for (isom=0 ; isom<3 ; isom++)
       {
         isom_s = (isom+1)%3;
@@ -3992,11 +3992,11 @@ long Parcours_interface::calcul_intersection_facette_arete_3D(const Domaine_VF& 
   Domaine_VDF& domaine_vdf = ref_cast(Domaine_VDF,domaine_dis.valeur());
 
   //Cerr << "arete " << num_arete << " cg " << domaine_vf.xa(num_arete,0) << " " <<  domaine_vf.xa(num_arete,1) << " " << domaine_vf.xa(num_arete,2) << finl;
-  for (long num_plan=0; num_plan<nb_faces_elem_; num_plan++) // tout comme les elements, les faces euleriennes ont 6 faces decrivant leur volume de controle
+  for (int num_plan=0; num_plan<nb_faces_elem_; num_plan++) // tout comme les elements, les faces euleriennes ont 6 faces decrivant leur volume de controle
     {
       new_poly_.resize(0,3);
       new_poly_plan_coupe_.resize_array(0);
-      long n = 0;
+      int n = 0;
       // Coefficients de la fonction qui definit le plan
       double a,b,c,d;
       double signe = calcul_eq_aretes(domaine_vdf, num_arete, num_plan, a, b, c, d);
@@ -4012,18 +4012,18 @@ long Parcours_interface::calcul_intersection_facette_arete_3D(const Domaine_VF& 
       const double f2 = (a * coord_som[2][0] + b * coord_som[2][1] + c * coord_som[2][2] + d) * signe;
 
       // Recherche des points du polygone qui sont dans le demi-espace
-      const long nb_sommets_poly = poly_.dimension(0);
+      const int nb_sommets_poly = poly_.dimension(0);
       i = nb_sommets_poly - 1; // Le dernier sommet du polygone
       double u = poly_(i,0);
       double v = poly_(i,1);
       double w = poly_(i,2);
       // Calcul de la "fonction plan" au sommet du polygone
       double f = f0 * u + f1 * v + f2 * w;
-      long sommet_dehors = inf_strict(f,Zero) ? 1 : 0;
+      int sommet_dehors = inf_strict(f,Zero) ? 1 : 0;
 
       for (i = 0; i < nb_sommets_poly; i++)
         {
-          long sommet_precedent_dehors = sommet_dehors;
+          int sommet_precedent_dehors = sommet_dehors;
           double u_prec = u;
           double v_prec = v;
           double f_prec = f;
@@ -4052,7 +4052,7 @@ long Parcours_interface::calcul_intersection_facette_arete_3D(const Domaine_VF& 
               new_poly_(n,1) = new_v;
               new_poly_(n,2) = new_w;
               n++;
-              const long num_plan_coupe = sommet_dehors ? polygone_plan_coupe_[i] : num_plan;
+              const int num_plan_coupe = sommet_dehors ? polygone_plan_coupe_[i] : num_plan;
               new_poly_plan_coupe_.append_array(num_plan_coupe);
             }
           if (! sommet_dehors)
@@ -4063,7 +4063,7 @@ long Parcours_interface::calcul_intersection_facette_arete_3D(const Domaine_VF& 
               new_poly_(n,1) = v;
               new_poly_(n,2) = w;
               n++;
-              const long num_plan_coupe = polygone_plan_coupe_[i];
+              const int num_plan_coupe = polygone_plan_coupe_[i];
               new_poly_plan_coupe_.append_array(num_plan_coupe);
             }
         }
@@ -4077,7 +4077,7 @@ long Parcours_interface::calcul_intersection_facette_arete_3D(const Domaine_VF& 
       polygone_plan_coupe_ = new_poly_plan_coupe_;
     }
   // *********************************************************************
-  const long nb_sommets_poly = poly_.dimension(0);
+  const int nb_sommets_poly = poly_.dimension(0);
   // Calcul du centre de gravite et de la surface de l'intersection
   double volume = 0.;
   double surface = 0.;
@@ -4162,7 +4162,7 @@ long Parcours_interface::calcul_intersection_facette_arete_3D(const Domaine_VF& 
       //calcul des coordonnees reelles du centre de gravite
       FTd_vecteur3 centre_de_gravite;
       {
-        for (long ii = 0; ii < 3; ii++)
+        for (int ii = 0; ii < 3; ii++)
           {
             centre_de_gravite[ii] =
               u_centre * coord_som[0][ii]
@@ -4226,11 +4226,11 @@ long Parcours_interface::calcul_intersection_facette_arete_3D(const Domaine_VF& 
                                               0., 0., 0.);
     }
 
-  long code_retour = 0;
+  int code_retour = 0;
   {
     for (i = 0; i < nb_sommets_poly; i++)
       {
-        const long plan_coupe = polygone_plan_coupe_[i];
+        const int plan_coupe = polygone_plan_coupe_[i];
         if (plan_coupe >= 0)
           code_retour |= 1 << plan_coupe;
       }
@@ -4289,7 +4289,7 @@ void Parcours_interface::calcul_inverse_matrice33(const FTd_matrice33& matrice, 
   if (t==0.)
     {
       Cerr<<"PB : matrice non inversible : t= "<<t<<finl<<"  matrice= "<<finl;
-      long i,j;
+      int i,j;
       for (i=0 ; i<3 ; i++)
         {
           for (j=0 ; j<3 ; j++)
@@ -4323,7 +4323,7 @@ void Parcours_interface::calcul_inverse_matrice33(const FTd_matrice33& matrice, 
  */
 void Parcours_interface::calcul_produit_matrice33_vecteur(const FTd_matrice33& matrice, const FTd_vecteur3& vect, FTd_vecteur3& res)
 {
-  long i,j;
+  int i,j;
   for (i=0 ; i<3 ; i++)
     {
       double x = 0.;
@@ -4350,22 +4350,22 @@ void Parcours_interface::calcul_produit_matrice33_vecteur(const FTd_matrice33& m
  * @return (double) contribution du volume engendre par la surface dans l'element
  */
 double Parcours_interface::volume_tetraedre(const Domaine_VF& domaine_vf,
-                                            long num_element,
-                                            long num_facette,
+                                            int num_element,
+                                            int num_facette,
                                             const Maillage_FT_Disc& maillage,
                                             const DoubleTab& poly_reelles,
                                             const FTd_vecteur3& centre_de_gravite,
                                             double epsilon) const
 {
-  static const long SOM_Z = 0;  // indice du sommet qui servira d'origine
-  static const long SOM_A = 1;     // indice du sommet qui servira pour le premier vecteur
-  static const long SOM_B = 2;     // indice du sommet qui servira pour le second vecteur
-  static const long SOM_C = 3;     // indice du sommet qui servira pour le troisieme vecteur
+  static const int SOM_Z = 0;  // indice du sommet qui servira d'origine
+  static const int SOM_A = 1;     // indice du sommet qui servira pour le premier vecteur
+  static const int SOM_B = 2;     // indice du sommet qui servira pour le second vecteur
+  static const int SOM_C = 3;     // indice du sommet qui servira pour le troisieme vecteur
 
-  const long som_Z = (*domaine_elem_ptr)(num_element,SOM_Z);
-  const long som_A = (*domaine_elem_ptr)(num_element,SOM_A);
-  const long som_B = (*domaine_elem_ptr)(num_element,SOM_B);
-  const long som_C = (*domaine_elem_ptr)(num_element,SOM_C);
+  const int som_Z = (*domaine_elem_ptr)(num_element,SOM_Z);
+  const int som_A = (*domaine_elem_ptr)(num_element,SOM_A);
+  const int som_B = (*domaine_elem_ptr)(num_element,SOM_B);
+  const int som_C = (*domaine_elem_ptr)(num_element,SOM_C);
 
   FTd_matrice33 matrice, matrice_inv;
   //on commence par calculer la matrice de transformation de la base (OX,OY,OZ) vers (ZA,ZB,ZC)
@@ -4385,10 +4385,10 @@ double Parcours_interface::volume_tetraedre(const Domaine_VF& domaine_vf,
   //on inverse ensuite la matrice de transformation
   calcul_inverse_matrice33(matrice,matrice_inv);
 
-  long i,k;
+  int i,k;
 
   //calcul des coordonnes du polygone dans le repere de reference
-  const long nb_sommets_poly = poly_reelles.dimension(0);
+  const int nb_sommets_poly = poly_reelles.dimension(0);
   DoubleTabFT poly_reelles_ref(nb_sommets_poly,3);
   FTd_vecteur3 poly, poly_ref;
   for (i=0 ; i<nb_sommets_poly ; i++)
@@ -4407,9 +4407,9 @@ double Parcours_interface::volume_tetraedre(const Domaine_VF& domaine_vf,
   //calcul de la normale a la facette dans le repere de reference
   FTd_vecteur3 normale_ref;
   double AB[3], AC[3], AB_ref[3], AC_ref[3];
-  const long somA = maillage.facettes_(num_facette, 0);
-  const long somB = maillage.facettes_(num_facette, 1);
-  const long somC = maillage.facettes_(num_facette, 2);
+  const int somA = maillage.facettes_(num_facette, 0);
+  const int somB = maillage.facettes_(num_facette, 1);
+  const int somC = maillage.facettes_(num_facette, 2);
   for (k=0 ; k<dimension ; k++)
     {
       AB[k] = maillage.sommets_(somB,k) - maillage.sommets_(somA,k);
@@ -4478,8 +4478,8 @@ double Parcours_interface::volume_tetraedre_reference(const DoubleTab& poly_reel
   double v_elem = 0.5 /3.;
   assert(v_elem>0.);
 
-  const long nb_sommets_poly = poly_reelles_ref.dimension(0);
-  long k,i, i_prec = nb_sommets_poly -1;
+  const int nb_sommets_poly = poly_reelles_ref.dimension(0);
+  int k,i, i_prec = nb_sommets_poly -1;
   //on entre dans cette fonction qu'avec des triangles
   assert(nb_sommets_poly==3);
   //calcul de la normale au triangle dans le repere de reference
@@ -4500,8 +4500,8 @@ double Parcours_interface::volume_tetraedre_reference(const DoubleTab& poly_reel
     {
       return 0;
     }
-  long coupe_face_opp = -1;
-  long coupe_face_opp_p1 = -1;
+  int coupe_face_opp = -1;
+  int coupe_face_opp_p1 = -1;
   //calcule l'aire de la surface projetee sur face_bas
   double aire_projetee = 0.;
   for (i=0 ; i<nb_sommets_poly ; i++)
@@ -4699,7 +4699,7 @@ double Parcours_interface::volume_tetraedre_reference(const DoubleTab& poly_reel
  * @return (double) contribution du volume engendre par la surface dans l'element
  */
 double Parcours_interface::volume_hexaedre(const Domaine_VF& domaine_vf,
-                                           long num_element,
+                                           int num_element,
                                            const DoubleTab& poly_reelles,
                                            const FTd_vecteur3& norme,
                                            const FTd_vecteur3& centre_de_gravite,
@@ -4707,18 +4707,18 @@ double Parcours_interface::volume_hexaedre(const Domaine_VF& domaine_vf,
                                            double epsilon) const
 {
   // Conventions TRUST VDF :
-  static const long NUM_FACE_GAUCHE = 0;
-  static const long NUM_FACE_DROITE = 3;
-  static const long NUM_FACE_BAS = 1;
-  static const long NUM_FACE_HAUT = 4;
-  static const long NUM_FACE_ARRIERE = 2;
-  static const long NUM_FACE_AVANT = 5;
-  long face_bas = domaine_vf.elem_faces(num_element, NUM_FACE_BAS);
-  long face_haut = domaine_vf.elem_faces(num_element, NUM_FACE_HAUT);
-  long face_gauche = domaine_vf.elem_faces(num_element, NUM_FACE_GAUCHE);
-  long face_droite = domaine_vf.elem_faces(num_element, NUM_FACE_DROITE);
-  long face_arriere = domaine_vf.elem_faces(num_element, NUM_FACE_ARRIERE);
-  long face_avant = domaine_vf.elem_faces(num_element, NUM_FACE_AVANT);
+  static const int NUM_FACE_GAUCHE = 0;
+  static const int NUM_FACE_DROITE = 3;
+  static const int NUM_FACE_BAS = 1;
+  static const int NUM_FACE_HAUT = 4;
+  static const int NUM_FACE_ARRIERE = 2;
+  static const int NUM_FACE_AVANT = 5;
+  int face_bas = domaine_vf.elem_faces(num_element, NUM_FACE_BAS);
+  int face_haut = domaine_vf.elem_faces(num_element, NUM_FACE_HAUT);
+  int face_gauche = domaine_vf.elem_faces(num_element, NUM_FACE_GAUCHE);
+  int face_droite = domaine_vf.elem_faces(num_element, NUM_FACE_DROITE);
+  int face_arriere = domaine_vf.elem_faces(num_element, NUM_FACE_ARRIERE);
+  int face_avant = domaine_vf.elem_faces(num_element, NUM_FACE_AVANT);
   double y_bas = domaine_vf.xv(face_bas, 1);
   double y_haut = domaine_vf.xv(face_haut, 1);
   double x_gauche = domaine_vf.xv(face_gauche, 0);
@@ -4769,8 +4769,8 @@ double Parcours_interface::volume_hexaedre(const Domaine_VF& domaine_vf,
   double v_elem = (x_droite - x_gauche) * (y_haut - y_bas) * (z_avant - z_arriere);
   assert(v_elem>0.);
 
-  const long nb_sommets_poly = poly_reelles.dimension(0);
-  long i, i_prec = nb_sommets_poly -1;
+  const int nb_sommets_poly = poly_reelles.dimension(0);
+  int i, i_prec = nb_sommets_poly -1;
   //calcule l'aire de la surface projetee sur face_bas
   double aire_projetee = 0.;
   for (i=0 ; i<nb_sommets_poly ; i++)
@@ -4792,13 +4792,13 @@ double Parcours_interface::volume_hexaedre(const Domaine_VF& domaine_vf,
     {
       if (polygone_plan_coupe[i] == NUM_FACE_HAUT)
         {
-          const long i_precedent = (i-1) < 0 ? nb_sommets_poly-1 : (i-1);
-          const long i_suivant   = (i+1) >= nb_sommets_poly ? 0 : (i+1);
+          const int i_precedent = (i-1) < 0 ? nb_sommets_poly-1 : (i-1);
+          const int i_suivant   = (i+1) >= nb_sommets_poly ? 0 : (i+1);
           // Le segment [i-1,i] et sur la face du haut
-          const long coupe_face_haut = i_precedent;
-          const long coupe_face_haut_p1 = i;
+          const int coupe_face_haut = i_precedent;
+          const int coupe_face_haut_p1 = i;
           // Un segment voisin est-il sur la face de droite ?
-          long coupe_face_droite = -1;
+          int coupe_face_droite = -1;
           if (polygone_plan_coupe[i_precedent] == NUM_FACE_DROITE)
             coupe_face_droite = i_precedent;
           else if (polygone_plan_coupe[i_suivant] == NUM_FACE_DROITE)
@@ -4843,7 +4843,7 @@ double Parcours_interface::volume_hexaedre(const Domaine_VF& domaine_vf,
   return v;
 }
 
-double Parcours_interface::volume_hexaedre_arete_interne(const Domaine_VDF& domaine_vdf, long num_arete,
+double Parcours_interface::volume_hexaedre_arete_interne(const Domaine_VDF& domaine_vdf, int num_arete,
                                                          const DoubleTab& poly_reelles,
                                                          const FTd_vecteur3& norme,
                                                          const FTd_vecteur3& centre_de_gravite,
@@ -4851,30 +4851,30 @@ double Parcours_interface::volume_hexaedre_arete_interne(const Domaine_VDF& doma
                                                          double epsilon) const
 {
   // Conventions TRUST VDF :
-  static const long NUM_FACE_DROITE_ARETE = 3;
-  static const long NUM_FACE_HAUT_ARETE = 4;
+  static const int NUM_FACE_DROITE_ARETE = 3;
+  static const int NUM_FACE_HAUT_ARETE = 4;
 
-  const long nb_elems_reels=domaine_vdf.nb_elem();
+  const int nb_elems_reels=domaine_vdf.nb_elem();
 
   const IntTab& Qdm=domaine_vdf.Qdm();
   const IntTab& Aretes_Som=domaine_vdf.domaine().aretes_som();
   const DoubleTab& coord_som=domaine_vdf.domaine().coord_sommets();
   const IntVect& orientation_aretes=domaine_vdf.orientation_aretes();
 
-  const long arete_multiple=(domaine_vdf.aretes_multiples()(num_arete)>0); // peu importe si l'arete est multiple 1, 2 ou 3, on decoupe en 4 dans tous les cas
+  const int arete_multiple=(domaine_vdf.aretes_multiples()(num_arete)>0); // peu importe si l'arete est multiple 1, 2 ou 3, on decoupe en 4 dans tous les cas
 
   double y_bas=0,y_haut=0,x_gauche=0,x_droite=0,z_arriere=0,z_avant=0;
 
 
 
-  long ori_arete=dimension-orientation_aretes(num_arete)-1;
-  long face1=Qdm(num_arete,0);
-  long face2=Qdm(num_arete,1);
-  long face3=Qdm(num_arete,2);
-  long face4=Qdm(num_arete,3);
+  int ori_arete=dimension-orientation_aretes(num_arete)-1;
+  int face1=Qdm(num_arete,0);
+  int face2=Qdm(num_arete,1);
+  int face3=Qdm(num_arete,2);
+  int face4=Qdm(num_arete,3);
 
-  long s1=Aretes_Som(num_arete,0);
-  long s2=Aretes_Som(num_arete,1);
+  int s1=Aretes_Som(num_arete,0);
+  int s2=Aretes_Som(num_arete,1);
 
   assert(face1>=0 && face2>=0 && face3>=0 && face4>=0);
 
@@ -4910,7 +4910,7 @@ double Parcours_interface::volume_hexaedre_arete_interne(const Domaine_VDF& doma
     }
   else
     {
-      long elem1,elem2,elem3,elem4;
+      int elem1,elem2,elem3,elem4;
       elem1=domaine_vdf.face_voisins(face1,0);
       elem2=domaine_vdf.face_voisins(face2,0);
       elem3=domaine_vdf.face_voisins(face1,1);
@@ -5144,8 +5144,8 @@ double Parcours_interface::volume_hexaedre_arete_interne(const Domaine_VDF& doma
   double v_elem = (x_droite - x_gauche) * (y_haut - y_bas) * (z_avant - z_arriere);
   assert(v_elem>0.);
 
-  const long nb_sommets_poly = poly_reelles.dimension(0);
-  long i, i_prec = nb_sommets_poly -1;
+  const int nb_sommets_poly = poly_reelles.dimension(0);
+  int i, i_prec = nb_sommets_poly -1;
   //calcule l'aire de la surface projetee sur face_bas
   double aire_projetee = 0.;
   for (i=0 ; i<nb_sommets_poly ; i++)
@@ -5167,13 +5167,13 @@ double Parcours_interface::volume_hexaedre_arete_interne(const Domaine_VDF& doma
     {
       if (polygone_plan_coupe[i] == NUM_FACE_HAUT_ARETE)
         {
-          const long i_precedent = (i-1) < 0 ? nb_sommets_poly-1 : (i-1);
-          const long i_suivant   = (i+1) >= nb_sommets_poly ? 0 : (i+1);
+          const int i_precedent = (i-1) < 0 ? nb_sommets_poly-1 : (i-1);
+          const int i_suivant   = (i+1) >= nb_sommets_poly ? 0 : (i+1);
           // Le segment [i-1,i] et sur la face du haut
-          const long coupe_face_haut = i_precedent;
-          const long coupe_face_haut_p1 = i;
+          const int coupe_face_haut = i_precedent;
+          const int coupe_face_haut_p1 = i;
           // Un segment voisin est-il sur la face de droite ?
-          long coupe_face_droite = -1;
+          int coupe_face_droite = -1;
           if (polygone_plan_coupe[i_precedent] == NUM_FACE_DROITE_ARETE)
             coupe_face_droite = i_precedent;
           else if (polygone_plan_coupe[i_suivant] == NUM_FACE_DROITE_ARETE)
@@ -5221,7 +5221,7 @@ double Parcours_interface::volume_hexaedre_arete_interne(const Domaine_VDF& doma
 
 
 // debut EB : copie de la fonction volume_hexaedre mais en adaptant la position des sommets pour les faces
-double Parcours_interface::volume_hexaedre_face(const Domaine_VDF& domaine_vdf, long num_face,
+double Parcours_interface::volume_hexaedre_face(const Domaine_VDF& domaine_vdf, int num_face,
                                                 const DoubleTab& poly_reelles,
                                                 const FTd_vecteur3& norme,
                                                 const FTd_vecteur3& centre_de_gravite,
@@ -5229,24 +5229,24 @@ double Parcours_interface::volume_hexaedre_face(const Domaine_VDF& domaine_vdf, 
                                                 double epsilon) const
 {
   // Conventions TRUST VDF :
-  static const long NUM_FACE_DROITE_FACE = 3;
-  static const long NUM_FACE_HAUT_FACE = 4;
+  static const int NUM_FACE_DROITE_FACE = 3;
+  static const int NUM_FACE_HAUT_FACE = 4;
   /*
-  static long affichage_x=0;
-  static long affichage_y=0;
-  static long affichage_z=0;
+  static int affichage_x=0;
+  static int affichage_y=0;
+  static int affichage_z=0;
   */
-  long face_gauche=0, face_droite=0, face_bas=0, face_haut=0, face_avant=0, face_arriere=0;
+  int face_gauche=0, face_droite=0, face_bas=0, face_haut=0, face_avant=0, face_arriere=0;
   double y_bas=0,y_haut=0,x_gauche=0,x_droite=0,z_arriere=0,z_avant=0;
-  const long elem0 = domaine_vdf.face_voisins(num_face,0);
-  const long elem1 = domaine_vdf.face_voisins(num_face,1);
-  const long nb_elem_reel=domaine_vdf.nb_elem();
+  const int elem0 = domaine_vdf.face_voisins(num_face,0);
+  const int elem1 = domaine_vdf.face_voisins(num_face,1);
+  const int nb_elem_reel=domaine_vdf.nb_elem();
   // On verifie si on est sur une face de bord ou non
-  const long face_bord0 = (elem0==-1 || (elem0>=nb_elem_reel)); // pas d'acces a l'element de gauche, bas, arriere
-  const long face_bord1 = (elem1==-1 || (elem1>=nb_elem_reel)); // pas d'acces a l'element de droite, haut, avant
-  long orientation = domaine_vdf.orientation(num_face);
+  const int face_bord0 = (elem0==-1 || (elem0>=nb_elem_reel)); // pas d'acces a l'element de gauche, bas, arriere
+  const int face_bord1 = (elem1==-1 || (elem1>=nb_elem_reel)); // pas d'acces a l'element de droite, haut, avant
+  int orientation = domaine_vdf.orientation(num_face);
 
-  const long face_double=domaine_vdf.faces_doubles()[num_face];
+  const int face_double=domaine_vdf.faces_doubles()[num_face];
   if (!face_bord0 && !face_bord1 && !face_double) // au debut on utilise elem0 ou elem1
     {
       face_gauche=domaine_vdf.elem_faces(elem0,0);
@@ -5280,7 +5280,7 @@ double Parcours_interface::volume_hexaedre_face(const Domaine_VDF& domaine_vdf, 
     }
   else
     {
-      long elem=-1;// = face_bord0 ? elem1 : elem0;
+      int elem=-1;// = face_bord0 ? elem1 : elem0;
       if (face_double)
         {
           if (elem0>=nb_elem_reel) elem=elem1;
@@ -5309,7 +5309,7 @@ double Parcours_interface::volume_hexaedre_face(const Domaine_VDF& domaine_vdf, 
       z_avant=domaine_vdf.xv(face_avant,2);
       z_arriere=domaine_vdf.xv(face_arriere,2);
       // on corrige ensuite pour les faces du volume de controle de meme orientation que la face num_face
-      //long bord = face_bord0==1 ? 0 : 1;
+      //int bord = face_bord0==1 ? 0 : 1;
       if (orientation==0)
         {
           if (face_bord0)
@@ -5395,8 +5395,8 @@ double Parcours_interface::volume_hexaedre_face(const Domaine_VDF& domaine_vdf, 
   double v_elem = (x_droite - x_gauche) * (y_haut - y_bas) * (z_avant - z_arriere);
   assert(v_elem>0.);
 
-  const long nb_sommets_poly = poly_reelles.dimension(0);
-  long i, i_prec = nb_sommets_poly -1;
+  const int nb_sommets_poly = poly_reelles.dimension(0);
+  int i, i_prec = nb_sommets_poly -1;
   //calcule l'aire de la surface projetee sur face_bas
   double aire_projetee = 0.;
   for (i=0 ; i<nb_sommets_poly ; i++)
@@ -5418,13 +5418,13 @@ double Parcours_interface::volume_hexaedre_face(const Domaine_VDF& domaine_vdf, 
     {
       if (polygone_plan_coupe[i] == NUM_FACE_HAUT_FACE)
         {
-          const long i_precedent = (i-1) < 0 ? nb_sommets_poly-1 : (i-1);
-          const long i_suivant   = (i+1) >= nb_sommets_poly ? 0 : (i+1);
+          const int i_precedent = (i-1) < 0 ? nb_sommets_poly-1 : (i-1);
+          const int i_suivant   = (i+1) >= nb_sommets_poly ? 0 : (i+1);
           // Le segment [i-1,i] et sur la face du haut
-          const long coupe_face_haut = i_precedent;
-          const long coupe_face_haut_p1 = i;
+          const int coupe_face_haut = i_precedent;
+          const int coupe_face_haut_p1 = i;
           // Un segment voisin est-il sur la face de droite ?
-          long coupe_face_droite = -1;
+          int coupe_face_droite = -1;
           if (polygone_plan_coupe[i_precedent] == NUM_FACE_DROITE_FACE)
             coupe_face_droite = i_precedent;
           else if (polygone_plan_coupe[i_suivant] == NUM_FACE_DROITE_FACE)
@@ -5501,19 +5501,19 @@ double Parcours_interface::volume_hexaedre_face(const Domaine_VDF& domaine_vdf, 
  *   Sinon, renvoie -1.
  *
  */
-long Parcours_interface::calculer_face_sortie_element(const Domaine_VF& domaine_vf,
-                                                      const long num_element,
-                                                      double x0, double y0, double z0,
-                                                      double x1, double y1, double z1,
-                                                      double& pos_intersection) const
+int Parcours_interface::calculer_face_sortie_element(const Domaine_VF& domaine_vf,
+                                                     const int num_element,
+                                                     double x0, double y0, double z0,
+                                                     double x1, double y1, double z1,
+                                                     double& pos_intersection) const
 {
-  const long n_faces = nb_faces_elem_;
+  const int n_faces = nb_faces_elem_;
 
   double t_sortie = 2.;
   // Numero de la face de sortie (numero entre 0 et n_faces)
-  long face_sortie = -1;
+  int face_sortie = -1;
 
-  for (long face = 0; face < n_faces; face++)
+  for (int face = 0; face < n_faces; face++)
     {
       double a, b, c, d;
       double signe = calcul_eq_plan(domaine_vf, num_element, face, a, b, c, d);
@@ -5571,11 +5571,11 @@ long Parcours_interface::calculer_face_sortie_element(const Domaine_VF& domaine_
  * @param (x1, y1, z1) Coordonnees du point P1 (en 2D, z1 est ignore)
  * @param (x, y, z) On met dans (x,y,z) les coordonnees de l'intersection s'il y en a une, sinon on y met les coordonnees de p(P1) qui est sur la face "face_0" Valeur de retour: -1 s'il n'y a pas d'intersection sinon le numero de la face de bord ou passe le sommet
  */
-long Parcours_interface::calculer_sortie_face_bord(const long face_0,
-                                                   const long num_element,
-                                                   double x0, double y0, double z0,
-                                                   double x1, double y1, double z1,
-                                                   double& x, double& y, double& z) const
+int Parcours_interface::calculer_sortie_face_bord(const int face_0,
+                                                  const int num_element,
+                                                  double x0, double y0, double z0,
+                                                  double x1, double y1, double z1,
+                                                  double& x, double& y, double& z) const
 {
   // Principe de l'algo :
   // * On projete le point d'arrivee sur la face_0
@@ -5606,24 +5606,24 @@ long Parcours_interface::calculer_sortie_face_bord(const long face_0,
   assert(domaine_vf.face_voisins()(face_0,0) == num_element
          || domaine_vf.face_voisins()(face_0,1) == num_element);
   double pos_intersection = 1.;
-  long face_sortie = calculer_face_sortie_element(domaine_vf, num_element,
-                                                  x0, y0, z0,
-                                                  x1, y1, z1,
-                                                  pos_intersection);
+  int face_sortie = calculer_face_sortie_element(domaine_vf, num_element,
+                                                 x0, y0, z0,
+                                                 x1, y1, z1,
+                                                 pos_intersection);
 
   // Coordonnees de l'intersection
   x = (1. - pos_intersection) * x0 + pos_intersection * x1;
   y = (1. - pos_intersection) * y0 + pos_intersection * y1;
   z = (1. - pos_intersection) * z0 + pos_intersection * z1;
 
-  long face_bord_sortie;
+  int face_bord_sortie;
 
   // Le test face_sortie != face_0 permet de gerer des erreurs d'arrondi
   // qui font qu'on sort par la mauvaise face (deja vu)
   if (face_sortie >= 0 && face_sortie != face_0)
     {
       const IntTab& face_sommets = domaine_vf.face_sommets();
-      const long dimension2 = (Objet_U::dimension == 2);
+      const int dimension2 = (Objet_U::dimension == 2);
       //
       // Calcul du numero de l'arete de bord coupee :
       // c'est l'arete dont les deux sommets sont des sommets
@@ -5632,20 +5632,20 @@ long Parcours_interface::calculer_sortie_face_bord(const long face_0,
       assert(nb_sommets_par_face_ <= 4);
       // On met dans face_sortie_sommets les numeros des sommets de la face
       // de sortie (indices de sommets dans domaines_vf.domaine().domaine().les_sommets()).
-      long face_sortie_sommets[4];
-      long i;
+      int face_sortie_sommets[4];
+      int i;
       for (i = 0; i < nb_sommets_par_face_; i++)
         face_sortie_sommets[i] = face_sommets(face_sortie, i);
 
       // Tableau des numeros des sommets communs a face_0 et a face_sortie,
       // tries dans l'ordre croissant (si 2 sommets communs)
       // Ce sont des numeros locaux de sommets sur la face_0 :
-      long sommet_commun[2] = { -1, -1 };
+      int sommet_commun[2] = { -1, -1 };
       for (i = 0; i < nb_sommets_par_face_; i++)
         {
-          const long face_bord_sommet = face_sommets(face_0, i);
-          long s = -1;
-          long j;
+          const int face_bord_sommet = face_sommets(face_0, i);
+          int s = -1;
+          int j;
           for (j = 0; j < nb_sommets_par_face_; j++)
             {
               s = face_sortie_sommets[j];
@@ -5677,7 +5677,7 @@ long Parcours_interface::calculer_sortie_face_bord(const long face_0,
       // On doit avoir trouve un sommet commun en 2d, 2 en 3d.
       // Test aussi en optimise, sinon ca calcule n'importe-quoi
       {
-        long n;
+        int n;
         n = (sommet_commun[0] >= 0) ? 1 : 0;
         n += (sommet_commun[1] >= 0) ? 1 : 0;
         if (n != Objet_U::dimension - 1)
@@ -5691,16 +5691,16 @@ long Parcours_interface::calculer_sortie_face_bord(const long face_0,
       // communs que l'on vient de trouver :
       const Connectivite_frontieres& connect_front = refconnect_front_.valeur();
       const IntTab& def_face_arete = connect_front.def_face_aretes();
-      const long nb_aretes_face = def_face_arete.dimension(0);
+      const int nb_aretes_face = def_face_arete.dimension(0);
       for (i = 0; i < nb_aretes_face; i++)
         {
           // Les deux sommets de l'arete a tester (numeros locaux sur la face_0)
-          long sommet0 = def_face_arete(i, 0);
-          long sommet1 = def_face_arete(i, 1);
+          int sommet0 = def_face_arete(i, 0);
+          int sommet1 = def_face_arete(i, 1);
           // ... tries dans l'ordre croissant
           if (sommet1 >= 0 && sommet1 < sommet0)
             {
-              long s = sommet1;
+              int s = sommet1;
               sommet1 = sommet0;
               sommet0 = s;
             }
@@ -5733,12 +5733,12 @@ long Parcours_interface::calculer_sortie_face_bord(const long face_0,
 //  sinon il est a l'interieur. Une majoration de l'erreur sur ce resultat
 //  est donnee par get_erreur_geometrique.
 double Parcours_interface::distance_sommet_faces(const Domaine_VF& domaine_vf,
-                                                 const long num_element,
+                                                 const int num_element,
                                                  double x, double y, double z) const
 {
-  const long n_faces = nb_faces_elem_;
+  const int n_faces = nb_faces_elem_;
   double f_min = DMAXFLOAT;
-  for (long face = 0; face < n_faces; face++)
+  for (int face = 0; face < n_faces; face++)
     {
       double a, b, c, d;
       double signe = calcul_eq_plan(domaine_vf, num_element, face, a, b, c, d);
@@ -5771,7 +5771,7 @@ double Parcours_interface::get_erreur_geometrique() const
  *   ligne de contact).
  *
  */
-void Parcours_interface::projeter_vecteur_sur_face(const long num_face,
+void Parcours_interface::projeter_vecteur_sur_face(const int num_face,
                                                    double& x_,
                                                    double& y_,
                                                    double& z_) const
@@ -5790,7 +5790,7 @@ void Parcours_interface::projeter_vecteur_sur_face(const long num_face,
 
 // Normale unitaire a la face de bord num_face, au point x,y,z, dirigee vers
 // l'interieur du domaine.
-void Parcours_interface::calculer_normale_face_bord(long num_face, double x, double y, double z,
+void Parcours_interface::calculer_normale_face_bord(int num_face, double x, double y, double z,
                                                     double& nx_, double& ny_, double& nz_) const
 {
   const IntTab& face_voisins = refdomaine_vf_.valeur().face_voisins();
@@ -5812,12 +5812,12 @@ void Parcours_interface::calculer_normale_face_bord(long num_face, double x, dou
  *
  */
 double Parcours_interface::uzawa2(const Domaine_VF& domaine_vf,
-                                  const long elem,
-                                  double& x, double& y, double& z, const long is_face) const
+                                  const int elem,
+                                  double& x, double& y, double& z, const int is_face) const
 {
-  const long nb_faces = domaine_vf.elem_faces().dimension(1);
+  const int nb_faces = domaine_vf.elem_faces().dimension(1);
   ArrOfDouble coef_lagrange(nb_faces);
-  long i;
+  int i;
   double somme_m_x = 0., somme_m_y = 0., somme_m_z = 0.;
   double norme_infty = 0.;
   for (i = 0; i < nb_faces; i++)
@@ -5841,12 +5841,12 @@ double Parcours_interface::uzawa2(const Domaine_VF& domaine_vf,
   double solution_y = y;
   double solution_z = z;
   double dist_min;
-  const long max_iter = 10;
-  long niter;
+  const int max_iter = 10;
+  int niter;
   for (niter = 0; niter < max_iter; niter++)
     {
       dist_min = 1e37;
-      long finished = 1;
+      int finished = 1;
       double nsol_x = 0.;
       double nsol_y = 0.;
       double nsol_z = 0.;
@@ -5893,17 +5893,17 @@ double Parcours_interface::uzawa2(const Domaine_VF& domaine_vf,
  * Mise a jour de l'espace virtuel des sommets
  *
  */
-long Parcours_interface::eloigner_sommets_des_faces(Maillage_FT_Disc& maillage) const
+int Parcours_interface::eloigner_sommets_des_faces(Maillage_FT_Disc& maillage) const
 {
   //maillage.update_sommet_face(); // EB
-  const long nb_sommets = maillage.nb_sommets();
+  const int nb_sommets = maillage.nb_sommets();
   DoubleTab& sommets = maillage.sommets_;
   const ArrOfInt& som_elem = maillage.sommet_elem_;
   //const IntTab& som_face = maillage.sommet_face_; // EB
-  const long dim3 = (sommets.dimension(1) == 3);
+  const int dim3 = (sommets.dimension(1) == 3);
   const Domaine_VF& domaine_vf = refdomaine_vf_.valeur();
-  long count = 0;
-  for (long i = 0; i < nb_sommets; i++)
+  int count = 0;
+  for (int i = 0; i < nb_sommets; i++)
     {
       if (maillage.sommet_virtuel(i))
         continue;
@@ -5912,7 +5912,7 @@ long Parcours_interface::eloigner_sommets_des_faces(Maillage_FT_Disc& maillage) 
       //  cela semble donner un resultat correct. A voir...
       //if (maillage.sommet_ligne_contact(i))
       //  continue;
-      const long elem = som_elem[i];
+      const int elem = som_elem[i];
       double x = sommets(i, 0);
       double y = sommets(i, 1);
       double z = dim3 ? sommets(i, 2) : 0.;
@@ -5929,9 +5929,9 @@ long Parcours_interface::eloigner_sommets_des_faces(Maillage_FT_Disc& maillage) 
         }
       /*
       // debut EB
-      for (long dim=0; dim <dimension; dim++)
+      for (int dim=0; dim <dimension; dim++)
         {
-          const long face = som_face(i,dim);
+          const int face = som_face(i,dim);
           const double d_face = distance_sommet_faces_face(zone_vf, face, x, y, z);
           if (d_face < Erreur_max_coordonnees_)
             {
@@ -5948,7 +5948,7 @@ long Parcours_interface::eloigner_sommets_des_faces(Maillage_FT_Disc& maillage) 
       // fin EB
 
     }
-  const long nb_som_tot_deplaces = mp_sum(count);
+  const int nb_som_tot_deplaces = mp_sum(count);
   if (nb_som_tot_deplaces > 0)
     {
       if (je_suis_maitre())

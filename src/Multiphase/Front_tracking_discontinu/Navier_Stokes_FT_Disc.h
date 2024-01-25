@@ -49,17 +49,17 @@ public:
   // Methodes surchargees
   //
   void set_param(Param& titi) override;
-  //void ouvrir_fichier(SFichier& ,const Nom& , const long& , const Navier_Stokes_FT_Disc&);
-  long lire_motcle_non_standard(const Motcle&, Entree&) override;
-  long sauvegarder(Sortie&) const override; //EB
-  long reprendre(Entree&) override; // EB
+  //void ouvrir_fichier(SFichier& ,const Nom& , const int& , const Navier_Stokes_FT_Disc&);
+  int lire_motcle_non_standard(const Motcle&, Entree&) override;
+  int sauvegarder(Sortie&) const override; //EB
+  int reprendre(Entree&) override; // EB
   void imprimer(Sortie& os) const override;
-  virtual long impr_fpi(Sortie& os) const override; // EB
+  virtual int impr_fpi(Sortie& os) const override; // EB
   const Milieu_base& milieu() const override;
   Milieu_base&        milieu() override;
   void                associer_pb_base(const Probleme_base& probleme) override;
   void                discretiser() override;
-  long              preparer_calcul() override;
+  int              preparer_calcul() override;
   void                preparer_pas_de_temps();
   void mettre_a_jour(double temps) override;
   void                calculer_la_pression_en_pa() override;
@@ -67,7 +67,7 @@ public:
   void                projeter() override;
   virtual const Champ_base& calculer_div_normale_interface();
   void correct_at_exit_bad_gradient(DoubleTab& u0) const;
-  void calculer_delta_u_interface(Champ_base& u0, long phase_pilote, long ordre);
+  void calculer_delta_u_interface(Champ_base& u0, int phase_pilote, int ordre);
   const Champ_Don& diffusivite_pour_transport() const override;
 
   virtual const Champ_base * get_delta_vitesse_interface() const;
@@ -83,14 +83,14 @@ public:
     const ArrOfDouble& g,
     DoubleTab& gravite_face) const;
 
-  long is_terme_gravite_rhog() const;
+  int is_terme_gravite_rhog() const;
   const Champ_Fonc& champ_rho_faces() const;
   const Champ_Fonc& get_num_compo() const;
   void reprendre_num_compo(Entree& is) ;
 
   virtual void calculer_dI_dt(DoubleVect& dI_dt); // const;
-  const long& get_is_penalized() const;
-  const long& get_new_mass_source() const;
+  const int& get_is_penalized() const;
+  const int& get_new_mass_source() const;
   const DoubleTab& get_interfacial_area() const;
   DoubleTab& get_set_interfacial_area();  // Open access  in write-mode..
   const DoubleTab& get_mpoint() const;
@@ -335,11 +335,11 @@ public:
   void calcul_forces_interface_taylor_lagrange(DoubleVect& surface_tot_interf, DoubleTab& force_pression_tot_interf, DoubleTab& force_frottements_tot_interf);
 
   // Interpolation trilineaire de valeurs_champs aux facettes du maillage lagrangien. Valeurs_champs contient les infos aux faces du maillage eulerien.
-  long trilinear_interpolation_face(const DoubleTab& indicatrice_faces, const DoubleTab& valeurs_champ, DoubleTab& coord, DoubleTab& resu); // EB // on le declare public car on en a besoin dans Transport_Interfaces_FT_Disc:calculer_vitesse_transport_interpolee
-  long trilinear_interpolation_elem(const DoubleTab& indicatrice, const DoubleTab& valeurs_champ, DoubleTab& coord, DoubleTab& resu);
-  long trilinear_interpolation_elem(const DoubleTab& indicatrice, const DoubleTab& valeurs_champ, DoubleTab& coord, DoubleTab& resu, const long is_P2, const long discr);
+  int trilinear_interpolation_face(const DoubleTab& indicatrice_faces, const DoubleTab& valeurs_champ, DoubleTab& coord, DoubleTab& resu); // EB // on le declare public car on en a besoin dans Transport_Interfaces_FT_Disc:calculer_vitesse_transport_interpolee
+  int trilinear_interpolation_elem(const DoubleTab& indicatrice, const DoubleTab& valeurs_champ, DoubleTab& coord, DoubleTab& resu);
+  int trilinear_interpolation_elem(const DoubleTab& indicatrice, const DoubleTab& valeurs_champ, DoubleTab& coord, DoubleTab& resu, const int is_P2, const int discr);
   // Interpolation trilineaire de valeurs_champs aux sommets du maillage lagrangien. Valeurs_champs contient les infos aux faces du maillage eulerien.
-  long trilinear_interpolation_face_sommets(const DoubleTab& indicatrice_faces, const DoubleTab& valeurs_champ, DoubleTab& coord, DoubleTab& resu); // EB // on le declare public car on en a besoin dans Transport_Interfaces_FT_Disc:calculer_vitesse_transport_interpolee
+  int trilinear_interpolation_face_sommets(const DoubleTab& indicatrice_faces, const DoubleTab& valeurs_champ, DoubleTab& coord, DoubleTab& resu); // EB // on le declare public car on en a besoin dans Transport_Interfaces_FT_Disc:calculer_vitesse_transport_interpolee
 
 protected:
   // Methode surchargee de Navier_Stokes_std :
@@ -359,13 +359,13 @@ protected:
                                              Champ_base& gradient_i);
 
   // debut EB
-  long trilinear_interpolation_face(const DoubleTab& indicatrice_faces, const DoubleTab& valeurs_champ, DoubleTab& coord, DoubleTab& resu) const;
-  long trilinear_interpolation_gradU_face(const DoubleTab& indicatrice_face, const DoubleTab& valeurs_champ, DoubleTab& coord, DoubleTab& resu);
-  long trilinear_interpolation_gradU_elem_P1(const DoubleTab& indicatrice_face, const DoubleTab& indicatrice, const DoubleTab& valeurs_champ, DoubleTab& coord, DoubleTab& resu);
-  long trilinear_interpolation_gradU_elem(const DoubleTab& indicatrice_face, const DoubleTab& indicatrice, const DoubleTab& valeurs_champ, DoubleTab& coord, DoubleTab& resu);
-  double calculer_viscosite_arete(long face1, long face2, long compo);
-  inline double chercher_elem_voisins(const DoubleTab& indicatrice, DoubleVect& coord_elem_interp, IntVect& elem_voisins, const long sauv_list_P1=0, const long num_fa7=-1); // sauv_list_P1 : on sauvegarde la liste des elements auxquels appartiennent les points P1
-  inline void chercher_faces_voisines (DoubleVect& coord_elem_interp, IntVect& faces_voisines, long orientation);
+  int trilinear_interpolation_face(const DoubleTab& indicatrice_faces, const DoubleTab& valeurs_champ, DoubleTab& coord, DoubleTab& resu) const;
+  int trilinear_interpolation_gradU_face(const DoubleTab& indicatrice_face, const DoubleTab& valeurs_champ, DoubleTab& coord, DoubleTab& resu);
+  int trilinear_interpolation_gradU_elem_P1(const DoubleTab& indicatrice_face, const DoubleTab& indicatrice, const DoubleTab& valeurs_champ, DoubleTab& coord, DoubleTab& resu);
+  int trilinear_interpolation_gradU_elem(const DoubleTab& indicatrice_face, const DoubleTab& indicatrice, const DoubleTab& valeurs_champ, DoubleTab& coord, DoubleTab& resu);
+  double calculer_viscosite_arete(int face1, int face2, int compo);
+  inline double chercher_elem_voisins(const DoubleTab& indicatrice, DoubleVect& coord_elem_interp, IntVect& elem_voisins, const int sauv_list_P1=0, const int num_fa7=-1); // sauv_list_P1 : on sauvegarde la liste des elements auxquels appartiennent les points P1
+  inline void chercher_faces_voisines (DoubleVect& coord_elem_interp, IntVect& faces_voisines, int orientation);
   inline void chercher_faces_voisines_xyz (DoubleVect& coord_elem_interp, IntTab& faces_voisines);
   // fin EB
 
@@ -393,7 +393,7 @@ private:
   Navier_Stokes_FT_Disc_interne *variables_internes_;
 
   double minx,maxx,pente;
-  long is_repulsion;
+  int is_repulsion;
 
   void calculer_champ_forces_collisions(const DoubleTab& indicatrice, DoubleTab& valeurs_champ,  const Transport_Interfaces_FT_Disc& eq_transport,Transport_Interfaces_FT_Disc& eq_transport_non_const, REF(Transport_Interfaces_FT_Disc)& refeq_transport, const Maillage_FT_Disc& maillage); // HMS
   void calculer_correction_trainee(DoubleTab& valeurs_champ, const Transport_Interfaces_FT_Disc& eq_transport,Transport_Interfaces_FT_Disc& eq_transport_non_const, REF(Transport_Interfaces_FT_Disc)& refeq_transport, const Maillage_FT_Disc& maillage);// EB
@@ -410,7 +410,7 @@ private:
 *  Le tableau elem_voisins est rempli avec les 8 elements euleriens les plus proches du point coord_elem_interp. Ces elements
 *  seront utilises pour les interpolations trilineaires.
 */
-inline double Navier_Stokes_FT_Disc::chercher_elem_voisins(const DoubleTab& indicatrice, DoubleVect& coord_elem_interp, IntVect& elem_voisins, const long sauv_list_P1, const long num_fa7)
+inline double Navier_Stokes_FT_Disc::chercher_elem_voisins(const DoubleTab& indicatrice, DoubleVect& coord_elem_interp, IntVect& elem_voisins, const int sauv_list_P1, const int num_fa7)
 {
   const Domaine_VDF& domaine_vdf = ref_cast(Domaine_VDF, domaine_dis().valeur());
   const Domaine& domaine = domaine_vdf.domaine();
@@ -418,7 +418,7 @@ inline double Navier_Stokes_FT_Disc::chercher_elem_voisins(const DoubleTab& indi
 
   DoubleVect coord_elem_eulerien(dimension);
   IntTab& list_elem_P1=get_list_elem_P1();
-  long elem_eulerien=domaine.chercher_elements(coord_elem_interp(0), coord_elem_interp(1),coord_elem_interp(2));
+  int elem_eulerien=domaine.chercher_elements(coord_elem_interp(0), coord_elem_interp(1),coord_elem_interp(2));
   if (sauv_list_P1)  list_elem_P1(num_fa7,0)=elem_eulerien;
   if (elem_eulerien<0)
     {
@@ -427,10 +427,10 @@ inline double Navier_Stokes_FT_Disc::chercher_elem_voisins(const DoubleTab& indi
     }
   //if (indicatrice(elem_eulerien)<1) Cerr << "Elem eulerien " <<elem_eulerien << " d'indicatrice " << indicatrice(elem_eulerien) << finl;
 
-  for (long dim=0; dim<dimension; dim++) coord_elem_eulerien(dim)=domaine_vdf.xp(elem_eulerien,dim);
+  for (int dim=0; dim<dimension; dim++) coord_elem_eulerien(dim)=domaine_vdf.xp(elem_eulerien,dim);
   IntVect direction_interp(dimension); // Pour chaque direction, on regarde de quel cote de l'element le point se trouve. 0 : a gauche (pos_i_point<=pos_i_elem), 1 : a droite(pos_i_point>pos_i_elem)
   IntVect faces_elem_interp(2*dimension);
-  for (long dim=0; dim<dimension; dim++)
+  for (int dim=0; dim<dimension; dim++)
     {
       faces_elem_interp(dim)=domaine_vdf.elem_faces_pour_interp(elem_eulerien,dim);
       faces_elem_interp(dimension+dim)=domaine_vdf.elem_faces_pour_interp(elem_eulerien,dimension+dim);
@@ -501,9 +501,9 @@ inline double Navier_Stokes_FT_Disc::chercher_elem_voisins(const DoubleTab& indi
       elem_voisins(5)=domaine_vf.face_voisins_pour_interp(domaine_vdf.elem_faces_pour_interp(elem_voisins(1),2),0);
       elem_voisins(6)=domaine_vf.face_voisins_pour_interp(domaine_vdf.elem_faces_pour_interp(elem_voisins(2),2),0);
       elem_voisins(7)=domaine_vf.face_voisins_pour_interp(domaine_vdf.elem_faces_pour_interp(elem_voisins(3),2),0);
-      for (long i=0; i<4; i++)
+      for (int i=0; i<4; i++)
         {
-          long tmp=elem_voisins(i);
+          int tmp=elem_voisins(i);
           elem_voisins(i)=elem_voisins(i+4);
           elem_voisins(i+4)=tmp;
         }
@@ -513,24 +513,24 @@ inline double Navier_Stokes_FT_Disc::chercher_elem_voisins(const DoubleTab& indi
 /*! @brief meme principe que Navier_Stokes_FT_Disc::chercher_elem_voisins mais pour les faces
  * identifie 8 faces voisines d'orientation "orientation"
  */
-inline void Navier_Stokes_FT_Disc::chercher_faces_voisines (DoubleVect& coord_elem_interp, IntVect& faces_voisines, long orientation)
+inline void Navier_Stokes_FT_Disc::chercher_faces_voisines (DoubleVect& coord_elem_interp, IntVect& faces_voisines, int orientation)
 {
   const Domaine_VDF& domaine_vdf = ref_cast(Domaine_VDF, domaine_dis().valeur());
   const Domaine& domaine = domaine_vdf.domaine();
   const Domaine_VF& domaine_vf = ref_cast(Domaine_VF, domaine_dis().valeur());
   DoubleVect coord_elem_eulerien(dimension);
 
-  long elem_eulerien=domaine.chercher_elements(coord_elem_interp(0), coord_elem_interp(1),coord_elem_interp(2));
+  int elem_eulerien=domaine.chercher_elements(coord_elem_interp(0), coord_elem_interp(1),coord_elem_interp(2));
   if (elem_eulerien<0)
     {
       faces_voisines=-1;
       return;
     }
-  for (long dim=0; dim<dimension; dim++) coord_elem_eulerien(dim)=domaine_vdf.xp(elem_eulerien,dim);
+  for (int dim=0; dim<dimension; dim++) coord_elem_eulerien(dim)=domaine_vdf.xp(elem_eulerien,dim);
   IntVect direction_interp(dimension); // Pour chaque direction, on regarde de quel cote de l'element le point se trouve. 0 : a gauche (pos_i_point<=pos_i_elem), 1 : a droite(pos_i_point>pos_i_elem)
   IntVect faces_elem_interp(2*dimension);
 
-  for (long dim=0; dim<dimension; dim++)
+  for (int dim=0; dim<dimension; dim++)
     {
       faces_elem_interp(dim)=domaine_vdf.elem_faces_pour_interp(elem_eulerien,dim);
       faces_elem_interp(dimension+dim)=domaine_vdf.elem_faces_pour_interp(elem_eulerien,dimension+dim);
@@ -591,9 +591,9 @@ inline void Navier_Stokes_FT_Disc::chercher_faces_voisines (DoubleVect& coord_el
       faces_voisines(5)=domaine_vdf.elem_faces_pour_interp(domaine_vf.face_voisins_pour_interp(domaine_vdf.elem_faces_pour_interp(domaine_vf.face_voisins_pour_interp(faces_voisines(1),1),2),0),orientation);
       faces_voisines(6)=domaine_vdf.elem_faces_pour_interp(domaine_vf.face_voisins_pour_interp(domaine_vdf.elem_faces_pour_interp(domaine_vf.face_voisins_pour_interp(faces_voisines(2),1),2),0),orientation);
       faces_voisines(7)=domaine_vdf.elem_faces_pour_interp(domaine_vf.face_voisins_pour_interp(domaine_vdf.elem_faces_pour_interp(domaine_vf.face_voisins_pour_interp(faces_voisines(3),1),2),0),orientation);
-      for (long i=0; i<4; i++)
+      for (int i=0; i<4; i++)
         {
-          long tmp=faces_voisines(i);
+          int tmp=faces_voisines(i);
           faces_voisines(i)=faces_voisines(i+4);
           faces_voisines(i+4)=tmp;
         }
@@ -631,10 +631,10 @@ inline void Navier_Stokes_FT_Disc::chercher_faces_voisines (DoubleVect& coord_el
           faces_voisines(6)=domaine_vdf.elem_faces_pour_interp(domaine_vf.face_voisins_pour_interp(domaine_vdf.elem_faces_pour_interp(domaine_vf.face_voisins_pour_interp(faces_voisines(4),1),1),0),orientation);
           faces_voisines(7)=domaine_vdf.elem_faces_pour_interp(domaine_vf.face_voisins_pour_interp(domaine_vdf.elem_faces_pour_interp(domaine_vf.face_voisins_pour_interp(faces_voisines(5),1),1),0),orientation);
 
-          long tmp0=faces_voisines(0);
-          long tmp1=faces_voisines(1);
-          long tmp4=faces_voisines(4);
-          long tmp5=faces_voisines(5);
+          int tmp0=faces_voisines(0);
+          int tmp1=faces_voisines(1);
+          int tmp4=faces_voisines(4);
+          int tmp5=faces_voisines(5);
 
           faces_voisines(0)=faces_voisines(2);
           faces_voisines(1)=faces_voisines(3);
@@ -656,13 +656,13 @@ inline void Navier_Stokes_FT_Disc::chercher_faces_voisines (DoubleVect& coord_el
  */
 inline void Navier_Stokes_FT_Disc::chercher_faces_voisines_xyz (DoubleVect& coord_elem_interp, IntTab& faces_voisines)
 {
-  long nb_faces_voisines=8;
+  int nb_faces_voisines=8;
   IntVect faces_voisines_x(nb_faces_voisines),faces_voisines_y(nb_faces_voisines),faces_voisines_z(nb_faces_voisines);
   chercher_faces_voisines(coord_elem_interp,faces_voisines_x,0);
   chercher_faces_voisines(coord_elem_interp,faces_voisines_y,1);
   chercher_faces_voisines(coord_elem_interp,faces_voisines_z,2);
 
-  for (long i=0; i<8; i++)
+  for (int i=0; i<8; i++)
     {
       faces_voisines(0,i)=faces_voisines_x(i);
       faces_voisines(1,i)=faces_voisines_y(i);

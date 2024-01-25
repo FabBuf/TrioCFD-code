@@ -60,7 +60,7 @@ void Fluide_Diphasique::set_param(Param& param)
   Milieu_base::set_additional_params(param); // XD ref gravite field_base
 }
 
-long Fluide_Diphasique::lire_motcle_non_standard(const Motcle& mot, Entree& is)
+int Fluide_Diphasique::lire_motcle_non_standard(const Motcle& mot, Entree& is)
 {
   if ((mot=="fluide0") || (mot=="fluide1"))
     {
@@ -95,7 +95,7 @@ long Fluide_Diphasique::lire_motcle_non_standard(const Motcle& mot, Entree& is)
     return Milieu_base::lire_motcle_non_standard(mot,is);
 }
 
-void Fluide_Diphasique::verifier_coherence_champs(long& err,Nom& msg)
+void Fluide_Diphasique::verifier_coherence_champs(int& err,Nom& msg)
 {
   msg="";
   if (!sub_type(Champ_Uniforme,sigma_.valeur()))
@@ -124,7 +124,7 @@ void Fluide_Diphasique::verifier_coherence_champs(long& err,Nom& msg)
 }
 
 const Fluide_Incompressible&
-Fluide_Diphasique::fluide_phase(long phase) const
+Fluide_Diphasique::fluide_phase(int phase) const
 {
   assert(phase == 0 || phase == 1);
   if (phase == 0)
@@ -149,7 +149,7 @@ double Fluide_Diphasique::chaleur_latente() const
   return chaleur_latente_(0,0);
 }
 
-long Fluide_Diphasique::formule_mu() const
+int Fluide_Diphasique::formule_mu() const
 // These values are used in the switch of Navier_Stokes_FT_Disc::FT_disc_calculer_champs_rho_mu_nu_dipha
 {
   if (formule_mu_ == "standard")
@@ -165,7 +165,7 @@ long Fluide_Diphasique::formule_mu() const
 }
 
 
-long Fluide_Diphasique::initialiser(const double temps)
+int Fluide_Diphasique::initialiser(const double temps)
 {
   is_particule_solide_ ? phase0_PS_.initialiser(temps) : phase0_.initialiser(temps);
   phase1_.initialiser(temps);
