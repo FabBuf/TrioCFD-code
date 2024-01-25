@@ -24,6 +24,10 @@
 #include <Objet_U.h>
 #include <Fluide_Incompressible.h>
 #include <Milieu_base.h>
+// EB
+#include <Particule_Solide.h>
+
+// fin EB
 
 class Entree;
 class Motcle;
@@ -34,17 +38,17 @@ class Fluide_Diphasique : public Milieu_base
 public:
   Fluide_Diphasique();
   // Renvoie le fluide de la phase 0 ou 1.
-  const Fluide_Incompressible& fluide_phase(int la_phase) const;
+  const Fluide_Incompressible& fluide_phase(long la_phase) const;
   double sigma() const;
   double chaleur_latente() const;
-  int formule_mu() const;
+  long formule_mu() const;
   // Methode utilisee pour le calcul du mu du domaine
 
   // Surcharge des methodes standard du milieu_base :
   void set_param(Param& param) override;
-  void verifier_coherence_champs(int& err,Nom& message) override;
-  int lire_motcle_non_standard(const Motcle&, Entree&) override;
-  int initialiser(const double temps) override;
+  void verifier_coherence_champs(long& err,Nom& message) override;
+  long lire_motcle_non_standard(const Motcle&, Entree&) override;
+  long initialiser(const double temps) override;
   void mettre_a_jour(double temps) override;
   void discretiser(const Probleme_base& pb, const  Discretisation_base& dis) override;
 
@@ -64,8 +68,9 @@ public:
 protected:
 
 private:
-
-  Fluide_Incompressible phase0_;
+  long is_particule_solide_; // EB
+  Particule_Solide phase0_PS_; // EB
+  Fluide_Incompressible phase0_; // EB
   Fluide_Incompressible phase1_;
   // Tension de surface (J/m^2)
   Champ_Don sigma_;

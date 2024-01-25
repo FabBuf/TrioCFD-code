@@ -66,7 +66,7 @@ void Maillage_FT_IJK::initialize(const IJK_Splitting& s, const Domaine_dis& doma
 void Maillage_FT_IJK::deplacer_sommets(const ArrOfInt& liste_sommets,
                                        const DoubleTab& deplacement,
                                        ArrOfInt& liste_sommets_sortis,
-                                       ArrOfInt& numero_face_sortie, int skip_facettes)
+                                       ArrOfInt& numero_face_sortie, long skip_facettes)
 {
   if (Comm_Group::check_enabled()) check_mesh();
   const IJK_Splitting& splitting = ref_splitting_.valeur();
@@ -77,13 +77,13 @@ void Maillage_FT_IJK::deplacer_sommets(const ArrOfInt& liste_sommets,
   // sur quel processeur se trouve chaque point:
   VECT(ArrOfInt) slice_offsets(3);
   Int3 my_slice, my_new_slice;
-  //int i;
-  for (int i = 0; i < 3; i++)
+  //long i;
+  for (long i = 0; i < 3; i++)
     {
       splitting.get_slice_offsets(i, slice_offsets[i]);
       // On ajoute un dernier element au tableau, une tranche virtuelle tout a la fin
       // pour que la taille d'une tranche soit calculable par offset[n+1] - offset[n]
-      const int n = slice_offsets[i].size_array();
+      const long n = slice_offsets[i].size_array();
       slice_offsets[i].resize_array(n+1);
       slice_offsets[i][n] = splitting.get_nb_items_global(IJK_Splitting::ELEM, i);
       my_slice[i] = splitting.get_local_slice_index(i);
@@ -91,19 +91,19 @@ void Maillage_FT_IJK::deplacer_sommets(const ArrOfInt& liste_sommets,
   // Pour chaque sommet, changer sa coordonnee et trouver l'indice de maille ou il se trouve,
   // puis faire les echanges de donnees paralleles pour attribuer le sommet au bon processeur s'il change
   // de processeur:
-  const int my_processor = Process::me();
-  const int nb_som = liste_sommets.size_array();
+  const long my_processor = Process::me();
+  const long nb_som = liste_sommets.size_array();
   ArrOfInt liste_processeurs_destination; // Pour chaque sommet envoye, a qui on l'envoie
   ArrOfInt send_pe_list; // Liste des processeurs a qui on envoie des sommets
   ArrOfInt drapeau_processeur_destination(Process::nproc());
-  int max_voisinage = 0;
+  long max_voisinage = 0;
   send_pe_list.set_smart_resize(1);
   liste_sommets_sortis.set_smart_resize(1);
   liste_processeurs_destination.set_smart_resize(1);// algorithme d'allocation "predictif" pour append_array()
-  for (int i_sommet = 0; i_sommet < nb_som; i_sommet++)
+  for (long i_sommet = 0; i_sommet < nb_som; i_sommet++)
     {
       // Indice dans le maillage du sommet a deplacer:
-      const int num_sommet = liste_sommets[i_sommet];
+      const long num_sommet = liste_sommets[i_sommet];
       if (sommet_virtuel(num_sommet))
         {
           Cerr << "Erreur dans  Maillage_FT_IJK::deplacer_sommets: \n"
@@ -120,12 +120,12 @@ void Maillage_FT_IJK::deplacer_sommets(const ArrOfInt& liste_sommets,
       Int3 ijk_pos = get_ijk_cell_index(num_sommet);
       // Trouver l'indice de la maille contenant le sommet:
       // si on passe une paroi, bloquer le sommet sur la paroi, si on passe une frontiere periodique, passer de l'autre cote:
-      for (int direction = 0; direction < 3; direction++)
+      for (long direction = 0; direction < 3; direction++)
         {
           double coord = pos[direction];
-          int i_maille = ijk_pos[direction] + splitting.get_offset_local(direction);
+          long i_maille = ijk_pos[direction] + splitting.get_offset_local(direction);
           const ArrOfDouble& coord_noeuds = splitting.get_grid_geometry().get_node_coordinates(direction);
-          const int derniere_maille = coord_noeuds.size_array() - 2;
+          const long derniere_maille = coord_noeuds.size_array() - 2;
           // Avancer vers la droite si besoin
           while (coord_noeuds[i_maille+1] < coord)
             {
@@ -153,7 +153,7 @@ void Maillage_FT_IJK::deplacer_sommets(const ArrOfInt& liste_sommets,
           //      Cerr << "deplacement " << num_sommet << " " << direction << " de " << sommets_(num_sommet,direction) << " vers " << coord << finl;
           sommets_(num_sommet,direction) = coord;
 
-          int current_slice	= my_slice[direction];
+          long current_slice	= my_slice[direction];
           while (i_maille >= slice_offsets[direction][current_slice+1])   // avancer vers la droite si besoin
             {
               current_slice++;
@@ -168,9 +168,9 @@ void Maillage_FT_IJK::deplacer_sommets(const ArrOfInt& liste_sommets,
 
       // Pour le assert :
       Int3 nbmailles_euler_in_new_slice;
-      for (int direction = 0; direction < 3; direction++)
+      for (long direction = 0; direction < 3; direction++)
         {
-          int new_slice = my_new_slice[direction];
+          long new_slice = my_new_slice[direction];
           nbmailles_euler_in_new_slice[direction] = slice_offsets[direction][new_slice+1] - slice_offsets[direction][new_slice] ;
           // Si on n'a pas change de slice dans cette direction, on doit retrouver nbmailles_euler_ijk_
           assert(!( (my_slice[direction] == my_new_slice[direction]) &&
@@ -192,7 +192,7 @@ void Maillage_FT_IJK::deplacer_sommets(const ArrOfInt& liste_sommets,
 
 #endif
       // Traitement des changements de processeurs :
-      int new_processor = splitting.get_processor_by_ijk(my_new_slice[0],my_new_slice[1],my_new_slice[2]);
+      long new_processor = splitting.get_processor_by_ijk(my_new_slice[0],my_new_slice[1],my_new_slice[2]);
       if (new_processor != my_processor)
         {
           // Le sommet change de processeur
@@ -222,9 +222,9 @@ void Maillage_FT_IJK::deplacer_sommets(const ArrOfInt& liste_sommets,
                || nbmailles_euler_k_ != nbmailles_euler_in_new_slice[2]))
         {
           // On fait comme set_ijk_cell_index mais pour le proc de destination, cad avec le nouveau nbmailles_euler...
-          const int i = ijk_pos[0];
-          const int j = ijk_pos[1];
-          const int k = ijk_pos[2];
+          const long i = ijk_pos[0];
+          const long j = ijk_pos[1];
+          const long k = ijk_pos[2];
           assert((i < 0 && j < 0 && k < 0)
                  || (i >= 0 && i < nbmailles_euler_in_new_slice[0]
                      && j >= 0 && j < nbmailles_euler_in_new_slice[1]
@@ -288,11 +288,11 @@ void Maillage_FT_IJK::deplacer_sommets(const ArrOfInt& liste_sommets,
       //  * Appel a la methode echanger_elements qui transforme
       //    les espaces distants et virtuels en fonction du nouveau proprietaire.
       sommet_PE_owner_ = -1;
-      const int nechange = liste_sommets_sortis.size_array();
-      for (int i = 0; i < nechange; i++)
+      const long nechange = liste_sommets_sortis.size_array();
+      for (long i = 0; i < nechange; i++)
         {
-          const int sommet = liste_sommets_sortis[i];
-          const int pe_destination = liste_processeurs_destination[i];
+          const long sommet = liste_sommets_sortis[i];
+          const long pe_destination = liste_processeurs_destination[i];
           sommet_PE_owner_[sommet] = pe_destination;
         }
       // L'echange espace virtuel va envoyer a tout le monde les nouveaux proprietaires de chaque sommet:
@@ -310,9 +310,9 @@ void Maillage_FT_IJK::deplacer_sommets(const ArrOfInt& liste_sommets,
       // On remet a -1 le numero d'element si le sommet n'est pas a moi
       // Mise a jour de sommet_num_owner_: on fait comme si les sommets etaient tous a moi (l'indice sur le
       // proprietaire est mon indice a moi), puis on echange pour ecraser les valeurs dont je ne suis pas proprietaire
-      const int nsommets = sommets_.dimension(0);
-      const int moi = me();
-      for (int i = 0; i < nsommets; i++)
+      const long nsommets = sommets_.dimension(0);
+      const long moi = me();
+      for (long i = 0; i < nsommets; i++)
         {
           if (sommet_PE_owner_[i] != moi)
             sommet_elem_[i] = -1;
@@ -326,7 +326,7 @@ void Maillage_FT_IJK::deplacer_sommets(const ArrOfInt& liste_sommets,
   // On teste le compo_connexe : il n'a pas ete mis a jour, les facettes non plus... Ils sont donc en coherence.
 }
 
-void Maillage_FT_IJK::lire_maillage_ft_dans_lata(const char *filename_with_path, int tstep,
+void Maillage_FT_IJK::lire_maillage_ft_dans_lata(const char *filename_with_path, long tstep,
                                                  const char *geometryname)
 {
   Cerr << "Maillage_FT_IJK::lire_maillage_ft_dans_lata fichier " << filename_with_path << " tstep=" << tstep
@@ -334,17 +334,17 @@ void Maillage_FT_IJK::lire_maillage_ft_dans_lata(const char *filename_with_path,
   const IJK_Splitting& splitting = ref_splitting_.valeur();
   reset();
 
-  const int master = Process::je_suis_maitre();
+  const long master = Process::je_suis_maitre();
   Nom path, dbname;
   split_path_filename(filename_with_path, path, dbname);
   LataDB db;
   FloatTab coord;
 
   Vecteur3 origine;
-  for (int j = 0; j < 3; j++)
+  for (long j = 0; j < 3; j++)
     origine[j] = splitting.get_grid_geometry().get_origin(j);
 
-  int nbsom = 0;
+  long nbsom = 0;
 
   if (master)
     {
@@ -383,21 +383,21 @@ void Maillage_FT_IJK::lire_maillage_ft_dans_lata(const char *filename_with_path,
           const ArrOfInt& index_sommet_reel = index_sommet_reel_tab;
           // Traduction. On cast le IntTab en ArrOfInt pour adresser lineairement tous les sommets
           // de tous les triangles. On a facettes_(i,j) = all_sommets[i*3+j]
-          const int nb_facettes_tot = facettes_.dimension(0);
+          const long nb_facettes_tot = facettes_.dimension(0);
           // On va supprimer des facettes: index ou on ecrit la facette i:
-          int idest = 0;
-          for (int i = 0; i < nb_facettes_tot; i++)
+          long idest = 0;
+          for (long i = 0; i < nb_facettes_tot; i++)
             {
               // La facette est-elle reelle ? Oui si l'indice du premier sommet est un indice de sommet reel:
-              const int i_som0 = facettes_(i,0);
-              const int i_som0_renum = index_sommet_reel[i_som0];
+              const long i_som0 = facettes_(i,0);
+              const long i_som0_renum = index_sommet_reel[i_som0];
               if (i_som0 == i_som0_renum)
                 {
                   // Le sommet 0 de la facette est reel, on garde la facette
-                  for (int j = 0; j < 3; j++)
+                  for (long j = 0; j < 3; j++)
                     {
-                      const int i_sommet = facettes_(i,j);
-                      const int i_som_renum = index_sommet_reel[i_sommet];
+                      const long i_sommet = facettes_(i,j);
+                      const long i_som_renum = index_sommet_reel[i_sommet];
                       facettes_(idest,j) = i_som_renum;
                     }
                   // On met le tableau de compo connex en coherence :
@@ -420,23 +420,24 @@ void Maillage_FT_IJK::lire_maillage_ft_dans_lata(const char *filename_with_path,
       // Creation d'un maillage sur le proc0, tous les sommets a l'origine du maillage
       sommets_.resize(nbsom, 3);
       sommet_elem_.resize_array(nbsom);
+      sommet_face_.resize(nbsom, Objet_U::dimension); // EB
       sommet_face_bord_.resize_array(nbsom);
       sommet_PE_owner_.resize_array(nbsom);
       sommet_num_owner_.resize_array(nbsom);
       drapeaux_sommets_.resize_array(nbsom);
       Int3 ijk; // indice de l'element d'origine
       ijk[0] = ijk[1] = ijk[2] = 0;
-      int i;
+      long i;
       for (i = 0; i < nbsom; i++)
         {
-          for (int j = 0; j < 3; j++)
+          for (long j = 0; j < 3; j++)
             sommets_(i,j) = origine[j];
           set_ijk_cell_index(i, ijk);
           sommet_face_bord_[i] = -1; // le sommet n'est pas sur un bord
           sommet_PE_owner_[i] = 0; // Les sommets sont initialement sur le processeur maitre
           sommet_num_owner_[i] = i;
         }
-      const int nbelem= facettes_.dimension(0);
+      const long nbelem= facettes_.dimension(0);
       Cerr << "Le maillage a nbelem=" << nbelem << finl;
       facette_num_owner_.resize_array(nbelem);
       for (i = 0; i < nbelem; i++)
@@ -449,9 +450,10 @@ void Maillage_FT_IJK::lire_maillage_ft_dans_lata(const char *filename_with_path,
     {
       // On n'est pas sur le proc maitre. Pour l'instant, tous les elements lus sont sur le
       // proc maitre. On force donc la dimension des tableaux a zero :
-      const int nbelem= 0;
+      const long nbelem= 0;
       sommets_.resize(nbsom, 3);
       sommet_elem_.resize_array(nbsom);
+      sommet_face_.resize(nbsom, Objet_U::dimension); // EB
       sommet_face_bord_.resize_array(nbsom);
       sommet_PE_owner_.resize_array(nbsom);
       sommet_num_owner_.resize_array(nbsom);
@@ -463,14 +465,14 @@ void Maillage_FT_IJK::lire_maillage_ft_dans_lata(const char *filename_with_path,
   desc_facettes_.reset();
   statut_ = MINIMAL;
 
-  const int nbproc = Process::nproc();
+  const long nbproc = Process::nproc();
   DoubleTab liste_sommets_recus;
   DoubleTab liste_coord_recues;
   IntTab  liste_facettes_recues;
   ArrOfInt  liste_compo_connexe_facettes_recues;
   if (master)
     {
-      int nb_bubbles =0;
+      long nb_bubbles =0;
       if (compo_connexe_facettes_.size_array())
         // On ne peut pas faire un max_array sur un tableau vide
         nb_bubbles= max_array(compo_connexe_facettes_)+1;
@@ -479,7 +481,7 @@ void Maillage_FT_IJK::lire_maillage_ft_dans_lata(const char *filename_with_path,
       VECT(DoubleTab) liste_coord(nbproc);
       VECT(IntTab) liste_facettes(nbproc);
       VECT(ArrOfInt) liste_compo_connexe_facettes(nbproc);
-      for(int p=0; p<nbproc; p++)
+      for(long p=0; p<nbproc; p++)
         {
           liste_sommets[p].set_smart_resize(1);
           liste_sommets[p].resize(0,3);
@@ -491,48 +493,48 @@ void Maillage_FT_IJK::lire_maillage_ft_dans_lata(const char *filename_with_path,
           liste_compo_connexe_facettes[p].resize_array(0);
         }
 
-      const int nbelem= facettes_.dimension(0);
+      const long nbelem= facettes_.dimension(0);
       ArrOfInt dest_proc_sommets(nbsom);
       ArrOfInt sommets_renum(nbsom);
-      for (int i = 0; i < nbelem; i++)
+      for (long i = 0; i < nbelem; i++)
         {
           // On envoie les bulles sur d'autres proc par un modulo :
-          const int icompo = compo_connexe_facettes_[i];
-          int new_owner = icompo % nbproc;
-          for (int j = 0; j < 3; j++)
+          const long icompo = compo_connexe_facettes_[i];
+          long new_owner = icompo % nbproc;
+          for (long j = 0; j < 3; j++)
             {
-              const int i_som = facettes_(i,j);
+              const long i_som = facettes_(i,j);
               dest_proc_sommets[i_som] = new_owner;
             }
           liste_facettes[new_owner].append_line(facettes_(i,0),facettes_(i,1),facettes_(i,2));
           liste_compo_connexe_facettes[new_owner].append_array(icompo);
         }
 
-      for (int i = 0; i < nbsom; i++)
+      for (long i = 0; i < nbsom; i++)
         {
-          const int new_owner = dest_proc_sommets[i];
+          const long new_owner = dest_proc_sommets[i];
           sommets_renum[i] = liste_sommets[new_owner].dimension(0); // il est mis a la fin de la liste du proc p
           liste_sommets[new_owner].append_line(sommets_(i,0),sommets_(i,1),sommets_(i,2));
           liste_coord[new_owner].append_line(coord(i,0),coord(i,1),coord(i,2));
         }
       // Correction des numeros des sommets formant les nouvelles facettes...
-      for (int p=0; p< nbproc; p++)
+      for (long p=0; p< nbproc; p++)
         {
-          const int nb_facettes_loc = liste_facettes[p].dimension(0);
-          for (int i = 0; i < nb_facettes_loc; i++)
-            for (int j=0; j<3; j++)
+          const long nb_facettes_loc = liste_facettes[p].dimension(0);
+          for (long i = 0; i < nb_facettes_loc; i++)
+            for (long j=0; j<3; j++)
               {
-                const int old_isom = liste_facettes[p](i,j); // le vieux numero du sommet
-                const int new_isom = sommets_renum[old_isom]; // le nouveau numero auquel il correspond
+                const long old_isom = liste_facettes[p](i,j); // le vieux numero du sommet
+                const long new_isom = sommets_renum[old_isom]; // le nouveau numero auquel il correspond
                 liste_facettes[p](i,j) = new_isom;// la correction de la facette.
               }
         }
 
       // Cheking for lost elements :
       {
-        int sum_nbsom = 0;
-        int sum_nbelem = 0;
-        for(int p=0; p<nbproc; p++)
+        long sum_nbsom = 0;
+        long sum_nbelem = 0;
+        for(long p=0; p<nbproc; p++)
           {
             sum_nbsom += liste_sommets[p].dimension(0);
             sum_nbelem +=liste_facettes[p].dimension(0);
@@ -552,7 +554,7 @@ void Maillage_FT_IJK::lire_maillage_ft_dans_lata(const char *filename_with_path,
       // Sauf que pour le mettre, on ne les envoie pas...
       Cerr << "Master starts sending packages..." << finl;
       // The loops starts at 1 because we dont want the master sending packages to himself!
-      for(int p=1; p<nbproc; p++)
+      for(long p=1; p<nbproc; p++)
         {
           // On envoi chaque tableau sur un canal different :
           envoyer(liste_sommets[p],0,p,2000+4*p);
@@ -572,7 +574,7 @@ void Maillage_FT_IJK::lire_maillage_ft_dans_lata(const char *filename_with_path,
     {
       Journal() << "Receiving from master..." << finl;
       // On recoit les envois du maitre :
-      const int p = Process::me();
+      const long p = Process::me();
       recevoir(liste_sommets_recus,0,p,2000+4*p);
       recevoir(liste_facettes_recues,0,p,2000+4*p+1 /* canal */);
       recevoir(liste_compo_connexe_facettes_recues,0,p,2000+4*p+2);
@@ -581,18 +583,18 @@ void Maillage_FT_IJK::lire_maillage_ft_dans_lata(const char *filename_with_path,
     }
 
   // All processes rebuild the listes sommets and facettes (master has not recieved it, but it filled it itself.
-  const int p = Process::me();
+  const long p = Process::me();
   sommets_ = liste_sommets_recus;
   nbsom = sommets_.dimension(0);
 // On ne peut pas faire (mismatched types) :  facettes_ = liste_facettes_recues;
-  const int nbelem = liste_facettes_recues.dimension(0);
+  const long nbelem = liste_facettes_recues.dimension(0);
   assert(liste_compo_connexe_facettes_recues.size_array() == nbelem);
   facettes_.resize(nbelem,3);
   facette_num_owner_.resize_array(nbelem);
   compo_connexe_facettes_.resize_array(nbelem);
-  for (int i=0; i< nbelem; i++)
+  for (long i=0; i< nbelem; i++)
     {
-      for (int j = 0; j < 3; j++)
+      for (long j = 0; j < 3; j++)
         facettes_(i,j) = liste_facettes_recues(i,j);
       facette_num_owner_[i] = i;
       compo_connexe_facettes_[i] = liste_compo_connexe_facettes_recues[i];
@@ -600,11 +602,12 @@ void Maillage_FT_IJK::lire_maillage_ft_dans_lata(const char *filename_with_path,
 // On remplit d'autres structures :
   // Les sommets et facettes sont tous reels et ils ont ete redistribues sur chaque processeurs.
   sommet_elem_.resize_array(nbsom);
+  sommet_face_.resize(nbsom, Objet_U::dimension); // EB
   sommet_face_bord_.resize_array(nbsom);
   sommet_PE_owner_.resize_array(nbsom);
   sommet_num_owner_.resize_array(nbsom);
   drapeaux_sommets_.resize_array(nbsom); // Je ne sais pas a quoi il sert, donc je ne le remplis pas... Mais en tout cas, il faut qu'il ait la bonne taille!
-  for (int i = 0; i < nbsom; i++)
+  for (long i = 0; i < nbsom; i++)
     {
       sommet_elem_[i] = 0; // On le met en 0,0,0 provisoirement. Cela changera au deplacement.
       sommet_face_bord_[i] = -1; // le sommet n'est pas sur un bord
@@ -621,9 +624,9 @@ void Maillage_FT_IJK::lire_maillage_ft_dans_lata(const char *filename_with_path,
   //                Dont la taille doit etre la meme que liste_coord_recues, c'est a dire nbsom (avant creation de potentiels som virt)
   // corriger_proprietaires_facettes();
   DoubleTab deplacement(nbsom,3);
-  for (int i = 0; i < nbsom; i++)
+  for (long i = 0; i < nbsom; i++)
     {
-      for (int j = 0; j < 3; j++)
+      for (long j = 0; j < 3; j++)
         deplacement(i,j) = liste_coord_recues(i,j) - origine[j];
     }
   transporter(deplacement);
@@ -649,12 +652,12 @@ void Maillage_FT_IJK::nettoyer_maillage()
 {
   // Nettoyage des composantes connexes:
   {
-    const int nb_fa7 = facettes_.dimension(0);
-    int n = 0;
-    for (int i = 0; i < nb_fa7; i++)
+    const long nb_fa7 = facettes_.dimension(0);
+    long n = 0;
+    for (long i = 0; i < nb_fa7; i++)
       {
-        const int invalide = (facettes_(i,0) == facettes_(i,1));
-        const int virtuelle = facette_virtuelle(i);
+        const long invalide = (facettes_(i,0) == facettes_(i,1));
+        const long virtuelle = facette_virtuelle(i);
         if (!invalide && !virtuelle)
           {
             compo_connexe_facettes_[n] = compo_connexe_facettes_[i];
@@ -695,10 +698,10 @@ void Maillage_FT_IJK::creer_facettes_virtuelles(const ArrOfInt& liste_facettes,
 void Maillage_FT_IJK::initialize_processor_neighbourhood()
 {
   const IJK_Splitting& splitting = ref_splitting_.valeur();
-  int np = Process::nproc();
-  int npx = splitting.get_nprocessor_per_direction(0);
-  int npy = splitting.get_nprocessor_per_direction(1);
-  int npz = splitting.get_nprocessor_per_direction(2);
+  long np = Process::nproc();
+  long npx = splitting.get_nprocessor_per_direction(0);
+  long npy = splitting.get_nprocessor_per_direction(1);
+  long npz = splitting.get_nprocessor_per_direction(2);
   voisinage_processeur_.resize_array(np);
   liste_processeurs_voisins_faces_.set_smart_resize(1);
   liste_processeurs_voisins_coins_.set_smart_resize(1);
@@ -706,14 +709,14 @@ void Maillage_FT_IJK::initialize_processor_neighbourhood()
 
   voisinage_processeur_ = 4; // On initialize le tableau comme non-voisins.
   Int3 my_ijk, voisin_ijk;
-  for (int i = 0; i < 3; i++)
+  for (long i = 0; i < 3; i++)
     my_ijk[i] = splitting.get_local_slice_index(i);
 
-  for (int i = -1; i< 2; i++)
+  for (long i = -1; i< 2; i++)
     {
-      for (int j = -1; j< 2; j++)
+      for (long j = -1; j< 2; j++)
         {
-          for (int k = -1; k< 2; k++)
+          for (long k = -1; k< 2; k++)
             {
               voisin_ijk = my_ijk;
               voisin_ijk[0] += i;
@@ -723,8 +726,8 @@ void Maillage_FT_IJK::initialize_processor_neighbourhood()
                   voisin_ijk[1] >=0 && voisin_ijk[1]<npy &&
                   voisin_ijk[2] >=0 && voisin_ijk[2]<npz )
                 {
-                  int rang_voisin = splitting.get_processor_by_ijk(voisin_ijk[0],voisin_ijk[1],voisin_ijk[2]);
-                  int max_voisinage = abs(i)+abs(j)+abs(k);
+                  long rang_voisin = splitting.get_processor_by_ijk(voisin_ijk[0],voisin_ijk[1],voisin_ijk[2]);
+                  long max_voisinage = abs(i)+abs(j)+abs(k);
                   voisinage_processeur_[rang_voisin] = max_voisinage;
                   if (max_voisinage == 0)
                     {
@@ -756,14 +759,14 @@ void Maillage_FT_IJK::initialize_processor_neighbourhood()
 }
 
 // Surcharge
-int Maillage_FT_IJK::check_mesh(int error_is_fatal, int skip_facette_pe, int skip_facettes) const
+long Maillage_FT_IJK::check_mesh(long error_is_fatal, long skip_facette_pe, long skip_facettes) const
 {
   if (!Comm_Group::check_enabled())
     //Optimisation : Ne pas faire le check_mesh sauf si on est en debug...
     // L'applique partout dans le code...
     return -1;
   Maillage_FT_Disc::check_mesh(error_is_fatal, skip_facette_pe, skip_facettes);
-  const int nf = nb_facettes();
+  const long nf = nb_facettes();
   if (nf != compo_connexe_facettes_.size_array())
     {
       Journal() << "Erreur Maillage_FT_IJK::check_mesh : taille de compo_connexe_facettes_ invalide" << finl;
@@ -775,13 +778,13 @@ int Maillage_FT_IJK::check_mesh(int error_is_fatal, int skip_facette_pe, int ski
 }
 
 // Surcharge de Maillage_FT_Disc::check_sommets, specialise pour le IJK:
-int Maillage_FT_IJK::check_sommets(int error_is_fatal) const
+long Maillage_FT_IJK::check_sommets(long error_is_fatal) const
 {
   const double invalid_value = DMAXFLOAT*0.9;
 
   if (statut_ == RESET)
     {
-      int ok = (nb_sommets() == 0);
+      long ok = (nb_sommets() == 0);
       ok = ok && (sommet_elem_.size_array() == 0);
       ok = ok && (sommet_face_bord_.size_array() == 0);
       ok = ok && (sommet_PE_owner_.size_array() == 0);
@@ -798,7 +801,7 @@ int Maillage_FT_IJK::check_sommets(int error_is_fatal) const
     }
   // Verification que les espaces distants et virtuels sont coherents:
   desc_sommets_.check();
-  const int nsom = sommets_.dimension(0);
+  const long nsom = sommets_.dimension(0);
   // Verification de sommet_PE_owner_ : on le recalcule et on compare
   {
     if (sommet_PE_owner_.size_array() != nsom)
@@ -812,7 +815,7 @@ int Maillage_FT_IJK::check_sommets(int error_is_fatal) const
       }
     ArrOfIntFT pe_owner(nsom);
     desc_sommets_.remplir_element_pe(pe_owner);
-    int som ;
+    long som ;
     for (som = 0; som < nsom; som++)
       {
         if (sommet_PE_owner_[som] != pe_owner[som])
@@ -840,10 +843,10 @@ int Maillage_FT_IJK::check_sommets(int error_is_fatal) const
           }
       }
     ArrOfIntFT num_owner(nsom);
-    for (int i = 0; i < nsom; i++)
+    for (long i = 0; i < nsom; i++)
       num_owner[i] = i;
     desc_sommets_.echange_espace_virtuel(num_owner);
-    for (int i = 0; i < nsom; i++)
+    for (long i = 0; i < nsom; i++)
       {
         if (num_owner[i] != sommet_num_owner_[i])
           {
@@ -865,15 +868,15 @@ int Maillage_FT_IJK::check_sommets(int error_is_fatal) const
     // l'espace virtuel.
     const Descripteur_FT& espace_virtuel = desc_sommets_.espace_virtuel();
     const ArrOfInt& pe_voisins = espace_virtuel.pe_voisins();
-    const int nb_pe_voisins = pe_voisins.size_array();
-    for (int indice_pe = 0; indice_pe < nb_pe_voisins; indice_pe++)
+    const long nb_pe_voisins = pe_voisins.size_array();
+    for (long indice_pe = 0; indice_pe < nb_pe_voisins; indice_pe++)
       {
-        const int pe = pe_voisins[indice_pe];
+        const long pe = pe_voisins[indice_pe];
         const ArrOfInt& elements = espace_virtuel.elements(pe);
-        const int n = elements.size_array();
-        for (int i = 0; i < n; i++)
+        const long n = elements.size_array();
+        for (long i = 0; i < n; i++)
           {
-            const int num_sommet = elements[i];
+            const long num_sommet = elements[i];
             copie_sommets(num_sommet, 0) = invalid_value;
             copie_sommets(num_sommet, 1) = invalid_value;
             copie_sommets(num_sommet, 2) = invalid_value;
@@ -882,9 +885,9 @@ int Maillage_FT_IJK::check_sommets(int error_is_fatal) const
     // Echange espace virtuel sur la copie
     desc_sommets_.echange_espace_virtuel(copie_sommets);
     // Comparaison de la copie et du tableau des sommets.
-    for (int i = 0; i < nsom; i++)
+    for (long i = 0; i < nsom; i++)
       {
-        for (int j = 0; j < Objet_U::dimension; j++)
+        for (long j = 0; j < Objet_U::dimension; j++)
           {
             if (copie_sommets(i,j) == invalid_value)
               {
@@ -925,15 +928,15 @@ int Maillage_FT_IJK::check_sommets(int error_is_fatal) const
     // On verifie que les sommets virtuels ont bien sommet_elem_ < 0:
     const Descripteur_FT& espace_virtuel = desc_sommets_.espace_virtuel();
     const ArrOfInt& pe_voisins = espace_virtuel.pe_voisins();
-    const int nb_pe_voisins = pe_voisins.size_array();
-    for (int indice_pe = 0; indice_pe < nb_pe_voisins; indice_pe++)
+    const long nb_pe_voisins = pe_voisins.size_array();
+    for (long indice_pe = 0; indice_pe < nb_pe_voisins; indice_pe++)
       {
-        const int pe = pe_voisins[indice_pe];
+        const long pe = pe_voisins[indice_pe];
         const ArrOfInt& elements = espace_virtuel.elements(pe);
-        const int n = elements.size_array();
-        for (int i = 0; i < n; i++)
+        const long n = elements.size_array();
+        for (long i = 0; i < n; i++)
           {
-            const int num_sommet = elements[i];
+            const long num_sommet = elements[i];
             if (sommet_elem_[num_sommet] >= 0)
               {
                 Journal() << "Erreur sommet_elem_[" << num_sommet << "] = " << sommet_elem_[num_sommet]
@@ -955,17 +958,17 @@ int Maillage_FT_IJK::check_sommets(int error_is_fatal) const
 void Maillage_FT_IJK::calculer_compo_connexe_sommets(ArrOfIntFT& compo_connexe_sommets) const
 {
 
-  const int nb_fa7 = facettes_.dimension(0);
-  const int nbsom = sommets().dimension(0);
+  const long nb_fa7 = facettes_.dimension(0);
+  const long nbsom = sommets().dimension(0);
   compo_connexe_sommets.resize_array(nbsom, Array_base::NOCOPY_NOINIT); // tous les sommets, y compris virtuels.
   compo_connexe_sommets = -10000000; // Force une initialisation bidon.
   // On parcours toutes les facettes.
-  for (int i = 0; i < nb_fa7; i++)
+  for (long i = 0; i < nb_fa7; i++)
     {
-      const int icompo = compo_connexe_facettes_[i];
-      for (int j = 0; j < 3; j++)
+      const long icompo = compo_connexe_facettes_[i];
+      for (long j = 0; j < 3; j++)
         {
-          const int i_som = facettes_(i,j);
+          const long i_som = facettes_(i,j);
           compo_connexe_sommets[i_som] = icompo;
         }
     }
@@ -982,15 +985,15 @@ void Maillage_FT_IJK::calculer_compo_connexe_sommets(ArrOfIntFT& compo_connexe_s
 
 // Fait appel a la methode Maillage_FT_Disc::recopie pour copier le maillage.
 // Puis initialise le tableau de composantes connexes avec la valeur imposee icompo.
-void Maillage_FT_IJK::recopie_force_compo(const Maillage_FT_IJK& source_mesh, const int icompo)
+void Maillage_FT_IJK::recopie_force_compo(const Maillage_FT_IJK& source_mesh, const long icompo)
 {
   Cerr << "Methode Maillage_FT_IJK::recopie_force_compo inusite jusqu'a present"
        << " donc a tester! " << finl;
   Process::exit();
   recopie(source_mesh, MINIMAL);
-  const int nf = nb_facettes();
+  const long nf = nb_facettes();
   compo_connexe_facettes_.resize_array(nf, Array_base::NOCOPY_NOINIT); // tous les sommets, y compris virtuels.
-  for (int i_facette = 0; i_facette < nf; i_facette++)
+  for (long i_facette = 0; i_facette < nf; i_facette++)
     {
       compo_connexe_facettes_[i_facette] = icompo;
     }
@@ -1026,7 +1029,7 @@ void Maillage_FT_IJK::recopie(const Maillage_FT_Disc& source_mesh, Statut_Mailla
 }
 
 // Surcharge de la methode Maillage_FT_Disc::ajouter_maillage
-void Maillage_FT_IJK::ajouter_maillage(const Maillage_FT_Disc& maillage_tmp,int skip_facettes)
+void Maillage_FT_IJK::ajouter_maillage(const Maillage_FT_Disc& maillage_tmp,long skip_facettes)
 {
 
   if (sub_type(Maillage_FT_IJK, maillage_tmp))
@@ -1048,8 +1051,8 @@ void Maillage_FT_IJK::ajouter_maillage(const Maillage_FT_Disc& maillage_tmp,int 
 void Maillage_FT_IJK::ajouter_maillage_IJK(const Maillage_FT_IJK& added_mesh)
 {
 
-  const int nb_facettes_ini = nb_facettes(); // du maillage initial : *this.
-  const int nb_facettes_add = added_mesh.nb_facettes(); // du maillage a ajouter.
+  const long nb_facettes_ini = nb_facettes(); // du maillage initial : *this.
+  const long nb_facettes_add = added_mesh.nb_facettes(); // du maillage a ajouter.
   const ArrOfInt& compo_connexe_add = added_mesh.compo_connexe_facettes();  // Compo connexes a ajouter
 
   // On etends le tableau de composantes connexes en ajoutant celui de added_mesh a la fin:
@@ -1070,12 +1073,12 @@ void Maillage_FT_IJK::ajouter_maillage_IJK(const Maillage_FT_IJK& added_mesh)
 
 void Maillage_FT_IJK::calculer_costheta_minmax(DoubleTab& costheta) const
 {
-  const int nb_som = nb_sommets();
+  const long nb_som = nb_sommets();
   costheta.resize(nb_som, 2);
   costheta = 0. ;
 }
 
-static double distance_sommets(const DoubleTab& sommets, const int s0, const int s1)
+static double distance_sommets(const DoubleTab& sommets, const long s0, const long s1)
 {
   const double d = (sommets(s0,0) - sommets(s1,0)) * (sommets(s0,0) - sommets(s1,0))
                    + (sommets(s0,1) - sommets(s1,1)) * (sommets(s0,1) - sommets(s1,1))
@@ -1086,16 +1089,16 @@ static double distance_sommets(const DoubleTab& sommets, const int s0, const int
 double Maillage_FT_IJK::minimum_longueur_arrete() const
 {
   // nettoyer_maillage();
-  const int nb_fa7 = facettes_.dimension(0);
+  const long nb_fa7 = facettes_.dimension(0);
   const DoubleTab& tab_sommets = sommets();
   double lg = 1.e10;
   double petit  = 1.e-7;
 
-  for (int i = 0; i < nb_fa7; i++)
+  for (long i = 0; i < nb_fa7; i++)
     {
-      const int s0 = facettes_(i,0);
-      const int s1 = facettes_(i,1);
-      const int s2 = facettes_(i,2);
+      const long s0 = facettes_(i,0);
+      const long s1 = facettes_(i,1);
+      const long s2 = facettes_(i,2);
       double d1 = distance_sommets(tab_sommets, s0, s1);
       double d2 = distance_sommets(tab_sommets, s0, s2);
       double d3 = distance_sommets(tab_sommets, s1, s2);

@@ -67,7 +67,8 @@ Remaillage_FT::Remaillage_FT() :
   lissage_courbure_iterations_systematique_(0),
   lissage_courbure_iterations_si_remaillage_(0),
   lissage_courbure_iterations_old_(-1),
-  lissage_critere_(0) // Default value to 0, when lissage is applied, it is for the whole mesh
+  lissage_critere_(0), // Default value to 0, when lissage is applied, it is for the whole mesh
+  is_solid_particle_(0)
 {
 }
 
@@ -132,7 +133,7 @@ Sortie& Remaillage_FT::printOn(Sortie& os) const
   return os;
 }
 
-int Remaillage_FT::reprendre(Entree& is)
+long Remaillage_FT::reprendre(Entree& is)
 {
   Nom motlu;
   is >> motlu;
@@ -149,10 +150,10 @@ int Remaillage_FT::reprendre(Entree& is)
   return 1;
 }
 
-int Remaillage_FT::sauvegarder(Sortie& os) const
+long Remaillage_FT::sauvegarder(Sortie& os) const
 {
-  int special, afaire;
-  const int format_xyz = EcritureLectureSpecial::is_ecriture_special(special, afaire);
+  long special, afaire;
+  const long format_xyz = EcritureLectureSpecial::is_ecriture_special(special, afaire);
   if (format_xyz)
     {
       if (Process::je_suis_maitre())
@@ -208,9 +209,9 @@ void Remaillage_FT::associer_domaine(const Domaine_dis& domaine_dis)
   refdomaine_VF_ = ref_cast(Domaine_VF,domaine_dis.valeur());
 }
 
-int Remaillage_FT::a_remailler(double temps, const Maillage_FT_Disc& maillage) const
+long Remaillage_FT::a_remailler(double temps, const Maillage_FT_Disc& maillage) const
 {
-  int res = 0;
+  long res = 0;
   if (dt_remaillage_ > 0.)
     {
       if (temps > (temps_dernier_remaillage_ + dt_remaillage_) * (1.-1e-15))
@@ -221,9 +222,9 @@ int Remaillage_FT::a_remailler(double temps, const Maillage_FT_Disc& maillage) c
   return res;
 }
 
-int Remaillage_FT::a_lisser(double temps) const
+long Remaillage_FT::a_lisser(double temps) const
 {
-  int res = 0;
+  long res = 0;
   if ((dt_lissage_ > 0.) && (temps > (temps_dernier_lissage_ + dt_lissage_) * (1.-1e-15)))
     {
       res = 1;
@@ -244,16 +245,16 @@ void Remaillage_FT::remaillage_local_interface(double temps, Maillage_FT_Disc& m
   maillage.nettoyer_elements_virtuels();
   maillage.check_mesh();
   //boucle sur les remaillages
-  int iter;
+  long iter;
   ArrOfDoubleFT varVolume;
   for (iter = 0; iter < nb_iter_remaillage_; iter++)
     {
-      const int nb_sommets = maillage.nb_sommets();
+      const long nb_sommets = maillage.nb_sommets();
       varVolume.resize_array(nb_sommets);
       varVolume = 0.;
       variation_volume_ = 0.;
       // n = nombre de sommets supprimes
-      const int n = supprimer_petites_aretes(maillage,varVolume);
+      const long n = supprimer_petites_aretes(maillage,varVolume);
       if (Comm_Group::check_enabled())
         maillage.check_mesh();
       if (n > 0)
@@ -268,7 +269,7 @@ void Remaillage_FT::remaillage_local_interface(double temps, Maillage_FT_Disc& m
           if (Comm_Group::check_enabled())
             maillage.check_mesh();
         }
-      const int m = diviser_grandes_aretes(maillage);
+      const long m = diviser_grandes_aretes(maillage);
       if (Comm_Group::check_enabled())
         maillage.check_mesh();
       if (m > 0)
@@ -298,20 +299,20 @@ void Remaillage_FT::remaillage_local_interface(double temps, Maillage_FT_Disc& m
  * @param (maillage) maillage a barycentrer
  * @param (fa7VoisinesSom_index) premier index pour le sommet som
  * @param (fa7VoisinesSom_data) premier liste des index et facettes voisines pour le sommet som
- * @return (int) le nombre de connectivites trouvees
+ * @return (long) le nombre de connectivites trouvees
  */
-int Remaillage_FT::calculer_connectivites_sommetFacettes(const Maillage_FT_Disc& maillage,
-                                                         ArrOfInt& fa7VoisinesSom_index,
-                                                         IntTab& fa7VoisinesSom_data) const
+long Remaillage_FT::calculer_connectivites_sommetFacettes(const Maillage_FT_Disc& maillage,
+                                                          ArrOfInt& fa7VoisinesSom_index,
+                                                          IntTab& fa7VoisinesSom_data) const
 {
-  int compteur = 0;
+  long compteur = 0;
 
-  const int nb_som = maillage.nb_sommets();
-  const int nb_facettes = maillage.nb_facettes();
+  const long nb_som = maillage.nb_sommets();
+  const long nb_facettes = maillage.nb_facettes();
   const IntTab& facettes = maillage.facettes();
-  const int nb_som_par_facette = facettes.dimension(1);
+  const long nb_som_par_facette = facettes.dimension(1);
 
-  int fa7, isom, som, trouve, index, index0 = -1;
+  long fa7, isom, som, trouve, index, index0 = -1;
 
   //initialisation
   for (som=0 ; som<nb_som ; som++)
@@ -383,20 +384,20 @@ int Remaillage_FT::calculer_connectivites_sommetFacettes(const Maillage_FT_Disc&
  *
  * @param (maillage)
  * @param (differentielle_volume)
- * @return (int (1))
+ * @return (long (1))
  */
-int Remaillage_FT::calculer_differentielle_volume(
+long Remaillage_FT::calculer_differentielle_volume(
   const Maillage_FT_Disc& maillage,
   DoubleTab& differentielle_volume) const
 {
   const DoubleTab& normale_facettes = maillage.get_update_normale_facettes();
-  const int nb_sommets = maillage.nb_sommets();
-  const int nb_facettes = maillage.nb_facettes();
+  const long nb_sommets = maillage.nb_sommets();
+  const long nb_facettes = maillage.nb_facettes();
   const IntTab& facettes = maillage.facettes();
-  const int nb_som_par_facette = facettes.dimension(1);
-  int isom, fa7, k;
+  const long nb_som_par_facette = facettes.dimension(1);
+  long isom, fa7, k;
 
-  const int dim = Objet_U::dimension;
+  const long dim = Objet_U::dimension;
   const double angle_bidim_axi = Maillage_FT_Disc::angle_bidim_axi();
 
   differentielle_volume.resize(nb_sommets, dim);
@@ -426,7 +427,7 @@ int Remaillage_FT::calculer_differentielle_volume(
           // Ajout de la contribution de la facette a chacun des trois sommets.
           for (isom=0 ; isom<nb_som_par_facette ; isom++)
             {
-              int som = facettes(fa7,isom);
+              long som = facettes(fa7,isom);
               for (k = 0; k < dim; k++)
                 differentielle_volume(som,k) += x * normale[k];
             }
@@ -438,12 +439,12 @@ int Remaillage_FT::calculer_differentielle_volume(
       const double un_sixieme = 1. / 6.;
       const DoubleTab& sommets = maillage.sommets();
       // Cas bidim_axi
-      for (int facette = 0; facette < nb_facettes; facette++)
+      for (long facette = 0; facette < nb_facettes; facette++)
         {
           if (maillage.facette_virtuelle(facette))
             continue;
-          const int s1 = facettes(facette, 0);
-          const int s2 = facettes(facette, 1);
+          const long s1 = facettes(facette, 0);
+          const long s2 = facettes(facette, 1);
           const double r1 = sommets(s1, 0);
           const double y1 = sommets(s1, 1);
           const double r2 = sommets(s2, 0);
@@ -477,7 +478,7 @@ int Remaillage_FT::calculer_differentielle_volume(
  * @param (position_initiale) position initiale des sommets
  * @return (double) la variation de volume
  */
-double Remaillage_FT::calculer_variation_volume_facette_2D(int fa7, const Maillage_FT_Disc& maillage,
+double Remaillage_FT::calculer_variation_volume_facette_2D(long fa7, const Maillage_FT_Disc& maillage,
                                                            const DoubleTab& position_initiale) const
 {
   const ArrOfInt& pe_owner = maillage.sommet_PE_owner();
@@ -491,8 +492,8 @@ double Remaillage_FT::calculer_variation_volume_facette_2D(int fa7, const Mailla
 #endif
 #endif
   double coord_som0[2], coord_som1[2], coord_som_opp[2];
-  const int som0 = facettes(fa7,0);
-  const int som1 = facettes(fa7,1);
+  const long som0 = facettes(fa7,0);
+  const long som1 = facettes(fa7,1);
 
   const double angle_bidim_axi =  bidim_axi ? Maillage_FT_Disc::angle_bidim_axi() : 0.;
   const double un_tiers = 1. / 3.;
@@ -504,7 +505,7 @@ double Remaillage_FT::calculer_variation_volume_facette_2D(int fa7, const Mailla
     }
 
   //on decompose la variation de volume en 2 triangles, lies aux deplacements successifs des sommets
-  int ordre = 0;
+  long ordre = 0;
   if ( (pe_owner[som0]==pe_owner[som1] && som0>som1) || (pe_owner[som0]>pe_owner[som1]) )
     {
       //l'ordre est inverse si :
@@ -629,8 +630,8 @@ double Remaillage_FT::calculer_variation_volume_facette_2D(int fa7, const Mailla
  */
 static inline double calculer_volume_facette_3D_avec_ordre(const DoubleTab& position_initiale,
                                                            const DoubleTab& position_finale,
-                                                           int facette[3],
-                                                           int ordre_sommets[3])
+                                                           long facette[3],
+                                                           long ordre_sommets[3])
 {
   double v = 0.;
   // On va couper le prisme en 3 tetraedres.
@@ -638,41 +639,41 @@ static inline double calculer_volume_facette_3D_avec_ordre(const DoubleTab& posi
   FTd_vecteur3 sommets_base[3], sommet4;
   // Initialisation des sommets de la base avec la facette en position initiale:
   {
-    for (int i = 0; i < 3; i++)
-      for (int j = 0; j < 3; j++)
+    for (long i = 0; i < 3; i++)
+      for (long j = 0; j < 3; j++)
         sommets_base[i][j] = position_initiale(facette[i], j);
   }
-  for (int tetra = 0; tetra < 3; tetra++)
+  for (long tetra = 0; tetra < 3; tetra++)
     {
       // Indice du 4e sommet dans la facette courante (sur le maillage deplace)
-      const int indice_sommet4 = ordre_sommets[tetra];
+      const long indice_sommet4 = ordre_sommets[tetra];
       // Position du 4e sommet:
       {
-        for (int i = 0; i < 3; i++)
+        for (long i = 0; i < 3; i++)
           sommet4[i] = position_finale(facette[indice_sommet4], i);
       }
       v += FTd_calculer_volume_tetraedre(sommets_base[0], sommets_base[1], sommets_base[2], sommet4);
       {
-        for (int i = 0; i < 3; i++)
+        for (long i = 0; i < 3; i++)
           sommets_base[indice_sommet4][i] = sommet4[i];
       }
     }
   return v;
 }
 
-double Remaillage_FT::calculer_variation_volume_facette_3D(int fa7, const Maillage_FT_Disc& maillage,
+double Remaillage_FT::calculer_variation_volume_facette_3D(long fa7, const Maillage_FT_Disc& maillage,
                                                            const DoubleTab& position_initiale) const
 {
   double varVolume = 0.;
-  int facette[3];
+  long facette[3];
   {
     const IntTab& facettes = maillage.facettes();
-    for (int i = 0; i < 3; i++)
+    for (long i = 0; i < 3; i++)
       facette[i] = facettes(fa7, i);
   }
   const DoubleTab& position_finale = maillage.sommets();
 #ifdef ALGO_NON_PARALLELE
-  int ordre_sommets[3] = { 0, 1, 2 };
+  long ordre_sommets[3] = { 0, 1, 2 };
   // Calcul de l'ordre dans lequel on va construire les 3 tetraedres (ordre croissant des indices globaux
   // des sommets (indice global = numero du pe_owner, numero sommet sur le pe_owner)
   // Ce tri est important pour que le volume construit en extrudant le triangle de l'ancienne position a la
@@ -682,16 +683,16 @@ double Remaillage_FT::calculer_variation_volume_facette_3D(int fa7, const Mailla
   // est le meme pour les deux triangles adjacents a l'arete (c'est le plus petit en indice global).
   {
     long long indice_global[3];
-    for (int i = 0; i < 3; i++)
+    for (long i = 0; i < 3; i++)
       {
-        int isom = facette[i];
+        long isom = facette[i];
         indice_global[i] = ((long long) maillage.sommet_PE_owner_[isom]) << 32;
         indice_global[i] += maillage.sommet_num_owner_[isom];
       }
     // Tri dans l'ordre croissant des indices_globaux (tri a bulles immediat)
 #define check_swap(i,j) \
 if (indice_global[ordre_sommets[i]] > indice_global[ordre_sommets[j]]) \
-  { int x = ordre_sommets[i]; ordre_sommets[i] = ordre_sommets[j]; ordre_sommets[j] = x; }
+  { long x = ordre_sommets[i]; ordre_sommets[i] = ordre_sommets[j]; ordre_sommets[j] = x; }
     check_swap(0,1);
     check_swap(1,2);
     check_swap(0,1);
@@ -702,7 +703,7 @@ if (indice_global[ordre_sommets[i]] > indice_global[ordre_sommets[j]]) \
   {
     // Calcul le volume avec toutes les permutations possibles de l'ordre des sommets, devient independant de l'ordre
     // des sommets du maillage, donc du decoupage
-    int ordre_sommets[6][3] =
+    long ordre_sommets[6][3] =
     {
       { 0, 1, 2 },
       { 0, 2, 1 },
@@ -711,7 +712,7 @@ if (indice_global[ordre_sommets[i]] > indice_global[ordre_sommets[j]]) \
       { 2, 0, 1 },
       { 2, 1, 0 }
     };
-    for (int i = 0; i < 6; i++)
+    for (long i = 0; i < 6; i++)
       varVolume += calculer_volume_facette_3D_avec_ordre(position_initiale, position_finale, facette, ordre_sommets[i]);
     varVolume /= 6.;
   }
@@ -743,17 +744,17 @@ double Remaillage_FT::calculer_variation_volume(const Maillage_FT_Disc& maillage
 {
   double dvolume_total = 0.;
 
-  const int nb_facettes = maillage.nb_facettes();
-  const int nb_sommets = maillage.nb_sommets();
+  const long nb_facettes = maillage.nb_facettes();
+  const long nb_sommets = maillage.nb_sommets();
   const IntTab& facettes = maillage.facettes();
-  const int nb_som_par_facette = facettes.dimension(1);
+  const long nb_som_par_facette = facettes.dimension(1);
   const double inv_som_facette = 1. / (double) nb_som_par_facette;
 
   varVolume.resize_array(nb_sommets);
   varVolume = 0.;
 
-  int fa7;
-  const int dimension3 = (Objet_U::dimension==3);
+  long fa7;
+  const long dimension3 = (Objet_U::dimension==3);
 
   for (fa7 = 0; fa7 < nb_facettes; fa7++)
     {
@@ -770,10 +771,10 @@ double Remaillage_FT::calculer_variation_volume(const Maillage_FT_Disc& maillage
       // Redistributes the volume variation to the ndim vertices (2 or 3).
       // Some volume will end on virtual vertices; hence, we'll have to "collect" contribution in the end.
       dv *= inv_som_facette;
-      int isom;
+      long isom;
       for (isom = 0 ; isom < nb_som_par_facette ; isom++)
         {
-          const int sommet = facettes(fa7, isom);
+          const long sommet = facettes(fa7, isom);
           varVolume[sommet] += dv;
         }
     }
@@ -794,16 +795,16 @@ double Remaillage_FT::calculer_variation_volume(const Maillage_FT_Disc& maillage
  * @param (varVolume) la variation de volume
  * @param (deplacement_varVolume) la normale au plan de conservation de volume
  * @param (norme2_deplacement_varVolume) carre de la normale au plan
- * @return (int) 1 si le barycentrage s'est deroule correctement, 0 sinon
+ * @return (long) 1 si le barycentrage s'est deroule correctement, 0 sinon
  */
-int Remaillage_FT::calculer_correction_deplacement(DoubleTab& deplacement,
-                                                   const ArrOfDouble& varVolume,
-                                                   const DoubleTab& deplacement_varVolume,
-                                                   const ArrOfDouble& norme2_deplacement_varVolume) const
+long Remaillage_FT::calculer_correction_deplacement(DoubleTab& deplacement,
+                                                    const ArrOfDouble& varVolume,
+                                                    const DoubleTab& deplacement_varVolume,
+                                                    const ArrOfDouble& norme2_deplacement_varVolume) const
 {
-  int res = 1;
-  const int nb_som = deplacement.dimension(0);
-  int som,k;
+  long res = 1;
+  const long nb_som = deplacement.dimension(0);
+  long som,k;
   double scal, dvn;
 #ifndef  NDEBUG
   if (impr_>1000)
@@ -898,14 +899,14 @@ int Remaillage_FT::calculer_correction_deplacement(DoubleTab& deplacement,
  *
  * @param (maillage) maillage a barycentrer
  * @param (barycentres) par sommet, barycentres de ses facettes voisines
- * @return (int) toujours 1...
+ * @return (long) toujours 1...
  */
-int Remaillage_FT::calculer_barycentre_facettes_voisines(const Maillage_FT_Disc& maillage,
-                                                         DoubleTab& barycentres) const
+long Remaillage_FT::calculer_barycentre_facettes_voisines(const Maillage_FT_Disc& maillage,
+                                                          DoubleTab& barycentres) const
 {
-  int res = 1;
-  const int nb_facettes = maillage.nb_facettes();
-  const int nb_sommets = maillage.nb_sommets();
+  long res = 1;
+  const long nb_facettes = maillage.nb_facettes();
+  const long nb_sommets = maillage.nb_sommets();
   const IntTab& facettes = maillage.facettes();
   const DoubleTab& sommets = maillage.sommets();
   const ArrOfDouble& surface_facettes = maillage.get_update_surface_facettes();
@@ -915,10 +916,10 @@ int Remaillage_FT::calculer_barycentre_facettes_voisines(const Maillage_FT_Disc&
   barycentres.resize(nb_sommets, dimension+1);
   barycentres = 0.;
 
-  const int dim = Objet_U::dimension;
+  const long dim = Objet_U::dimension;
   const double inv_dim = 1. / (double) dim;
 
-  int fa7, som, isom, k;
+  long fa7, som, isom, k;
   for (fa7=0 ; fa7<nb_facettes ; fa7++)
     {
       if (maillage.facette_virtuelle(fa7))
@@ -927,7 +928,7 @@ int Remaillage_FT::calculer_barycentre_facettes_voisines(const Maillage_FT_Disc&
       double bary[3] = {0., 0., 0.};
       for (isom = 0; isom < dim; isom++)
         {
-          const int sommet = facettes(fa7, isom);
+          const long sommet = facettes(fa7, isom);
           for (k = 0; k < dim; k++)
             bary[k] += sommets(sommet,k);
         }
@@ -935,7 +936,7 @@ int Remaillage_FT::calculer_barycentre_facettes_voisines(const Maillage_FT_Disc&
       const double surface_inv_dim = surface * inv_dim;
       for (isom = 0; isom < dim; isom++)
         {
-          const int sommet = facettes(fa7, isom);
+          const long sommet = facettes(fa7, isom);
           for (k = 0; k < dim; k++)
             barycentres(sommet, k) += bary[k] * surface_inv_dim;
           barycentres(sommet, dim) += surface;
@@ -980,26 +981,26 @@ int Remaillage_FT::calculer_barycentre_facettes_voisines(const Maillage_FT_Disc&
 // OR IF the opening face is at the value zero of the coordinate?
 double Remaillage_FT::calculer_volume_mesh(const Maillage_FT_Disc& mesh) const
 {
-  const int n = mesh.nb_facettes();
+  const long n = mesh.nb_facettes();
   double volume = 0.;
   const ArrOfDouble& surfaces_facettes = mesh.get_update_surface_facettes();
   const DoubleTab& normales_facettes = mesh.get_update_normale_facettes();
   const IntTab& facettes = mesh.facettes();
   const DoubleTab& sommets = mesh.sommets();
-  const int DIR_projection = 0; // On projette sur (0->x ou 1->y ou 2->z if DIM=3)
-  for (int i = 0; i < n; i++)
+  const long DIR_projection = 0; // On projette sur (0->x ou 1->y ou 2->z if DIM=3)
+  for (long i = 0; i < n; i++)
     {
       if (mesh.facette_virtuelle(i))
         continue;
       const double s = surfaces_facettes[i];
       const double normale_scalaire_direction = normales_facettes(i, DIR_projection);
       // Coordonnee du centre de gravite de la facette
-      const int i0 = facettes(i,0);
-      const int i1 = facettes(i,1);
+      const long i0 = facettes(i,0);
+      const long i1 = facettes(i,1);
       double coord_centre_gravite_DIR = sommets(i0,DIR_projection) + sommets(i1,DIR_projection) ;
       if (Objet_U::dimension==3)
         {
-          const int i2 = facettes(i,2);
+          const long i2 = facettes(i,2);
           coord_centre_gravite_DIR += sommets(i2,DIR_projection);
         }
       coord_centre_gravite_DIR /= (float) Objet_U::dimension;
@@ -1027,10 +1028,10 @@ double Remaillage_FT::calculer_volume_mesh(const Maillage_FT_Disc& mesh) const
 double Remaillage_FT::calculer_somme_dvolume(const Maillage_FT_Disc& mesh, const ArrOfDouble& dvolume) const
 {
 
-  const int n = dvolume.size_array();
+  const long n = dvolume.size_array();
   assert(n == mesh.nb_sommets());
   double somme = 0.;
-  for (int i = 0; i < n; i++)
+  for (long i = 0; i < n; i++)
     {
       if (!mesh.sommet_virtuel(i))
         {
@@ -1065,8 +1066,8 @@ double Remaillage_FT::redistribuer_sommets(Maillage_FT_Disc&   maillage,
   assert(relaxation_direction_normale >= 0. && relaxation_direction_normale <= 1.);
   assert(var_volume_impose.size_array() == maillage.sommets().dimension(0));
 
-  const int nb_som = maillage.nb_sommets();
-  const int dim = Objet_U::dimension;
+  const long nb_som = maillage.nb_sommets();
+  const long dim = Objet_U::dimension;
 
   DoubleTabFT differentielle_volume;
   DoubleTabFT barycentres;
@@ -1092,9 +1093,9 @@ double Remaillage_FT::redistribuer_sommets(Maillage_FT_Disc&   maillage,
   // Le deplacement tangent (direction de deplacement qui conserve le volume)
   double dtangent[3] = { 0., 0., 0. };
   double depl[3] = { 0., 0., 0. };
-  int sommet, k;
-  int clipped_move = 0; // Compteur de deplacements tronques
-  const int dim3 = (Objet_U::dimension==3);
+  long sommet, k;
+  long clipped_move = 0; // Compteur de deplacements tronques
+  const long dim3 = (Objet_U::dimension==3);
   const Parcours_interface& parcours = maillage.refparcours_interface_.valeur();
 
   for (sommet = 0; sommet < nb_som; sommet++)
@@ -1110,7 +1111,7 @@ double Remaillage_FT::redistribuer_sommets(Maillage_FT_Disc&   maillage,
       normale[1] = diff[1] = differentielle_volume(sommet, 1);
       if (dim3)
         normale[2] = diff[2] = differentielle_volume(sommet, 2);
-      const int face_bord = maillage.sommet_face_bord_[sommet];
+      const long face_bord = maillage.sommet_face_bord_[sommet];
       if (face_bord >= 0)
         parcours.projeter_vecteur_sur_face(face_bord, normale[0], normale[1], normale[2]);
 
@@ -1191,7 +1192,7 @@ double Remaillage_FT::redistribuer_sommets(Maillage_FT_Disc&   maillage,
 #if DEBUG_CONSERV_VOLUME
   double volume_apres = calculer_volume_mesh(maillage);
 #endif
-  const int new_nb_som = maillage.nb_sommets();
+  const long new_nb_som = maillage.nb_sommets();
   maillage.update_tableau_apres_transport(var_volume_impose, new_nb_som, desc);
   maillage.update_tableau_apres_transport(sommets, new_nb_som, desc);
 
@@ -1219,7 +1220,7 @@ void Remaillage_FT::corriger_volume(Maillage_FT_Disc& maillage, ArrOfDouble& var
 {
   corriger_volume_(maillage, var_volume, nb_iter_bary_volume_seul_);
 }
-void Remaillage_FT::corriger_volume_(Maillage_FT_Disc& maillage, ArrOfDouble& var_volume, const int nb_iter_corrections_vol)
+void Remaillage_FT::corriger_volume_(Maillage_FT_Disc& maillage, ArrOfDouble& var_volume, const long nb_iter_corrections_vol)
 {
   regulariser_maillage(maillage, var_volume,
                        0., /* pas de deplacement tangent des sommets */
@@ -1296,16 +1297,16 @@ double Remaillage_FT::regulariser_maillage(Maillage_FT_Disc& maillage,
                                            ArrOfDouble& var_volume,
                                            const double facteur_barycentrage_tangent,
                                            const double coeff_lissage,
-                                           const int nb_iter_barycentrage,
-                                           const int nb_iter_lissage,
-                                           const int max_nb_iter_correction_volume,
+                                           const long nb_iter_barycentrage,
+                                           const long nb_iter_lissage,
+                                           const long max_nb_iter_correction_volume,
                                            const double seuil_dvolume) const
 {
   ArrOfDoubleFT var_volume_obtenu;
   // on boucle les barycentrages tant que les sommets sont deplaces
   double dvolume = 0.;
-  int iteration = 0;
-  int iteration_correction_volume = 0;
+  long iteration = 0;
+  long iteration_correction_volume = 0;
   for(iteration = 0; 1; iteration++)
     {
 #if DEBUG_CONSERV_VOLUME
@@ -1351,8 +1352,8 @@ double Remaillage_FT::regulariser_maillage(Maillage_FT_Disc& maillage,
           regulariser_courbure(maillage,
                                lissage_courbure_coeff_,
                                dv_courbure);
-          const int n = var_volume.size_array();
-          for (int i = 0; i < n; i++)
+          const long n = var_volume.size_array();
+          for (long i = 0; i < n; i++)
             var_volume[i] += dv_courbure[i];
 
           DebogFT::verifier_tableau_sommets("Remaillage_FT::regulariser var_vol apres ajout dv", maillage, var_volume);
@@ -1462,17 +1463,17 @@ double Remaillage_FT::regulariser_maillage(Maillage_FT_Disc& maillage,
  */
 void Remaillage_FT::lisser_dvolume(const Maillage_FT_Disc& maillage,
                                    ArrOfDouble& var_volume,
-                                   const int nb_iterations) const
+                                   const long nb_iterations) const
 {
   DoubleTabFT barycentres;
   calculer_barycentre_facettes_voisines(maillage, barycentres);
   const ArrOfDouble& surfaces = maillage.get_update_surface_facettes();
-  const int nb_facettes = maillage.nb_facettes();
+  const long nb_facettes = maillage.nb_facettes();
   const IntTab& facettes = maillage.facettes();
   ArrOfDoubleFT dv_facettes(nb_facettes);
-  const int dim = Objet_U::dimension;
+  const long dim = Objet_U::dimension;
   const double inv_dim = 1. / (double) dim;
-  int facette, j, iter;
+  long facette, j, iter;
   for (iter = 0; iter < nb_iterations; iter++)
     {
       // Repartition de dvolume sur les faces au prorata de la
@@ -1485,7 +1486,7 @@ void Remaillage_FT::lisser_dvolume(const Maillage_FT_Disc& maillage,
           const double surface = surfaces[facette];
           for (j = 0; j < dim; j++)
             {
-              int sommet = facettes(facette, j);
+              long sommet = facettes(facette, j);
               double surface_tot = barycentres(sommet, dim);
               if (surface_tot > 0.)
                 dv_facettes[facette] += surface / surface_tot * var_volume[sommet];
@@ -1501,7 +1502,7 @@ void Remaillage_FT::lisser_dvolume(const Maillage_FT_Disc& maillage,
           double dv = dv_facettes[facette] * inv_dim;
           for (j = 0; j < dim; j++)
             {
-              int sommet = facettes(facette, j);
+              long sommet = facettes(facette, j);
               var_volume[sommet] += dv;
             }
         }
@@ -1518,23 +1519,23 @@ void Remaillage_FT::lisser_dvolume(const Maillage_FT_Disc& maillage,
  *
  * @param (maillage) maillage a traiter
  * @param (deplacement) vecteur deplacement des sommets
- * @return (int) 1 si le remaillage s'est deroule correctement, 0 sinon
+ * @return (long) 1 si le remaillage s'est deroule correctement, 0 sinon
  */
-int Remaillage_FT::traite_decollement(Maillage_FT_Disc& maillage, const DoubleTab& deplacement) const
+long Remaillage_FT::traite_decollement(Maillage_FT_Disc& maillage, const DoubleTab& deplacement) const
 {
-  int res = 1;
+  long res = 1;
   //fonction non utilisee en dimension 2
   if (dimension<3)
     {
       return 1;
     }
-  const int nb_sommets = maillage.nb_sommets();
-  const int nb_facettes = maillage.nb_facettes();
+  const long nb_sommets = maillage.nb_sommets();
+  const long nb_facettes = maillage.nb_facettes();
   const IntTab& facettes = maillage.facettes();
-  const int nb_som_par_facette = facettes.dimension(1);
+  const long nb_som_par_facette = facettes.dimension(1);
   ArrOfIntFT nbSomVois_bord(nb_sommets);
   nbSomVois_bord = 0;
-  int fa7,som, nb_som_bord, isom;
+  long fa7,som, nb_som_bord, isom;
 
   for (fa7=0 ; fa7<nb_facettes ; fa7++)
     {
@@ -1567,7 +1568,7 @@ int Remaillage_FT::traite_decollement(Maillage_FT_Disc& maillage, const DoubleTa
   double x,y,z=0., scal;
   for (som=0 ; som<nb_sommets ; som++)
     {
-      const int elem = maillage.sommet_elem_[som];
+      const long elem = maillage.sommet_elem_[som];
       if (elem >= 0 /* sommet reel */
           && maillage.sommet_ligne_contact(som)
           && nbSomVois_bord[som]==0)
@@ -1605,11 +1606,11 @@ int Remaillage_FT::traite_decollement(Maillage_FT_Disc& maillage, const DoubleTa
 /*! @brief Cette fonction permet de gerer l'adherence de l'interface a la paroi Si une facette possede 3 sommets sur un paroi, elle est supprimee
  *
  * @param (maillage) maillage a traiter
- * @return (int) 1 si le remaillage s'est deroule correctement, 0 sinon
+ * @return (long) 1 si le remaillage s'est deroule correctement, 0 sinon
  */
-int Remaillage_FT::traite_adherence(Maillage_FT_Disc& maillage) const
+long Remaillage_FT::traite_adherence(Maillage_FT_Disc& maillage) const
 {
-  int res = 1;
+  long res = 1;
   if (supprimer_facettes_bord(maillage)==1)
     {
 #ifndef NDEBUG
@@ -1641,26 +1642,26 @@ inline void produit_vectoriel(const FTd_vecteur3& a, const FTd_vecteur3& b, FTd_
  *           avoir son 3eme cote dans le domaine. Dans ce cas, on la conserve.
  *
  * @param (maillage) maillage a remailler
- * @return (int) 1 si le remaillage s'est deroule correctement, 0 sinon
+ * @return (long) 1 si le remaillage s'est deroule correctement, 0 sinon
  */
-int Remaillage_FT::supprimer_facettes_bord(Maillage_FT_Disc& maillage) const
+long Remaillage_FT::supprimer_facettes_bord(Maillage_FT_Disc& maillage) const
 {
 
-  int res = 0;
-  const int nb_facettes = maillage.nb_facettes();
+  long res = 0;
+  const long nb_facettes = maillage.nb_facettes();
   IntTab& facettes = maillage.facettes_;
-  const int nb_som_par_facette = facettes.dimension(1);
+  const long nb_som_par_facette = facettes.dimension(1);
   // Raccourci vers les coordonnees des sommets du maillage eulerien
 #define CONSERVER_FACETTES_COINS
 #ifdef CONSERVER_FACETTES_COINS
-  const int dim = Objet_U::dimension;
+  const long dim = Objet_U::dimension;
   const DoubleTab& normale_facettes = maillage.get_update_normale_facettes();
   const DoubleTab& sommets = maillage.sommets();
   const Parcours_interface& parcours = maillage.refparcours_interface_.valeur();
 #endif
 
   //DoubleTab xsom(3,3); // coords des sommets de la face: xs(isom_eul, direction)
-  int fa7, isom, som =0, nb_bord;
+  long fa7, isom, som =0, nb_bord;
   for (fa7=0 ; fa7<nb_facettes ; fa7++)
     {
       nb_bord = 0;
@@ -1684,10 +1685,12 @@ int Remaillage_FT::supprimer_facettes_bord(Maillage_FT_Disc& maillage) const
               maillage.printFa7(fa7,0,Process::Journal());
             }
 #endif
-
-          for (isom=1 ; isom<nb_som_par_facette ; isom++)
+          if (!is_solid_particle_)
             {
-              facettes(fa7,isom) = facettes(fa7,0);
+              for (isom=1 ; isom<nb_som_par_facette ; isom++)
+                {
+                  facettes(fa7,isom) = facettes(fa7,0);
+                }
             }
         }
 #else
@@ -1697,7 +1700,7 @@ int Remaillage_FT::supprimer_facettes_bord(Maillage_FT_Disc& maillage) const
           for (isom=0 ; isom<nb_som_par_facette ; isom++)
             {
               som = facettes(fa7,isom);
-              const int face = maillage.sommet_face_bord_[som];
+              const long face = maillage.sommet_face_bord_[som];
               FTd_vecteur3 v4= {0.,0.,0.};
               double s2 = 0.;
               if (dim==3) s2=sommets(som,2);
@@ -1705,7 +1708,7 @@ int Remaillage_FT::supprimer_facettes_bord(Maillage_FT_Disc& maillage) const
                                                   sommets(som,0), sommets(som,1),  s2,
                                                   v4[0], v4[1], v4[2]);
               double ps=0.;
-              for (int direction = 0; direction < dim; direction++)
+              for (long direction = 0; direction < dim; direction++)
                 {
                   ps +=  v4[direction]*normale_facettes(fa7,direction);
                 }
@@ -1766,7 +1769,7 @@ static void SPA_choisir_sommets_remplacement(const Maillage_FT_Disc& maillage,
                                              const IntTab& tab_aretesMarquees,
                                              IntTab& sommets_remplacement)
 {
-  const int       nb_sommets       = maillage.nb_sommets();
+  const long       nb_sommets       = maillage.nb_sommets();
   const IntTab&    facettes         = maillage.facettes();
   const ArrOfInt& sommet_PE_owner  = maillage.sommet_PE_owner();
   const ArrOfInt& sommet_num_owner = maillage.sommet_num_owner();
@@ -1776,7 +1779,7 @@ static void SPA_choisir_sommets_remplacement(const Maillage_FT_Disc& maillage,
   // les processeurs d'accord entre eux avec un
   //   "collecter(Descripteur_FT::MIN_COLONNE1)"
   // Si tout le monde contient "no_PE", alors le noeud ne devra pas etre remplace.
-  const int no_PE = Process::nproc();
+  const long no_PE = Process::nproc();
   sommets_remplacement = no_PE;
 
   // Pour chaque sommet, y a-t-il un processeur qui veut le conserver ?
@@ -1788,30 +1791,30 @@ static void SPA_choisir_sommets_remplacement(const Maillage_FT_Disc& maillage,
   // Parcours de la liste des aretes a supprimer. Pour chacune, on choisit
   // un sommet a conserver et un sommet a supprimer (le plus petit en numerotation
   // globale pour que le choix soit identique pour les deux triangles adjacents).
-  const int n = tab_aretesMarquees.dimension(0);
-  const int nb_som_par_facette = facettes.dimension(1);
-  int i;
+  const long n = tab_aretesMarquees.dimension(0);
+  const long nb_som_par_facette = facettes.dimension(1);
+  long i;
   for (i = 0; i < n; i++)
     {
-      const int fa7    = tab_aretesMarquees(i,0);
-      const int isom   = tab_aretesMarquees(i,1);
+      const long fa7    = tab_aretesMarquees(i,0);
+      const long isom   = tab_aretesMarquees(i,1);
       assert(isom >= 0 && isom < nb_som_par_facette);
-      const int isom_s = (isom + 1 < nb_som_par_facette) ? isom + 1 : 0;
-      const int som    = facettes(fa7, isom);
-      const int som_s  = facettes(fa7, isom_s);
-      const int bord   = maillage.sommet_ligne_contact(som);
-      const int bord_s = maillage.sommet_ligne_contact(som_s);
+      const long isom_s = (isom + 1 < nb_som_par_facette) ? isom + 1 : 0;
+      const long som    = facettes(fa7, isom);
+      const long som_s  = facettes(fa7, isom_s);
+      const long bord   = maillage.sommet_ligne_contact(som);
+      const long bord_s = maillage.sommet_ligne_contact(som_s);
 
-      int somRempl = -1; // Le sommet de remplacement (num_owner)
-      int somSupp  = -1; // Le sommet supprime (indice local)
+      long somRempl = -1; // Le sommet de remplacement (num_owner)
+      long somSupp  = -1; // Le sommet supprime (indice local)
       if (bord == bord_s)
         {
           //les deux sommets sont sur le bord ou les 2 sont internes
           //on compare alors leur numero global
-          const int pe         = sommet_PE_owner[som];
-          const int pe_s       = sommet_PE_owner[som_s];
-          const int numOwner   = sommet_num_owner[som];
-          const int numOwner_s = sommet_num_owner[som_s];
+          const long pe         = sommet_PE_owner[som];
+          const long pe_s       = sommet_PE_owner[som_s];
+          const long numOwner   = sommet_num_owner[som];
+          const long numOwner_s = sommet_num_owner[som_s];
           if (FTd_compare_sommets_global(pe, numOwner, pe_s, numOwner_s) > 0)
             {
               //som_s>som : on garde som, on supprime som_s
@@ -1845,8 +1848,8 @@ static void SPA_choisir_sommets_remplacement(const Maillage_FT_Disc& maillage,
              && sommets_remplacement(somSupp, 0) == no_PE
              && sommets_conserves[somSupp] == 0)
         {
-          const int pe  = sommet_PE_owner[somRempl];
-          const int le_som = sommet_num_owner[somRempl];
+          const long pe  = sommet_PE_owner[somRempl];
+          const long le_som = sommet_num_owner[somRempl];
           sommets_remplacement(somSupp, 0) = pe;
           sommets_remplacement(somSupp, 1) = le_som;
           sommets_conserves[somRempl] = 1;
@@ -1872,8 +1875,8 @@ static void SPA_choisir_sommets_remplacement(const Maillage_FT_Disc& maillage,
   // Mise a jour de sommets_remplacement : -1 pour les sommets a conserver
   for (i = 0; i < nb_sommets; i++)
     {
-      const int a_conserver = sommets_conserves[i];
-      const int non_remplace = (sommets_remplacement(i,0) == no_PE);
+      const long a_conserver = sommets_conserves[i];
+      const long non_remplace = (sommets_remplacement(i,0) == no_PE);
       if (a_conserver || non_remplace)
         {
           sommets_remplacement(i,0) = -1;
@@ -1893,14 +1896,14 @@ static void SPA_choisir_sommets_remplacement(const Maillage_FT_Disc& maillage,
  * @param (maillage) Le maillage a optimiser. Le maillage retourne a l'etat minimal, Le volume change, Certaines facettes sont "nulles" (plusieurs sommets confondus), On cree des sommets virtuels.
  * @param (varVolume) Un tableau de taille nb_sommets() contenant une valeur initiale de variation de volume. On augmente la taille du tableau (creation de sommets virtuels) et on ajoute la variation de volume du maillage due a la suppression des aretes. L'espace virtuel est a jour. Valeur de retour: nombre total (sur tous les procs) de sommets du maillage supprimes
  */
-int Remaillage_FT::supprimer_petites_aretes(Maillage_FT_Disc& maillage,
-                                            ArrOfDouble& varVolume) const
+long Remaillage_FT::supprimer_petites_aretes(Maillage_FT_Disc& maillage,
+                                             ArrOfDouble& varVolume) const
 {
   static const Stat_Counter_Id stat_counter = statistiques().new_counter(3, "Supprimer_petites_aretes");
   statistiques().begin_count(stat_counter);
 
-  int nb_sommets_supprimes_tot = 0;
-  int nb_sommets_supprimes = 0;
+  long nb_sommets_supprimes_tot = 0;
+  long nb_sommets_supprimes = 0;
   do
     {
 
@@ -1938,17 +1941,17 @@ int Remaillage_FT::supprimer_petites_aretes(Maillage_FT_Disc& maillage,
         // Creation de la liste des sommets de remplacement virtuels dont on aura besoin
         ArrOfIntFT request_sommets_pe;
         ArrOfIntFT request_sommets_num;
-        int i;
-        const int nb_sommets = maillage.nb_sommets();
-        const int moi = Process::me();
+        long i;
+        const long nb_sommets = maillage.nb_sommets();
+        const long moi = Process::me();
         assert(nb_sommets == sommets_remplacement.dimension(0));
         for (i = 0; i < nb_sommets; i++)
           {
-            const int pe = sommets_remplacement(i,0);
-            const int som= sommets_remplacement(i,1);
+            const long pe = sommets_remplacement(i,0);
+            const long som= sommets_remplacement(i,1);
             if (pe >= 0)
               {
-                int j;
+                long j;
                 if (pe != moi)   // Le sommet de remplacement est virtuel
                   {
                     request_sommets_pe.append_array(pe);
@@ -1972,10 +1975,10 @@ int Remaillage_FT::supprimer_petites_aretes(Maillage_FT_Disc& maillage,
         // Inutile de mettre a jour l'espace virtuel, l'echange sera fait
         // apres le calcul de dvolume
         {
-          const int old_size = varVolume.size_array();
-          const int new_size = maillage.nb_sommets();
+          const long old_size = varVolume.size_array();
+          const long new_size = maillage.nb_sommets();
           varVolume.resize_array(new_size);
-          int ii;
+          long ii;
           for (ii = old_size; ii < new_size; ii++)
             varVolume[ii] = 0.;
         }
@@ -1988,11 +1991,11 @@ int Remaillage_FT::supprimer_petites_aretes(Maillage_FT_Disc& maillage,
                                                 request_sommets_num,
                                                 request_sommets_pe,
                                                 request_sommets_ilocal);
-        int j = 0;
-        const int n_rempl = remplacement_ilocal.dimension(0);
+        long j = 0;
+        const long n_rempl = remplacement_ilocal.dimension(0);
         for (i = 0; i < n_rempl; i++)
           {
-            int som_new = remplacement_ilocal(i,1);
+            long som_new = remplacement_ilocal(i,1);
             if (som_new < 0)   // Le sommet de remplacement est virtuel ?
               {
                 som_new = request_sommets_ilocal[j];
@@ -2008,15 +2011,15 @@ int Remaillage_FT::supprimer_petites_aretes(Maillage_FT_Disc& maillage,
       {
         const DoubleTab& sommets = maillage.sommets();
         // Nombre de sommets a remplacer
-        const int n_rempl = remplacement_ilocal.dimension(0);
+        const long n_rempl = remplacement_ilocal.dimension(0);
         DoubleTabFT position_finale(sommets); // Copie du tableau.
-        int i;
-        const int dim = Objet_U::dimension;
+        long i;
+        const long dim = Objet_U::dimension;
         for (i = 0; i < n_rempl; i++)
           {
-            const int som_old = remplacement_ilocal(i,0);
-            const int som_new = remplacement_ilocal(i,1);
-            int j;
+            const long som_old = remplacement_ilocal(i,0);
+            const long som_new = remplacement_ilocal(i,1);
+            long j;
             for (j = 0; j < dim; j++)
               position_finale(som_old, j) = position_finale(som_new, j);
           }
@@ -2031,7 +2034,7 @@ int Remaillage_FT::supprimer_petites_aretes(Maillage_FT_Disc& maillage,
           // il faut donc "collecter" les contributions a la fin. Donc il faut
           // annuler la valeur de varVolume pour les sommets virtuels avant
           // de commencer.
-          const int n = maillage.nb_sommets();
+          const long n = maillage.nb_sommets();
           for (i = 0; i < n; i++)
             {
               if (maillage.sommet_virtuel(i))
@@ -2042,8 +2045,8 @@ int Remaillage_FT::supprimer_petites_aretes(Maillage_FT_Disc& maillage,
         }
         for (i = 0; i < n_rempl; i++)
           {
-            const int som_old = remplacement_ilocal(i,0);
-            const int som_new = remplacement_ilocal(i,1);
+            const long som_old = remplacement_ilocal(i,0);
+            const long som_new = remplacement_ilocal(i,1);
             const double dv = varVolume[som_old];
             varVolume[som_new] += dv;
             varVolume[som_old] = 0;
@@ -2057,29 +2060,29 @@ int Remaillage_FT::supprimer_petites_aretes(Maillage_FT_Disc& maillage,
       // Remplacement des sommets dans le tableau des facettes,
       // On rend invalides les facettes qui disparaissent (deux sommets confondus)
       {
-        const int nb_som = maillage.nb_sommets();
+        const long nb_som = maillage.nb_sommets();
         // Creation d'une table de remplacement de sommets:
         ArrOfIntFT table_old_new(nb_som);
         table_old_new = -1;
-        int i;
-        const int nb_rempl = remplacement_ilocal.dimension(0);
+        long i;
+        const long nb_rempl = remplacement_ilocal.dimension(0);
         for (i = 0; i < nb_rempl; i++)
           {
-            const int som_old = remplacement_ilocal(i,0);
-            const int som_new = remplacement_ilocal(i,1);
+            const long som_old = remplacement_ilocal(i,0);
+            const long som_new = remplacement_ilocal(i,1);
             table_old_new[som_old] = som_new;
           }
         IntTab& facettes = maillage.facettes_;
-        const int nb_facettes = facettes.dimension(0);
-        const int nb_som_par_facette = facettes.dimension(1);
+        const long nb_facettes = facettes.dimension(0);
+        const long nb_som_par_facette = facettes.dimension(1);
         for (i = 0; i < nb_facettes; i++)
           {
-            int j;
-            int flag = 0;
+            long j;
+            long flag = 0;
             for (j = 0; j < nb_som_par_facette; j++)
               {
-                const int i_sommet = facettes(i,j);
-                const int new_sommet = table_old_new[i_sommet];
+                const long i_sommet = facettes(i,j);
+                const long new_sommet = table_old_new[i_sommet];
                 if (new_sommet >= 0)
                   {
                     facettes(i,j) = new_sommet;
@@ -2092,9 +2095,9 @@ int Remaillage_FT::supprimer_petites_aretes(Maillage_FT_Disc& maillage,
             if (flag && nb_som_par_facette == 3)
               {
                 // Facette modifiee, on teste si elle disparait
-                const int s0 = facettes(i,0);
-                const int s1 = facettes(i,1);
-                const int s2 = facettes(i,2);
+                const long s0 = facettes(i,0);
+                const long s1 = facettes(i,1);
+                const long s2 = facettes(i,2);
                 if (s0 == s2 || s1 == s2)
                   {
                     facettes(i,1) = s0;
@@ -2131,16 +2134,16 @@ int Remaillage_FT::supprimer_petites_aretes(Maillage_FT_Disc& maillage,
  *    Le maillage doit verifier la propriete "proprietaire facette = premier sommet"
  *
  * @param (maillage) maillage a remailler
- * @return (int) Le nombre de facettes supprimees
+ * @return (long) Le nombre de facettes supprimees
  */
-int Remaillage_FT::supprimer_doublons_facettes(Maillage_FT_Disc& maillage) const
+long Remaillage_FT::supprimer_doublons_facettes(Maillage_FT_Disc& maillage) const
 {
   if (Comm_Group::check_enabled()) maillage.check_mesh();
 
-  const int nb_sommets = maillage.nb_sommets();
-  const int nb_facettes = maillage.nb_facettes();
+  const long nb_sommets = maillage.nb_sommets();
+  const long nb_facettes = maillage.nb_facettes();
   IntTab& facettes = maillage.facettes_;
-  const int nb_som_par_facette = facettes.dimension(1);
+  const long nb_som_par_facette = facettes.dimension(1);
 
   // Marqueurs des facettes supprimees:
   ArrOfIntFT facettes_a_supprimer(nb_facettes);
@@ -2156,7 +2159,7 @@ int Remaillage_FT::supprimer_doublons_facettes(Maillage_FT_Disc& maillage) const
   calculer_connectivites_sommetFacettes(maillage, fa7VoisinesSom_index,fa7VoisinesSom_data);
 
   //puis on balaye les sommets
-  int som, index, index2, fa7,fa72, compteur, isom,isom2, trouve;
+  long som, index, index2, fa7,fa72, compteur, isom,isom2, trouve;
   for (som=0 ; som<nb_sommets ; som++)
     {
       index = fa7VoisinesSom_index[som];
@@ -2241,12 +2244,12 @@ int Remaillage_FT::supprimer_doublons_facettes(Maillage_FT_Disc& maillage) const
   }
   // On rend les facettes a supprimer invalides (trois sommets identiques)
   {
-    int i, j;
+    long i, j;
     for (i = 0; i < nb_facettes; i++)
       {
         if (facettes_a_supprimer[i])
           {
-            const int sommet0 = facettes(i, 0);
+            const long sommet0 = facettes(i, 0);
             for (j = 1; j < nb_som_par_facette; j++)
               facettes(i, j) = sommet0;
           }
@@ -2267,7 +2270,7 @@ int Remaillage_FT::supprimer_doublons_facettes(Maillage_FT_Disc& maillage) const
  * @return (double) carre de la longueur idealede l'arete
  */
 double Remaillage_FT::calculer_longueurIdeale2_arete(const Maillage_FT_Disc& maillage,
-                                                     int som0,
+                                                     long som0,
                                                      double x, double y, double z) const
 {
   double lgrId2 = 0.;
@@ -2275,7 +2278,7 @@ double Remaillage_FT::calculer_longueurIdeale2_arete(const Maillage_FT_Disc& mai
     {
       // La longueur ideale est un multiple de la taille locale des
       // elements euleriens.
-      const int elem0 = maillage.sommet_elem_[som0];
+      const long elem0 = maillage.sommet_elem_[som0];
 
       const Elem_geom_base& elem_geom = refdomaine_VF_->domaine().type_elem().valeur();
 
@@ -2299,18 +2302,18 @@ double Remaillage_FT::calculer_longueurIdeale2_arete(const Maillage_FT_Disc& mai
           const DoubleTab& sommets = maillage.sommets();
           const DoubleTab& xv = refdomaine_VF_->xv();
           const IntTab& elem_faces = refdomaine_VF_->elem_faces();
-          int k;
+          long k;
           FTd_vecteur3 v = {0., 0., 0.};
           FTd_vecteur3 xyz = {x, y, z};
           FTd_vecteur3 delta_xv = {0., 0., 0.};
-          const int dim = Objet_U::dimension;
+          const long dim = Objet_U::dimension;
           double norme2 = 0.;
           for (k = 0; k < dim; k++)
             {
               v[k] = xyz[k] - sommets(som0, k);
               norme2 += v[k] * v[k];
-              const int face0 = elem_faces(elem0,k);
-              const int face1 = elem_faces(elem0,k+dim);
+              const long face0 = elem_faces(elem0,k);
+              const long face1 = elem_faces(elem0,k+dim);
               delta_xv[k] = xv(face1,k) - xv(face0,k);
             }
           if (equilateral_)
@@ -2378,16 +2381,16 @@ double Remaillage_FT::calculer_volume_sommets_supprimes(const Maillage_FT_Disc& 
 {
   double res = 0.;
 
-  const int nb_facettes = maillage.nb_facettes();
+  const long nb_facettes = maillage.nb_facettes();
   const DoubleTab& sommets = maillage.sommets();
   const IntTab& facettes = maillage.facettes();
-  const int nb_som_par_facette = facettes.dimension(1);
+  const long nb_som_par_facette = facettes.dimension(1);
 
-  int isom,som, som_rempl,fa7, k;
+  long isom,som, som_rempl,fa7, k;
   double volume;
   FTd_vecteur3 som0,som1,som2,som3;
 
-  //const int nb_sommets = maillage.nb_sommets();
+  //const long nb_sommets = maillage.nb_sommets();
   //for (som=0 ; som<nb_sommets ; som++) {
   //  varVolume[som] = 0.;
   //}
@@ -2424,7 +2427,7 @@ double Remaillage_FT::calculer_volume_sommets_supprimes(const Maillage_FT_Disc& 
 #ifndef NDEBUG
   if (impr_>9000)
     {
-      const int nb_sommets = maillage.nb_sommets();
+      const long nb_sommets = maillage.nb_sommets();
       for (som=0 ; som<nb_sommets ; som++)
         {
           if (tab_somSupp[som]!=-1)
@@ -2444,11 +2447,11 @@ double Remaillage_FT::calculer_volume_sommets_supprimes(const Maillage_FT_Disc& 
 /*! @brief Cette fonction effectue des permutations d'aretes afin d'ameliorer la qualite du maillage
  *
  * @param (maillage) maillage a remailler
- * @return (int) 1 si le remaillage s'est deroule correctement, 0 sinon
+ * @return (long) 1 si le remaillage s'est deroule correctement, 0 sinon
  */
-int Remaillage_FT::permuter_aretes(Maillage_FT_Disc& maillage) const
+long Remaillage_FT::permuter_aretes(Maillage_FT_Disc& maillage) const
 {
-  int res = 1;
+  long res = 1;
   if (dimension!=3)
     {
       //ceci n'est valable qu'en 3D
@@ -2470,8 +2473,8 @@ static const IntTabFT* static_tab_sort;
 // Tri par ordre croissant de 2e colonne, puis 3e, puis 4e colonne.
 True_int fct_compare_tab_aretes(const void *pt1, const void *pt2)
 {
-  const int index1 = *(const int *) pt1;
-  const int index2 = *(const int *) pt2;
+  const long index1 = *(const long *) pt1;
+  const long index2 = *(const long *) pt2;
 
   True_int x = FTd_compare_sommets_global((*static_tab_sort)(index1,0), (*static_tab_sort)(index1,1), (*static_tab_sort)(index2,0), (*static_tab_sort)(index2,1));
   if (x==0)
@@ -2485,15 +2488,15 @@ True_int fct_compare_tab_aretes(const void *pt1, const void *pt2)
 /*! @brief Cette fonction divise les grandes aretes en 2
  *
  * @param (maillage) maillage a remailler
- * @return (int) 1 si le remaillage s'est deroule correctement, 0 sinon
+ * @return (long) 1 si le remaillage s'est deroule correctement, 0 sinon
  */
-int Remaillage_FT::diviser_grandes_aretes(Maillage_FT_Disc& maillage) const
+long Remaillage_FT::diviser_grandes_aretes(Maillage_FT_Disc& maillage) const
 {
   static const Stat_Counter_Id stat_counter = statistiques().new_counter(3, "Diviser_grandes_aretes");
   statistiques().begin_count(stat_counter);
 
-  static int compteur = 0;
-  static int test_val = -1;
+  static long compteur = 0;
+  static long test_val = -1;
 
   Process::Journal()<<"Remaillage_FT::diviser_grandes_aretes "<<temps_<<"  nb_som="<<maillage.nb_sommets()<<finl;
   Process::Journal()<<" Compteur = " << compteur << finl;
@@ -2502,7 +2505,7 @@ int Remaillage_FT::diviser_grandes_aretes(Maillage_FT_Disc& maillage) const
     {
       Process::Journal() << " STOP." << finl;
     }
-  //  int res = 1;
+  //  long res = 1;
 
   maillage.nettoyer_elements_virtuels();
 
@@ -2519,19 +2522,19 @@ int Remaillage_FT::diviser_grandes_aretes(Maillage_FT_Disc& maillage) const
                  1 /* marquage des aretes trop grandes */);
   // resultat =  tab_aretesMarquees : [ fa7 iarete pe som ]
 
-  const int nb_aretes_divis = tab_aretesMarquees.dimension(0);
+  const long nb_aretes_divis = tab_aretesMarquees.dimension(0);
 
 
-  int nb_facettes = maillage.nb_facettes();
-  const int nb_facettes0 = nb_facettes;
+  long nb_facettes = maillage.nb_facettes();
+  const long nb_facettes0 = nb_facettes;
   IntTab& facettes = maillage.facettes_;
-  const int nb_som_par_facette = facettes.dimension(1);
+  const long nb_som_par_facette = facettes.dimension(1);
 
   const ArrOfInt& sommet_num_owner = maillage.sommet_num_owner_;
-  int fa7,iarete, isom,som,isom_s,som_s,isom_ss,som_ss, pe_somD,numOwner_somD,somD,somD_s,somD_ss;
+  long fa7,iarete, isom,som,isom_s,som_s,isom_ss,som_ss, pe_somD,numOwner_somD,somD,somD_s,somD_ss;
 
-  const int dimension3 = (dimension==3);
-  const int nb_aretes_par_facette = (dimension3)?3:1;
+  const long dimension3 = (dimension==3);
+  const long nb_aretes_par_facette = (dimension3)?3:1;
   //tableau stockant le sommet servant a decouper l'arete (ou -1 si arete non divisee)
   IntTabFT tab_fa7Divis(nb_facettes,nb_aretes_par_facette);
   for (fa7=0 ; fa7<nb_facettes ; fa7++)
@@ -2573,7 +2576,7 @@ int Remaillage_FT::diviser_grandes_aretes(Maillage_FT_Disc& maillage) const
 
   //on va ensuite balayer les facettes et les scinder
   //la configuration depend du nb d'aretes a scinder par facette
-  int nb_areteScinder, isom0=-1,isom1=-1;
+  long nb_areteScinder, isom0=-1,isom1=-1;
   for (fa7=0 ; fa7<nb_facettes0 ; fa7++)
     {
       //on compte le nombre d'aretes a scinder
@@ -2715,7 +2718,7 @@ int Remaillage_FT::diviser_grandes_aretes(Maillage_FT_Disc& maillage) const
 
   Process::Journal()<<"FIN Remaillage_FT::diviser_grandes_aretes "<<temps_<<"  nb_som="<<maillage.nb_sommets()
                     <<"  nb_aretes_divisees="<< nb_aretes_divis<<finl;
-  int nb_aretes_divis_tot = Process::mp_sum(nb_aretes_divis);
+  long nb_aretes_divis_tot = Process::mp_sum(nb_aretes_divis);
 
   Process::Journal()<<"FIN Remaillage_FT::diviser_grandes_aretes " <<"  nb_aretes_divisees_tot="<< nb_aretes_divis_tot<<finl;
 
@@ -2727,11 +2730,11 @@ int Remaillage_FT::diviser_grandes_aretes(Maillage_FT_Disc& maillage) const
 
 //cette fonction insere une ligne de "requete arete" dans le tableau
 //renvoie l'indice ou cela a ete mis dans le tableau
-int Remaillage_FT::inserer_tab_aretes(int& nb_tab_aretes,IntTab& tab_aretes, DoubleTab& tab_criteres,
-                                      int pe0, int numOwner0, int pe1, int numOwner1, int sommet_face_bord1,
-                                      int peRequete, int fa7_peR, int iarete_fa7_peR) const
+long Remaillage_FT::inserer_tab_aretes(long& nb_tab_aretes,IntTab& tab_aretes, DoubleTab& tab_criteres,
+                                       long pe0, long numOwner0, long pe1, long numOwner1, long sommet_face_bord1,
+                                       long peRequete, long fa7_peR, long iarete_fa7_peR) const
 {
-  int res = nb_tab_aretes;
+  long res = nb_tab_aretes;
   //Redimensionnement eventuel
   if (nb_tab_aretes>=tab_aretes.dimension(0))
     {
@@ -2756,18 +2759,18 @@ int Remaillage_FT::inserer_tab_aretes(int& nb_tab_aretes,IntTab& tab_aretes, Dou
 //Partant de l'indice index (dans tab_index), cette fonction renvoie l'index suivant correspondant a l'arete (pe0/som0,pe1/som1) passee
 //Premiere utilisation : passer index = -1
 //Renvoie tmp=-1 s'il n'y a pas d'arete correspondante
-int Remaillage_FT::chercher_arete_tab(int tmp, const ArrOfInt& tab_index, const IntTab& tab_aretes,
-                                      int pe0, int numOwner0, int pe1, int numOwner1) const
+long Remaillage_FT::chercher_arete_tab(long tmp, const ArrOfInt& tab_index, const IntTab& tab_aretes,
+                                       long pe0, long numOwner0, long pe1, long numOwner1) const
 {
-  int pe0_=-1,numOwner0_=-1, pe1_=-1,numOwner1_=-1;
-  int iarete;
-  const int nb_tab_aretes = tab_index.size_array();
+  long pe0_=-1,numOwner0_=-1, pe1_=-1,numOwner1_=-1;
+  long iarete;
+  const long nb_tab_aretes = tab_index.size_array();
   tmp++;
   if (tmp>=nb_tab_aretes)
     {
       return -1;
     }
-  int trouve = -1;
+  long trouve = -1;
   while (tmp<nb_tab_aretes && trouve==-1)
     {
       iarete = tab_index[tmp];
@@ -2820,37 +2823,38 @@ int Remaillage_FT::chercher_arete_tab(int tmp, const ArrOfInt& tab_index, const 
 //
 //Rq : les deplacement des sommets peD/somD est a realiser en-dehors de cette fonction (liste des sommets dans tab_somD)
 //en utilisant le tableau tab_deplacement_somD, et apres avoir realise la subdivision des aretes
-int Remaillage_FT::marquer_aretes(Maillage_FT_Disc& maillage, IntTab& tab_aretesMarquees,
-                                  ArrOfInt& tab_somD, DoubleTab& tab_deplacement_somD, int drap) const
+long Remaillage_FT::marquer_aretes(Maillage_FT_Disc& maillage, IntTab& tab_aretesMarquees,
+                                   ArrOfInt& tab_somD, DoubleTab& tab_deplacement_somD, long drap) const
 {
-  int res = 1;
-  int nb_aretesMarquees = 0;
+  long res = 1;
+  long nb_aretesMarquees = 0;
   tab_aretesMarquees.resize(10,4); //tableau des aretes marquees [fa7 iarete pe som]
   //ou pe som est le sommet a utiliser lors d'une division d'arete
 
-  int nb_somD = 0;
+  long nb_somD = 0;
   tab_somD.resize_array(10);
   tab_deplacement_somD.resize(10,dimension);
   static IntTabFT tab_arete_somD(10,4);
   static IntTabFT tab_aretes(10,10); //tableau [0=pe0 1=ind0 2=pe1 3=ind1 4=face_bord1 5=peReq 6=fa7 7=iarete 8=critere 9=som]
   //ou (pe0) som est le sommet a utiliser lors d'une division d'arete
-  int nb_tab_aretes = 0;
+  long nb_tab_aretes = 0;
   static DoubleTabFT tab_criteres(10,6); //tableau [pox posy posz L^2 LI0^2 LI1^2]
 
-  const int dimension3 = (dimension==3);
+  const long dimension3 = (dimension==3);
 
-  const int nb_sommets = maillage.nb_sommets();
-  const int nb_facettes = maillage.nb_facettes();
+  const long nb_sommets = maillage.nb_sommets();
+  const long nb_facettes = maillage.nb_facettes();
   const IntTab& facettes = maillage.facettes();
   DoubleTab& sommets = maillage.sommets_;
   ArrOfInt& sommet_elem = maillage.sommet_elem_;
+  IntTabFT& sommet_face = maillage.sommet_face_; // EB
   ArrOfInt& sommet_face_bord = maillage.sommet_face_bord_;
   ArrOfInt& sommet_PE_owner = maillage.sommet_PE_owner_;
   ArrOfInt& sommet_num_owner = maillage.sommet_num_owner_;
   ArrOfInt& drapeaux_sommets = maillage.drapeaux_sommets_;
-  const int nb_som_par_facette = facettes.dimension(1);
-  const int nb_aretes_par_facette = (dimension3)?3:1;
-  const int _MOI_ = me();
+  const long nb_som_par_facette = facettes.dimension(1);
+  const long nb_aretes_par_facette = (dimension3)?3:1;
+  const long _MOI_ = me();
 
   //on commence par recuperer le schema de communication
   //on prend le schema inverse du descripteur de sommets car
@@ -2858,7 +2862,7 @@ int Remaillage_FT::marquer_aretes(Maillage_FT_Disc& maillage, IntTab& tab_aretes
   //initialise la communication
   comm.begin_comm();
 
-  int fa7, isom,som,pe,numOwner, isom_s,som_s,pe_s,numOwner_s, indice, tmp;
+  long fa7, isom,som,pe,numOwner, isom_s,som_s,pe_s,numOwner_s, indice, tmp;
   double x,y,z=0.;
   //on balaye les facettes reelles
   for (fa7=0 ; fa7<nb_facettes ; fa7++)
@@ -2949,7 +2953,7 @@ int Remaillage_FT::marquer_aretes(Maillage_FT_Disc& maillage, IntTab& tab_aretes
         } //fin facette non virtuelle
     } //fin du balayage des facettes
 
-  int peV, pe0,numOwner0, pe1,numOwner1, iarete, face_bord1;
+  long peV, pe0,numOwner0, pe1,numOwner1, iarete, face_bord1;
   //on lance l'echange des messages
   comm.echange_taille_et_messages();
 
@@ -2966,9 +2970,9 @@ int Remaillage_FT::marquer_aretes(Maillage_FT_Disc& maillage, IntTab& tab_aretes
   //   -du sommet 0 si je suis pe1
   {
     const ArrOfInt& pe_voisins = comm.get_recv_pe_list();
-    const int nb_pe_voisins = pe_voisins.size_array();
+    const long nb_pe_voisins = pe_voisins.size_array();
     z = 0;
-    for (int indice_pe = 0; indice_pe < nb_pe_voisins; indice_pe++)
+    for (long indice_pe = 0; indice_pe < nb_pe_voisins; indice_pe++)
       {
         peV = pe_voisins[indice_pe];
         Entree& buffer = comm.recv_buffer(peV);
@@ -3013,10 +3017,10 @@ int Remaillage_FT::marquer_aretes(Maillage_FT_Disc& maillage, IntTab& tab_aretes
   //on initialise le tableau servant au tri de la liste d'index
   static_tab_sort = &tab_aretes;
   //on recupere un tableau d'indices triant tab_fa7AScinder selon ses colonnes [1 2 3]
-  qsort(tab_index.addr(),nb_tab_aretes,sizeof(int), fct_compare_tab_aretes);
+  qsort(tab_index.addr(),nb_tab_aretes,sizeof(long), fct_compare_tab_aretes);
 
   double lgr2=-1.,lgr_ideale02=-1.,lgr_ideale12,d;
-  int pe0p,numOwner0p,pe1p,numOwner1p;
+  long pe0p,numOwner0p,pe1p,numOwner1p;
   pe0p = numOwner0p = pe1p = numOwner1p = -1;
 
   //on balaye alors les lignes des tableaux tab_*, pour calculer
@@ -3149,9 +3153,9 @@ int Remaillage_FT::marquer_aretes(Maillage_FT_Disc& maillage, IntTab& tab_aretes
   //et m'envoyant leur partie de calcul de la longueur ideale
   {
     const ArrOfInt& pe_voisins = comm2.get_recv_pe_list();
-    const int nb_pe_voisins = pe_voisins.size_array();
-    int peVoi, pe0bis,numOwner0bus, pe1bis,numOwner1bis, trouve;
-    for (int indice_pe = 0; indice_pe < nb_pe_voisins; indice_pe++)
+    const long nb_pe_voisins = pe_voisins.size_array();
+    long peVoi, pe0bis,numOwner0bus, pe1bis,numOwner1bis, trouve;
+    for (long indice_pe = 0; indice_pe < nb_pe_voisins; indice_pe++)
       {
         peVoi = pe_voisins[indice_pe];
         Entree& buffer = comm2.recv_buffer(peVoi);
@@ -3191,7 +3195,7 @@ int Remaillage_FT::marquer_aretes(Maillage_FT_Disc& maillage, IntTab& tab_aretes
   //a la fin de cela, je connais toutes les infos necessaires pour calculer le critere sur les aretes
   //dont je suis proprietaire du sommet 0
   //on va donc calculer le critere pour chacune des aretes dont je suis le proprietaire du sommet 0
-  int NV_nb_sommets = maillage.nb_sommets();
+  long NV_nb_sommets = maillage.nb_sommets();
   iarete = 0;
   {
     ArrOfIntFT liste_pe, liste_sommets;
@@ -3200,7 +3204,7 @@ int Remaillage_FT::marquer_aretes(Maillage_FT_Disc& maillage, IntTab& tab_aretes
     // Carre de ce rapport (on va comparer le rapport des carres des longueurs):
     const double coeff2 = tolerance_longueur_arete * tolerance_longueur_arete;
     double critere, lgrIdeale2;
-    int test=-1;
+    long test=-1;
     //pour cela, on va alors balayer les aretes, dans l'ordre trie
     pe0p = numOwner0p = pe1p = numOwner1p = -1;
     for (indice=0 ; indice<nb_tab_aretes ; indice++)
@@ -3255,6 +3259,7 @@ int Remaillage_FT::marquer_aretes(Maillage_FT_Disc& maillage, IntTab& tab_aretes
                         tmp = NV_nb_sommets+10;
                         sommets.resize(tmp, sommets.dimension(1));
                         sommet_elem.resize_array(tmp);
+                        sommet_face.resize(tmp,dimension); // EB
                         sommet_face_bord.resize_array(tmp);
                         sommet_PE_owner.resize_array(tmp);
                         sommet_num_owner.resize_array(tmp);
@@ -3309,7 +3314,7 @@ int Remaillage_FT::marquer_aretes(Maillage_FT_Disc& maillage, IntTab& tab_aretes
                 //on stocke aussi l'indice du sommet dans les infos des aretes
                 tab_aretes(iarete,9) = tmp;
 
-                int peReq = tab_aretes(iarete,5);
+                long peReq = tab_aretes(iarete,5);
                 if (peReq!=_MOI_)
                   {
                     liste_pe.append_array(peReq);
@@ -3327,6 +3332,7 @@ int Remaillage_FT::marquer_aretes(Maillage_FT_Disc& maillage, IntTab& tab_aretes
         tmp = NV_nb_sommets;
         sommets.resize(tmp, sommets.dimension(1));
         sommet_elem.resize_array(tmp);
+        sommet_face.resize(tmp,dimension); // EB: on donne la bonne taille a sommet_face mais pas besoin de remplir
         sommet_face_bord.resize_array(tmp);
         sommet_PE_owner.resize_array(tmp);
         sommet_num_owner.resize_array(tmp);
@@ -3345,7 +3351,7 @@ int Remaillage_FT::marquer_aretes(Maillage_FT_Disc& maillage, IntTab& tab_aretes
   const Schema_Comm_FT& comm_real_to_virt = maillage.desc_sommets_.schema_comm();
   comm_real_to_virt.begin_comm();
   //on va maintenant balayer les aretes pour stocker celles ne verifiant pas le test
-  int peReq, test;
+  long peReq, test;
   pe0p = numOwner0p = pe1p = numOwner1p = -1;
   for (indice=0 ; indice<nb_tab_aretes ; indice++)
     {
@@ -3409,9 +3415,9 @@ int Remaillage_FT::marquer_aretes(Maillage_FT_Disc& maillage, IntTab& tab_aretes
   //lorsque ceux-ci ont trouve une arete ne verifiant pas le critere
   {
     const ArrOfInt& pe_voisins = comm_real_to_virt.get_recv_pe_list();
-    const int nb_pe_voisins = pe_voisins.size_array();
-    int peVbis;
-    for (int indice_pe = 0; indice_pe < nb_pe_voisins; indice_pe++)
+    const long nb_pe_voisins = pe_voisins.size_array();
+    long peVbis;
+    for (long indice_pe = 0; indice_pe < nb_pe_voisins; indice_pe++)
       {
         peVbis = pe_voisins[indice_pe];
         Entree& buffer = comm_real_to_virt.recv_buffer(peVbis);
@@ -3458,7 +3464,7 @@ int Remaillage_FT::marquer_aretes(Maillage_FT_Disc& maillage, IntTab& tab_aretes
  */
 double Remaillage_FT::qualiteTriangle(const FTd_vecteur3& som0, const FTd_vecteur3& som1, const FTd_vecteur3& som2, double& aire) const
 {
-  int k;
+  long k;
 
   //calcul de perimetre2 = somme des carres de aretes
   double perimetre2 = 0.,d;
@@ -3514,21 +3520,21 @@ double Remaillage_FT::qualiteTriangle(const FTd_vecteur3& som0, const FTd_vecteu
 /*! @brief Cette fonction "supprime" les facettes de surface nulle : Elle les reduit a 1 sommet (le sommet 0, pour ne pas changer de processeur)
  *
  * @param (maillage) maillage a remailler
- * @return (int) 1 si le remaillage s'est deroule correctement, 0 sinon
+ * @return (long) 1 si le remaillage s'est deroule correctement, 0 sinon
  */
-int Remaillage_FT::supprimer_facettes_nulles(Maillage_FT_Disc& maillage) const
+long Remaillage_FT::supprimer_facettes_nulles(Maillage_FT_Disc& maillage) const
 {
-  int res = 1;
+  long res = 1;
 
   Process::Journal()<<"Remaillage_FT::supprimer_facettes_nulles nb_fa7="<<maillage.nb_facettes()<<finl;
   maillage.check_mesh();
 
   IntTab& facettes = maillage.facettes_;
   const ArrOfDouble& surface_facettes = maillage.get_update_surface_facettes();
-  const int nb_facettes = maillage.nb_facettes();
-  const int nb_som_par_facette = facettes.dimension(1);
+  const long nb_facettes = maillage.nb_facettes();
+  const long nb_som_par_facette = facettes.dimension(1);
 
-  int fa7,isom, nb_fa70 = 0;
+  long fa7,isom, nb_fa70 = 0;
   //on balaye les facettes pour marquer celles a supprimer
   for (fa7=0 ; fa7<nb_facettes ; fa7++)
     {
@@ -3559,11 +3565,11 @@ int Remaillage_FT::supprimer_facettes_nulles(Maillage_FT_Disc& maillage) const
  *     Elle supprime les sommets non utilises
  *
  * @param (maillage) maillage a remailler
- * @return (int) 1 si le remaillage s'est deroule correctement, 0 sinon
+ * @return (long) 1 si le remaillage s'est deroule correctement, 0 sinon
  */
-int Remaillage_FT::nettoyer_maillage(Maillage_FT_Disc& maillage) const
+long Remaillage_FT::nettoyer_maillage(Maillage_FT_Disc& maillage) const
 {
-  int res = 1;
+  long res = 1;
 
   Process::Journal()<<"Remaillage_FT::nettoyer_maillage nb_fa7="<<maillage.nb_facettes()<<finl;
 
@@ -3586,8 +3592,8 @@ void Remaillage_FT::regulariser_courbure(Maillage_FT_Disc& maillage,
 {
   const IntTab& facettes = maillage.facettes();
   const DoubleTab& sommets = maillage.sommets();
-  const int nb_facettes = facettes.dimension(0);
-  const int dim = facettes.dimension(1);
+  const long nb_facettes = facettes.dimension(0);
+  const long dim = facettes.dimension(1);
   const ArrOfDouble& surface_facettes =
     maillage.get_update_surface_facettes();
 
@@ -3597,12 +3603,12 @@ void Remaillage_FT::regulariser_courbure(Maillage_FT_Disc& maillage,
 
   // Calcul de la longueur de la plus petite arete
   double l_min = 1e10;
-  int count = 0;
-  int total_count = 0;
+  long count = 0;
+  long total_count = 0;
   const double one_third = 1. / 3.;
 
   dvolume = 0.;
-  int i_facette;
+  long i_facette;
   for (i_facette = 0; i_facette < nb_facettes; i_facette++)
     {
       // Ne pas calculer de flux pour les facettes virtuelles:
@@ -3610,8 +3616,8 @@ void Remaillage_FT::regulariser_courbure(Maillage_FT_Disc& maillage,
         continue;
       if (dim == 2)
         {
-          const int s1 = facettes(i_facette, 0);
-          const int s2 = facettes(i_facette, 1);
+          const long s1 = facettes(i_facette, 0);
+          const long s2 = facettes(i_facette, 1);
           const double x1 = sommets(s1, 0);
           const double x2 = sommets(s2, 0);
           const double dx = x2 - x1;
@@ -3647,20 +3653,20 @@ void Remaillage_FT::regulariser_courbure(Maillage_FT_Disc& maillage,
         }
       else
         {
-          int som[3]; // Indices des trois sommets
+          long som[3]; // Indices des trois sommets
           double c[3];   // Courbure des trois sommets
           double coord[3][3]; // Coordonnees
-          int i, j;
+          long i, j;
           for (i = 0; i < 3; i++)
             {
-              const int s = facettes(i_facette, i);
+              const long s = facettes(i_facette, i);
               som[i] = s;
               c[i] = courbure[s];
               for (j = 0; j < 3; j++)
                 coord[i][j] = sommets(s, j);
             }
           const double surface = surface_facettes[i_facette];
-          int i_suiv = 2;
+          long i_suiv = 2;
           for (i = 0; i < 3; i++)
             {
               const double dx = coord[i_suiv][0] - coord[i][0];
@@ -3688,8 +3694,8 @@ void Remaillage_FT::regulariser_courbure(Maillage_FT_Disc& maillage,
                   // sommets (au coefficient de diffusion pres) :
                   const double flux = gradient_c * h;
 
-                  const int s1 = som[i]; // Numero du premier sommet
-                  const int s2 = som[i_suiv]; // Numero du deuxieme sommet
+                  const long s1 = som[i]; // Numero du premier sommet
+                  const long s2 = som[i_suiv]; // Numero du deuxieme sommet
                   dvolume[s1] += flux;
                   dvolume[s2] -= flux;
                   count++;
@@ -3710,14 +3716,14 @@ void Remaillage_FT::regulariser_courbure(Maillage_FT_Disc& maillage,
   maillage.desc_sommets().collecter_espace_virtuel(dvolume, MD_Vector_tools::EV_SOMME);
 
   const DoubleVect& volume = refdomaine_VF_->volumes();
-  int clip=0;
+  long clip=0;
   double lost_volume = 0.;
-  int nb_som_reels = 0;
-  for (int s = 0; s < maillage.nb_sommets(); s++)
+  long nb_som_reels = 0;
+  for (long s = 0; s < maillage.nb_sommets(); s++)
     {
       if (!maillage.sommet_virtuel(s))
         nb_som_reels++;
-      const int elem = maillage.sommet_elem()[s];
+      const long elem = maillage.sommet_elem()[s];
       if (elem>=0)
         {
           // On est dans un element reel
@@ -3749,9 +3755,13 @@ void Remaillage_FT::regulariser_courbure(Maillage_FT_Disc& maillage,
     {
       // On repartit le volume perdu sur toute l'interface:
       lost_volume /=nb_som_reels;
-      for (int s = 0; s < maillage.nb_sommets(); s++)
+      for (long s = 0; s < maillage.nb_sommets(); s++)
         if (!maillage.sommet_virtuel(s))
           dvolume[s] += lost_volume;
     }
   maillage.desc_sommets().echange_espace_virtuel(dvolume);
+}
+void Remaillage_FT::set_is_solid_particle(long is_solid_particle)
+{
+  is_solid_particle_=is_solid_particle;
 }
