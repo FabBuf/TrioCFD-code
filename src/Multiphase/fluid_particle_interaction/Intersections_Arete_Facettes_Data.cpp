@@ -16,8 +16,8 @@
 // Le numero de la face doit verifier 0 <= num_face < zone.nb_faces()
 // Si le numero de facette est superieur a la taille de l'index des facettes,
 // on agrandit l'index.
-void Intersections_Arete_Facettes::ajoute_intersection(long num_facette,
-                                                       long num_face,
+void Intersections_Arete_Facettes::ajoute_intersection(int num_facette,
+                                                       int num_face,
                                                        double fraction_surface_intersection,
                                                        double contrib_volume_phase1,
                                                        double barycentre_u,
@@ -25,11 +25,11 @@ void Intersections_Arete_Facettes::ajoute_intersection(long num_facette,
                                                        double barycentre_w)
 {
   // Verification de taille de l'index des facettes
-  long nb_facettes = index_facette_arete_.size_array();
+  int nb_facettes = index_facette_arete_.size_array();
   if (num_facette >= nb_facettes)
     {
       index_facette_arete_.resize_array(num_facette+1);
-      for (long i = nb_facettes; i <= num_facette; i++)
+      for (int i = nb_facettes; i <= num_facette; i++)
         index_facette_arete_[i] = -1;
     }
   // Verification de taille du tableau de donnees des intersections
@@ -39,7 +39,7 @@ void Intersections_Arete_Facettes::ajoute_intersection(long num_facette,
       Intersections_Arete_Facettes_Data *new_data =
         new Intersections_Arete_Facettes_Data[data_allocated_size];
       if (data_real_size > 0)
-        for (long i=0; i<data_real_size; i++)
+        for (int i=0; i<data_real_size; i++)
           new_data[i] = data[i];
       if (data)
         delete[] data;
@@ -49,9 +49,9 @@ void Intersections_Arete_Facettes::ajoute_intersection(long num_facette,
   // chercher la fin...)
   {
     // Indice de l'intersection entre la face et la premiere facette
-    long& lindex_face = index_arete_facette_[num_face];
+    int lindex_face = index_arete_facette_[num_face];
     // Indice de l'intersection entre la facette et la premiere face
-    long& lindex_facette = index_facette_arete_[num_facette];
+    int lindex_facette = index_facette_arete_[num_facette];
     Intersections_Arete_Facettes_Data& new_entry = data[data_real_size];
     // Indice de l'intersection de la meme facette avec la face suivante
     new_entry.index_arete_suivante_ = lindex_facette;
@@ -87,8 +87,8 @@ Intersections_Arete_Facettes::~Intersections_Arete_Facettes()
   data = 0;
 }
 
-void Intersections_Arete_Facettes::reset(long nb_faces_euleriennes,
-                                         long nb_facettes)
+void Intersections_Arete_Facettes::reset(int nb_faces_euleriennes,
+                                         int nb_facettes)
 {
   data_real_size = 0;
   index_arete_facette_.resize_array(nb_faces_euleriennes);
@@ -97,7 +97,7 @@ void Intersections_Arete_Facettes::reset(long nb_faces_euleriennes,
   index_facette_arete_ = -1;
 }
 
-void Intersections_Arete_Facettes::get_liste_aretes_traversees(long num_facette,
+void Intersections_Arete_Facettes::get_liste_aretes_traversees(int num_facette,
                                                                ArrOfInt& liste_faces) const
 {
   liste_faces.resize_array(0);
@@ -106,22 +106,22 @@ void Intersections_Arete_Facettes::get_liste_aretes_traversees(long num_facette,
     // elle ne figure meme pas dans l'index
     return;
 
-  long index = index_facette_arete_[num_facette];
+  int index = index_facette_arete_[num_facette];
   for (; index >= 0; index = data[index].index_arete_suivante_)
     {
-      const long face = data[index].numero_arete_;
+      const int face = data[index].numero_arete_;
       liste_faces.append_array(face);
     }
 }
 
-void Intersections_Arete_Facettes::get_liste_facettes_traversantes(long num_face,
+void Intersections_Arete_Facettes::get_liste_facettes_traversantes(int num_face,
                                                                    ArrOfInt& liste_facettes) const
 {
   liste_facettes.resize_array(0);
-  long index = index_arete_facette_[num_face];
+  int index = index_arete_facette_[num_face];
   for (; index >= 0; index = data[index].index_facette_suivante_)
     {
-      const long facette = data[index].numero_facette_;
+      const int facette = data[index].numero_facette_;
       liste_facettes.append_array(facette);
     }
 }
@@ -162,7 +162,7 @@ const Intersections_Arete_Facettes& Intersections_Arete_Facettes::operator=(cons
       if (data)
         delete data;
       data = new Intersections_Arete_Facettes_Data[data_allocated_size];
-      long i;
+      int i;
       for (i=0 ; i<data_real_size; i++)
         {
           data[i] = iaf.data[i];

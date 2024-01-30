@@ -71,7 +71,7 @@ void Postraitement_Forces_Interfaces_FT::set_param(Param& p)
 }
 
 
-long Postraitement_Forces_Interfaces_FT::lire_motcle_non_standard(const Motcle& mot, Entree& is)
+int Postraitement_Forces_Interfaces_FT::lire_motcle_non_standard(const Motcle& mot, Entree& is)
 {
 
   if (mot=="methode_calcul_force_pression")
@@ -82,7 +82,7 @@ long Postraitement_Forces_Interfaces_FT::lire_motcle_non_standard(const Motcle& 
       Motcle motbis;
       is >> motbis;
       Cerr << "Reading methode_calcul_force_pression : " << motbis << finl;
-      const long r = mots.search(motbis);
+      const int r = mots.search(motbis);
       switch(r)
         {
         case 0:
@@ -107,7 +107,7 @@ long Postraitement_Forces_Interfaces_FT::lire_motcle_non_standard(const Motcle& 
       Motcle motbis;
       is >> motbis;
       Cerr << "Reading methode_calcul_force_frottements : " << motbis << finl;
-      const long r = mots.search(motbis);
+      const int r = mots.search(motbis);
       switch(r)
         {
         case 0:
@@ -134,7 +134,7 @@ long Postraitement_Forces_Interfaces_FT::lire_motcle_non_standard(const Motcle& 
       Motcle motbis;
       is >> motbis;
       Cerr << "Reading methode_interpolation : " << motbis << finl;
-      const long r = mots.search(motbis);
+      const int r = mots.search(motbis);
       switch(r)
         {
         case 0:
@@ -162,23 +162,23 @@ long Postraitement_Forces_Interfaces_FT::lire_motcle_non_standard(const Motcle& 
 }
 
 
-long Postraitement_Forces_Interfaces_FT::postraiter_forces()
+int Postraitement_Forces_Interfaces_FT::postraiter_forces()
 {
   if (calcul_forces_) return 1;
   return 0;
 }
-long Postraitement_Forces_Interfaces_FT::postraiter_flux()
+int Postraitement_Forces_Interfaces_FT::postraiter_flux()
 {
   if (calcul_flux_) return 1;
   return 0;
 }
 
-long Postraitement_Forces_Interfaces_FT::postraiter_forces() const
+int Postraitement_Forces_Interfaces_FT::postraiter_forces() const
 {
   if (calcul_forces_) return 1;
   return 0;
 }
-long Postraitement_Forces_Interfaces_FT::postraiter_flux() const
+int Postraitement_Forces_Interfaces_FT::postraiter_flux() const
 {
   if (calcul_flux_) return 1;
   return 0;

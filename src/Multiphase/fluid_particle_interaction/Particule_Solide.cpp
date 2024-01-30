@@ -60,5 +60,5 @@ const double& Particule_Solide::rayon() const { return rayon_; }
 const double& Particule_Solide::diametre() const { return diametre_; }
 const double& Particule_Solide::volume_compo() const { return volume_compo_; }
 const double& Particule_Solide::masse_compo() const { return masse_compo_; }
-const long& Particule_Solide::monodisperse() const { return monodisperse_; }
+const int& Particule_Solide::monodisperse() const { return monodisperse_; }
 

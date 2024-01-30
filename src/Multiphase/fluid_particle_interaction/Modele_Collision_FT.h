@@ -41,11 +41,11 @@ class Modele_Collision_FT : public Objet_U
 public:
   Modele_Collision_FT();
   void set_param(Param& p);
-  long lire_motcle_non_standard(const Motcle&, Entree&) override;
-  long reprendre(Entree& is) override;
-  long sauvegarder(Sortie& os) const override;
+  int lire_motcle_non_standard(const Motcle&, Entree&) override;
+  int reprendre(Entree& is) override;
+  int sauvegarder(Sortie& os) const override;
   void reset(); // il faut que les tableaux aient les bonnes dimensions pour etre lu lors de la reorise
-  void calculer_force_contact(DoubleTab& force_contact, long& isFirstStepOfCollision, double& dist_int, double& next_dist_int, DoubleTab& norm, DoubleTab& dUn, double& masse_eff, long& compo, long& voisin, double& Stb, double& ed, double& vitesseRelNorm, double& dt, double& prod_scal);
+  void calculer_force_contact(DoubleTab& force_contact, int& isFirstStepOfCollision, double& dist_int, double& next_dist_int, DoubleTab& norm, DoubleTab& dUn, double& masse_eff, int& compo, int& voisin, double& Stb, double& ed, double& vitesseRelNorm, double& dt, double& prod_scal);
   const double& sigma() const;
   const double& tau_coll() const;
   const double& delta_n() const;
@@ -53,15 +53,15 @@ public:
   const double& get_amortissement_cst() const;
 
   void set_s_Verlet(double s_Verlet);
-  const long& is_detection_Verlet() const;
-  const long& is_LC_activated() const;
+  const int& is_detection_Verlet() const;
+  const int& is_LC_activated() const;
   double& get_s_Verlet();
-  const long& get_Px() const;
-  const long& get_Py() const;
-  const long& get_Pz() const;
-  long& get_nb_dt_Verlet();
-  long& get_dt_compute_Verlet();
-  long& get_nb_pas_dt_max_Verlet();
+  const int& get_Px() const;
+  const int& get_Py() const;
+  const int& get_Pz() const;
+  int& get_nb_dt_Verlet();
+  int& get_dt_compute_Verlet();
+  int& get_nb_pas_dt_max_Verlet();
   const double& get_d_act_lub() const;
   const double& get_d_sat_lub() const;
   ArrOfIntFT& get_liste_zone_sup();
@@ -78,10 +78,10 @@ public:
 
   DoubleVect& get_collisions_detected();
 
-  long& compteur_collisions();
+  int& compteur_collisions();
   double& rayon_particule();
-  const long& modele_lubrification() const;
-  const long& force_elem_diphasique() const;
+  const int& modele_lubrification() const;
+  const int& force_elem_diphasique() const;
   const DoubleTab& position_bords() const;
   static void set_resize_parametres_geometriques();
   static void set_longueur(DoubleVect& Longueurs);
@@ -94,27 +94,27 @@ public:
   static DoubleVect& get_longueurs();
   static IntVect& get_nb_noeuds();
   void calculer_positions_bords(const DoubleVect& rayon_particule);
-  long checkForDuplicates(ArrOfInt& vector);
+  int checkForDuplicates(ArrOfInt& vector);
 
   void associer_equation_transport(const Equation_base& equation);
-  void set_nb_compo_tot(long nb_compo_tot);
+  void set_nb_compo_tot(int nb_compo_tot);
   void set_nom_fichier_reprise_FT(Nom fichier_reprise_FT);
   void set_d_act_lub(double d_act_lub);
   void set_d_sat_lub(double d_sat_lub);
 
 protected:
   double tau_coll_;
-  long decalage_bords_;
-  long f_elem_diph_;
-  long modele_lubrification_;
+  int decalage_bords_;
+  int f_elem_diph_;
+  int modele_lubrification_;
   double sigma_;
   double delta_n_;
   double raideur_cst_;
   double amortissement_cst_;
   double d_act_lub_;
   double d_sat_lub_;
-  long nb_compo_tot_;
-  //long sauvegarde_reprise_fichier_unique_;
+  int nb_compo_tot_;
+  //int sauvegarde_reprise_fichier_unique_;
   Nom fichier_reprise_FT_;
   DoubleTab raideur_;
   DoubleTab e_eff_;
@@ -125,20 +125,20 @@ protected:
   DoubleVect collision_detected_;
 
   double s_Verlet_;
-  long nb_dt_Verlet_;
-  long dt_compute_Verlet_;
-  long nb_pas_dt_max_Verlet_;
-  long is_detection_Verlet_;
-  long activate_linked_cell_;
-  long Px_; // nb procs suivant x
-  long Py_; // nb procs suivant y
-  long Pz_; // nb procs suivant z
+  int nb_dt_Verlet_;
+  int dt_compute_Verlet_;
+  int nb_pas_dt_max_Verlet_;
+  int is_detection_Verlet_;
+  int activate_linked_cell_;
+  int Px_; // nb procs suivant x
+  int Py_; // nb procs suivant y
+  int Pz_; // nb procs suivant z
   ArrOfIntFT liste_zone_sup_;
   ArrOfIntFT liste_zone_inf_;
 
 
   DoubleVect valeurs_decalage;
-  long compteur_collisions_;
+  int compteur_collisions_;
 
   REF(Transport_Interfaces_FT_Disc) refequation_transport_;
 

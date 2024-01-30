@@ -90,7 +90,7 @@ void Modele_Collision_FT::set_param(Param& p)
   p.ajouter("amortissement_cst", &amortissement_cst_);
 }
 
-long Modele_Collision_FT::lire_motcle_non_standard(const Motcle& mot, Entree& is)
+int Modele_Collision_FT::lire_motcle_non_standard(const Motcle& mot, Entree& is)
 {
 
   if (mot=="modele_collision")
@@ -107,7 +107,7 @@ long Modele_Collision_FT::lire_motcle_non_standard(const Motcle& mot, Entree& is
       Motcle motbis;
       is >> motbis;
       Cerr << "Reading modele_collisions_part : " << motbis << finl;
-      const long r = mots.search(motbis);
+      const int r = mots.search(motbis);
       switch(r)
         {
         case 0:
@@ -157,7 +157,7 @@ long Modele_Collision_FT::lire_motcle_non_standard(const Motcle& mot, Entree& is
           is >> motbis;
           while (motbis != accfermee)
             {
-              long rang2 = mots.search(motbis);
+              int rang2 = mots.search(motbis);
               switch(rang2)
                 {
                 case 0:
@@ -210,7 +210,7 @@ long Modele_Collision_FT::lire_motcle_non_standard(const Motcle& mot, Entree& is
 // copie de la methode ecrire_tableau(Sortie& os, const DoubleTab& tab) de Sauvegarde_Reprise_Maillage_FT.cpp
 void ecrire_tableau_donnee_modele_collision(Sortie& os, const DoubleTab& tab)
 {
-  const long dim0 = tab.dimension(0);
+  const int dim0 = tab.dimension(0);
   if (Process::je_suis_maitre())
     os << dim0 << space << tab.dimension(1) << finl;
   os.put(tab.addr(), tab.size_array());
@@ -219,8 +219,8 @@ void ecrire_tableau_donnee_modele_collision(Sortie& os, const DoubleTab& tab)
 //
 void lire_tableau_donnee_modele_collision(Entree& is, DoubleTab& tab, Entree * fichier)
 {
-  long dim0;
-  long dim1;
+  int dim0;
+  int dim1;
   (*fichier)  >> dim0  >> dim1;
   DoubleTab tmp;
   tmp.resize(dim0,dim1);
@@ -232,18 +232,18 @@ void Modele_Collision_FT::reset()
 {
   /*const Transport_Interfaces_FT_Disc& eq_transport =refequation_transport_.valeur();
   const Maillage_FT_Disc& maillage_interface=eq_transport.maillage_interface();
-  const long nb_facettes = maillage_interface.nb_facettes();
+  const int nb_facettes = maillage_interface.nb_facettes();
   ArrOfInt compo_connexes_facettes(nb_facettes); // Init a zero
-  long n = search_connex_components_local_FT(maillage_interface, compo_connexes_facettes); // */
-  long nb_compo_tot = nb_compo_tot_;//compute_global_connex_components_FT(maillage_interface, compo_connexes_facettes, n); //
-  long nb_bords=6;
+  int n = search_connex_components_local_FT(maillage_interface, compo_connexes_facettes); // */
+  int nb_compo_tot = nb_compo_tot_;//compute_global_connex_components_FT(maillage_interface, compo_connexes_facettes, n); //
+  int nb_bords=6;
   F_old_.resize(nb_compo_tot,nb_compo_tot+nb_bords);
   raideur_.resize(nb_compo_tot,nb_compo_tot+nb_bords);
   e_eff_.resize(nb_compo_tot,nb_compo_tot+nb_bords);
 }
 
 
-void ouvrir_fichier_collision(SFichier& os, const long& flag, const Transport_Interfaces_FT_Disc& equation, Nom fichier_sauvegarde)
+void ouvrir_fichier_collision(SFichier& os, const int& flag, const Transport_Interfaces_FT_Disc& equation, Nom fichier_sauvegarde)
 {
   // flag nul on n'ouvre pas le fichier
   if (flag==0)
@@ -251,7 +251,7 @@ void ouvrir_fichier_collision(SFichier& os, const long& flag, const Transport_In
   Nom fichier=fichier_sauvegarde;
 
   const Schema_Temps_base& sch=equation.probleme().schema_temps();
-  const long& precision=sch.precision_impr();
+  const int& precision=sch.precision_impr();
   // On cree le fichier a la premiere impression avec l'en tete ou si le fichier n'existe pas
 
   os.ouvrir(fichier,std::_S_out); // std::_S_out pour ne conserver que la derniere position
@@ -259,7 +259,7 @@ void ouvrir_fichier_collision(SFichier& os, const long& flag, const Transport_In
   os.setf(ios::scientific);
 }
 
-void ouvrir_fichier_collision(EFichier& os, const long& flag, const Transport_Interfaces_FT_Disc& equation, Nom fichier_reprise)
+void ouvrir_fichier_collision(EFichier& os, const int& flag, const Transport_Interfaces_FT_Disc& equation, Nom fichier_reprise)
 {
   // flag nul on n'ouvre pas le fichier
   if (flag==0)
@@ -267,7 +267,7 @@ void ouvrir_fichier_collision(EFichier& os, const long& flag, const Transport_In
   Nom fichier=fichier_reprise;//Objet_U::nom_du_cas()+"_modele_collision.sauv";
 
   const Schema_Temps_base& sch=equation.probleme().schema_temps();
-  const long& precision=sch.precision_impr();
+  const int& precision=sch.precision_impr();
   // On cree le fichier a la premiere impression avec l'en tete ou si le fichier n'existe pas
 
   os.ouvrir(fichier,ios::app);
@@ -276,10 +276,10 @@ void ouvrir_fichier_collision(EFichier& os, const long& flag, const Transport_In
   os.setf(ios::scientific);
 }
 
-long Modele_Collision_FT::reprendre(Entree& is)
+int Modele_Collision_FT::reprendre(Entree& is)
 {
   Nom motlu;
-  const long format_xyz = EcritureLectureSpecial::is_lecture_special();
+  const int format_xyz = EcritureLectureSpecial::is_lecture_special();
 
   reset();
   if (format_xyz)
@@ -334,10 +334,10 @@ long Modele_Collision_FT::reprendre(Entree& is)
   return 1;
 }
 
-long Modele_Collision_FT::sauvegarder(Sortie& os) const
+int Modele_Collision_FT::sauvegarder(Sortie& os) const
 {
-  long special, afaire;
-  const long format_xyz = EcritureLectureSpecial::is_ecriture_special(special, afaire);
+  int special, afaire;
+  const int format_xyz = EcritureLectureSpecial::is_ecriture_special(special, afaire);
 
   if (format_xyz)
     {
@@ -359,7 +359,7 @@ long Modele_Collision_FT::sauvegarder(Sortie& os) const
     }
   else
     {
-      long bytes = 0;
+      int bytes = 0;
       os << que_suis_je() << finl;
       os << "F_old" << finl;
       F_old_.ecrit(os);
@@ -378,7 +378,7 @@ long Modele_Collision_FT::sauvegarder(Sortie& os) const
 }
 
 
-void  Modele_Collision_FT::calculer_force_contact(DoubleTab& force_contact, long& isFirstStepOfCollision, double& dist_int, double& next_dist_int, DoubleTab& norm, DoubleTab& dUn, double& masse_eff, long& compo, long& voisin, double& Stb, double& ed, double& vitesseRelNorm, double& dt, double& prod_scal)
+void  Modele_Collision_FT::calculer_force_contact(DoubleTab& force_contact, int& isFirstStepOfCollision, double& dist_int, double& next_dist_int, DoubleTab& norm, DoubleTab& dUn, double& masse_eff, int& compo, int& voisin, double& Stb, double& ed, double& vitesseRelNorm, double& dt, double& prod_scal)
 {
   switch (modele_collision_)
     {
@@ -388,7 +388,7 @@ void  Modele_Collision_FT::calculer_force_contact(DoubleTab& force_contact, long
         double raideur = get_raideur_cst();
         double amortisseur = get_amortissement_cst();
 
-        for (long d = 0; d < dimension; d++)
+        for (int d = 0; d < dimension; d++)
           force_contact(d)=-1 * raideur * next_dist_int * norm(d) -1*amortisseur*dUn(d);
       }
       break;
@@ -398,7 +398,7 @@ void  Modele_Collision_FT::calculer_force_contact(DoubleTab& force_contact, long
         double raideur = get_raideur_cst();
         double amortisseur = get_amortissement_cst();
 
-        for (long d = 0; d < dimension; d++)
+        for (int d = 0; d < dimension; d++)
           force_contact(d)=-1 * raideur * dist_int * norm(d) -1*amortisseur*dUn(d);
       }
       break;
@@ -410,7 +410,7 @@ void  Modele_Collision_FT::calculer_force_contact(DoubleTab& force_contact, long
         double raideur = get_raideur_cst();
         double amortisseur = get_amortissement_cst();
 
-        for (long d = 0; d < dimension; d++)
+        for (int d = 0; d < dimension; d++)
           {
 
             double F_n = -1 * raideur * dist_int * norm(d) -1*amortisseur*dUn(d);
@@ -427,17 +427,17 @@ void  Modele_Collision_FT::calculer_force_contact(DoubleTab& force_contact, long
         //Cerr << "Modele Mohagheg. \n" << finl;
         DoubleTab& raideur=get_raideur();
         DoubleTab& e_eff=get_e_eff();
-        //long isFirstStepOfCollision = Tool::F_now(compo, voisin) > Tool::F_old(compo, voisin);
+        //int isFirstStepOfCollision = Tool::F_now(compo, voisin) > Tool::F_old(compo, voisin);
         if (isFirstStepOfCollision)
           {
             raideur(compo,voisin)= masse_eff * pow(vitesseRelNorm / sigma_, 2);
             e_eff(compo,voisin)=Stb > 18 ? ed * (1 - 8.65 * pow(Stb, -0.75)) : 0;
           }
-        long isPhasePenetration = prod_scal <= 0;
+        int isPhasePenetration = prod_scal <= 0;
         double le_e_eff = isPhasePenetration ? 1 : e_eff(compo, voisin);
         double la_raideur = raideur(compo, voisin);
 
-        for (long d = 0; d < dimension; d++)
+        for (int d = 0; d < dimension; d++)
           force_contact(d)=-1 * le_e_eff * le_e_eff * la_raideur * next_dist_int * norm(d);
       }
       break;
@@ -454,11 +454,11 @@ void  Modele_Collision_FT::calculer_force_contact(DoubleTab& force_contact, long
             //Tool::e_eff(compo, voisin) = ed * exp(-35 / (Stb + 1e-6));
             //Tool::raideur(compo, voisin) = (masse_eff * (pow(M_PI,2) + pow(log(ed), 2))) / pow(tau_coll, 2);
           }
-        long isPhaseCompression = prod_scal <= 0;
+        int isPhaseCompression = prod_scal <= 0;
 
         double le_e_eff = isPhaseCompression ? 1 : e_eff(compo, voisin);
         double la_raideur = raideur(compo, voisin);
-        for (long d = 0; d < dimension; d++)
+        for (int d = 0; d < dimension; d++)
           {
             force_contact(d)=-1 * le_e_eff * le_e_eff * la_raideur * dist_int * norm(d);
           }
@@ -470,18 +470,18 @@ void  Modele_Collision_FT::calculer_force_contact(DoubleTab& force_contact, long
         DoubleTab& e_eff=get_e_eff();
         if (isFirstStepOfCollision)
           {
-            long Nc=8;
+            int Nc=8;
             double  tau_c = Nc * dt ;
             raideur(compo,voisin)=(masse_eff * (pow(M_PI,2)+ pow(log(ed), 2))) / pow(tau_c, 2);
             e_eff(compo,voisin)=ed * exp(-35 / (Stb + 1e-6));
           }
 
-        long isPhaseCompression = prod_scal <= 0;
+        int isPhaseCompression = prod_scal <= 0;
         double le_e_eff = isPhaseCompression ? 1 : e_eff(compo, voisin);
         double la_raideur = raideur(compo, voisin);
         //double amortisseur = -1*(masse_eff * log(ed)) / (tau_coll); //EB
 
-        for (long d = 0; d < dimension; d++)
+        for (int d = 0; d < dimension; d++)
           {
             force_contact(d)=-1 * le_e_eff * le_e_eff * la_raideur * next_dist_int * norm(d);
           }
@@ -499,11 +499,11 @@ void  Modele_Collision_FT::calculer_force_contact(DoubleTab& force_contact, long
 
           }
 
-        long isPhaseCompression = prod_scal <= 0;
+        int isPhaseCompression = prod_scal <= 0;
         double le_e_eff = isPhaseCompression ? 1 : e_eff(compo, voisin);
         double la_raideur = raideur(compo, voisin);
 
-        for (long d = 0; d < dimension; d++)
+        for (int d = 0; d < dimension; d++)
           {
             double F_n = -1 * la_raideur * dist_int * norm(d) ;
             double y_np1 = dist_int + dUn(d) * dt +0.5 * F_n * dt * dt / masse_eff ;
@@ -520,7 +520,7 @@ void  Modele_Collision_FT::calculer_force_contact(DoubleTab& force_contact, long
         double raideur = (masse_eff * (pow(M_PI,2) + pow(log(ed), 2))) / pow(tau_coll_, 2); // tau_coll tel que definit dans le jdd
         double amortisseur = -1*(masse_eff * log(ed)) / (tau_coll_);
 
-        for (long d = 0; d < dimension; d++)
+        for (int d = 0; d < dimension; d++)
           force_contact(d)=-1 * raideur * next_dist_int * norm(d) -1*amortisseur*dUn(d);
       }
       break;
@@ -535,10 +535,10 @@ void  Modele_Collision_FT::calculer_force_contact(DoubleTab& force_contact, long
 void Modele_Collision_FT::calculer_positions_bords(const DoubleVect& rayon_particule)
 {
 
-  long nb_compo_tot=rayon_particule.size();
+  int nb_compo_tot=rayon_particule.size();
   positions_bords_.resize(nb_compo_tot,6);
   valeurs_decalage.resize(6);
-  for (long compo=0; compo<nb_compo_tot; compo++)
+  for (int compo=0; compo<nb_compo_tot; compo++)
 
     {
       switch(decalage_bords_)
@@ -619,11 +619,11 @@ void Modele_Collision_FT::set_s_Verlet(double s_Verlet)
   s_Verlet_=s_Verlet;
 }
 
-const long& Modele_Collision_FT::is_detection_Verlet() const
+const int& Modele_Collision_FT::is_detection_Verlet() const
 {
   return is_detection_Verlet_;
 }
-const long& Modele_Collision_FT::is_LC_activated() const
+const int& Modele_Collision_FT::is_LC_activated() const
 {
   return activate_linked_cell_;
 }
@@ -631,28 +631,28 @@ double& Modele_Collision_FT::get_s_Verlet()
 {
   return s_Verlet_;
 }
-const long& Modele_Collision_FT::get_Px() const
+const int& Modele_Collision_FT::get_Px() const
 {
   return Px_;
 }
-const long& Modele_Collision_FT::get_Py() const
+const int& Modele_Collision_FT::get_Py() const
 {
   return Py_;
 }
-const long& Modele_Collision_FT::get_Pz() const
+const int& Modele_Collision_FT::get_Pz() const
 {
   return Pz_;
 }
 
-long& Modele_Collision_FT::get_nb_dt_Verlet()
+int& Modele_Collision_FT::get_nb_dt_Verlet()
 {
   return nb_dt_Verlet_;
 }
-long& Modele_Collision_FT::get_dt_compute_Verlet()
+int& Modele_Collision_FT::get_dt_compute_Verlet()
 {
   return dt_compute_Verlet_;
 }
-long& Modele_Collision_FT::get_nb_pas_dt_max_Verlet()
+int& Modele_Collision_FT::get_nb_pas_dt_max_Verlet()
 {
   return nb_pas_dt_max_Verlet_;
 }
@@ -729,17 +729,17 @@ const DoubleTab& Modele_Collision_FT::position_bords() const
   return positions_bords_;
 }
 
-long& Modele_Collision_FT::compteur_collisions()
+int& Modele_Collision_FT::compteur_collisions()
 {
   return compteur_collisions_;
 }
 
-const long& Modele_Collision_FT::modele_lubrification() const
+const int& Modele_Collision_FT::modele_lubrification() const
 {
   return modele_lubrification_;
 }
 
-const long& Modele_Collision_FT::force_elem_diphasique() const
+const int& Modele_Collision_FT::force_elem_diphasique() const
 {
   return f_elem_diph_;
 }
@@ -749,13 +749,13 @@ const double& Modele_Collision_FT::tau_coll() const
   return tau_coll_;
 }
 
-long Modele_Collision_FT::checkForDuplicates(ArrOfInt& vector)
+int Modele_Collision_FT::checkForDuplicates(ArrOfInt& vector)
 {
-  long flag =0;
+  int flag =0;
   ArrOfInt copy_vector(vector);
-  const long size = copy_vector.size_array();
+  const int size = copy_vector.size_array();
   copy_vector.ordonne_array();
-  for (long i = 0; i < size-1; i++)
+  for (int i = 0; i < size-1; i++)
     {
       if (copy_vector(i)==copy_vector(i+1))
         {
@@ -775,28 +775,28 @@ void Modele_Collision_FT::set_param_geom(Domaine_VDF& domaine_vdf)
   Modele_Collision_FT::set_resize_parametres_geometriques();
   // 1. Nombre de noeuds par direction
   NiNj=0;
-  for (long i=0; i<bords.nb_bords(); i++)
+  for (int i=0; i<bords.nb_bords(); i++)
     {
-      long nb_boundary_faces = mp_sum(ref_cast(Frontiere,bords(i)).nb_faces());
-      long nb_boundary_faces_local=ref_cast(Frontiere,bords(i)).nb_faces();
+      int nb_boundary_faces = mp_sum(ref_cast(Frontiere,bords(i)).nb_faces());
+      int nb_boundary_faces_local=ref_cast(Frontiere,bords(i)).nb_faces();
       if (nb_boundary_faces_local>0)
         {
-          long face1=ref_cast(Frontiere,bords(i)).num_premiere_face();
-          long orientation_face1=domaine_vdf.orientation(face1);
+          int face1=ref_cast(Frontiere,bords(i)).num_premiere_face();
+          int orientation_face1=domaine_vdf.orientation(face1);
           NiNj(orientation_face1)=nb_boundary_faces;
         }
     }
 
   // EB : les valeurs seront bidons si les conditions citees precedemment ne sont pas remplies
-  long long NxNy= static_cast<long>(mp_max(NiNj(2))) ;
-  long long NxNz= static_cast<long>(mp_max(NiNj(1)));
-  long long NyNz= static_cast<long>(mp_max(NiNj(0)));
+  int NxNy= static_cast<int>(mp_max(NiNj(2))) ;
+  int NxNz= static_cast<int>(mp_max(NiNj(1)));
+  int NyNz= static_cast<int>(mp_max(NiNj(0)));
 
-  long Nx,Ny,Nz;
+  int Nx,Ny,Nz;
 
-  Ny= NxNz>0 ? static_cast<long>(sqrt(NxNy*NyNz/NxNz)) : 0; // nb elements dans la direction y
-  Nz= NxNy>0 ? static_cast<long>((NxNz*Ny/NxNy)) : 0; // idem z, attention a l'ordre des operations car Nz est un entier
-  Nx= Ny>0 ? static_cast<long>(NxNy/Ny) : 0; // idem x
+  Ny= NxNz>0 ? static_cast<int>(sqrt(NxNy*NyNz/NxNz)) : 0; // nb elements dans la direction y
+  Nz= NxNy>0 ? static_cast<int>((NxNz*Ny/NxNy)) : 0; // idem z, attention a l'ordre des operations car Nz est un entier
+  Nx= Ny>0 ? static_cast<int>(NxNy/Ny) : 0; // idem x
   Nx++; // nb noeuds dans la direction x
   Ny++; // idem y
   Nz++; // idem z
@@ -808,7 +808,7 @@ void Modele_Collision_FT::set_param_geom(Domaine_VDF& domaine_vdf)
   double Ox=0,Oy=0,Oz=0;
   double Lx=0,Ly=0,Lz=0;
 
-  for (long j=0; j<dimension; j++)
+  for (int j=0; j<dimension; j++)
     {
       double min_ = mp_min(BB(j,0));
       double max_ = mp_max(BB(j,1));
@@ -842,7 +842,7 @@ void Modele_Collision_FT::associer_equation_transport(const Equation_base& equat
   refequation_transport_ = eq;
 }
 
-void Modele_Collision_FT::set_nb_compo_tot(long nb_compo_tot)
+void Modele_Collision_FT::set_nb_compo_tot(int nb_compo_tot)
 {
   nb_compo_tot_=nb_compo_tot;
 }

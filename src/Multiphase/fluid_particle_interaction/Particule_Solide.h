@@ -25,10 +25,10 @@ public:
   const double& diametre() const;
   const double& volume_compo() const;
   const double& masse_compo() const;
-  const long& monodisperse() const;
+  const int& monodisperse() const;
 protected :
   double e_dry_;
-  long monodisperse_;
+  int monodisperse_;
   mutable double rayon_;
   mutable double diametre_;
   mutable double volume_compo_;

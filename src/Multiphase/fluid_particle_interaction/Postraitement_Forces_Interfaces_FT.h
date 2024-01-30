@@ -30,11 +30,11 @@ class Postraitement_Forces_Interfaces_FT : public Objet_U
 public:
   Postraitement_Forces_Interfaces_FT();
   void set_param(Param& p);
-  long lire_motcle_non_standard(const Motcle&, Entree&) override;
-  long postraiter_forces();
-  long postraiter_flux();
-  long postraiter_forces() const;
-  long postraiter_flux() const;
+  int lire_motcle_non_standard(const Motcle&, Entree&) override;
+  int postraiter_forces();
+  int postraiter_flux();
+  int postraiter_forces() const;
+  int postraiter_flux() const;
   double get_distance_interpolation_pression_P1() const;
   double get_distance_interpolation_pression_P2() const;
   double get_distance_interpolation_temperature_P1() const;
@@ -42,13 +42,13 @@ public:
   double get_distance_interpolation_gradU_P1() const;
   double get_distance_interpolation_gradU_P2() const;
 
-  long calcul_forces_;
-  long calcul_forces_theoriques_stokes_;
-  long calcul_flux_;
-  long flag_pression_facettes_;
-  long flag_force_pression_facettes_;
-  long flag_force_frottements_facettes_;
-  long flag_tenseur_contraintes_facettes_;
+  int calcul_forces_;
+  int calcul_forces_theoriques_stokes_;
+  int calcul_flux_;
+  int flag_pression_facettes_;
+  int flag_force_pression_facettes_;
+  int flag_force_frottements_facettes_;
+  int flag_tenseur_contraintes_facettes_;
 
 
   enum Methode_calcul_force_pression { TRILINEAIRE_LINEAIRE, TAYLOR_LAGRANGE_ORDRE3_PRESSION }; // Le developpement de la methode TAYLOR_LAGRANGE_ORDRE3 n'est pas termine (et doit surement etre repris depuis le debut)

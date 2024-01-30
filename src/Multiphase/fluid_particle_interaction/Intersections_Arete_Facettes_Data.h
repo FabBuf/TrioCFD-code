@@ -35,10 +35,10 @@ public: // On copie ce qui est fait dans Intersections_Elem_Facettes_Data (parce
   // En 2D, on a barycentre_[2] = 0.;
   double barycentre_[3];
 
-  long index_arete_suivante_;  // -1 si derniere arete de la liste
-  long index_facette_suivante_; // idem.
-  long numero_facette_;
-  long numero_arete_;
+  int index_arete_suivante_;  // -1 si derniere arete de la liste
+  int index_facette_suivante_; // idem.
+  int numero_facette_;
+  int numero_arete_;
 };
 
 // ====================================================================
@@ -49,7 +49,7 @@ public: // On copie ce qui est fait dans Intersections_Elem_Facettes_Data (parce
 // doublement chainee.
 // Pour parcourir les facettes qui coupent une face "arete", on fait:
 //
-//   long index=index_arete()[arete];
+//   int index=index_arete()[arete];
 //   while (index >= 0) {
 //     const Intersections_Arete_Facettes_Data & data = data_intersection(index);
 //     ... // faire quelque chose avec data
@@ -58,7 +58,7 @@ public: // On copie ce qui est fait dans Intersections_Elem_Facettes_Data (parce
 //
 // Pour parcourir les faces qui sont coupes par une facette "facette":
 //
-//   long index=index_facette()[facette];
+//   int index=index_facette()[facette];
 //   while (index >= 0) {
 //     const Intersections_Arete_Facettes_Data & data = data_intersection(index);
 //     ... // faire quelque chose avec data
@@ -70,12 +70,12 @@ class Intersections_Arete_Facettes
 public:
   Intersections_Arete_Facettes();
   ~Intersections_Arete_Facettes();
-  void get_liste_aretes_traversees(long num_facette,
+  void get_liste_aretes_traversees(int num_facette,
                                    ArrOfInt& liste_aretes) const;
-  void get_liste_facettes_traversantes(long num_arete,
+  void get_liste_facettes_traversantes(int num_arete,
                                        ArrOfInt& liste_facettes) const;
-  void ajoute_intersection(long num_facette,
-                           long num_arete,
+  void ajoute_intersection(int num_facette,
+                           int num_arete,
                            double surface_intersection,
                            double contrib_volume_phase1,
                            double barycentre_u,
@@ -86,12 +86,12 @@ public:
   // nb_aretes_euleriennes doit etre correct.
   // nb_facettes peut etre une estimation seulement (en pratique lors du
   // parcours on ne peut pas prevoir le nombre final de facettes)
-  void reset(long nb_aretes_euleriennes=0, long nb_facettes=0);
+  void reset(int nb_aretes_euleriennes=0, int nb_facettes=0);
 
   const ArrOfInt& index_arete() const;
   const ArrOfInt& index_facette() const;
-  inline const Intersections_Arete_Facettes_Data& data_intersection(long index) const;
-  inline Intersections_Arete_Facettes_Data& get_set_data_intersection(long index);
+  inline const Intersections_Arete_Facettes_Data& data_intersection(int index) const;
+  inline Intersections_Arete_Facettes_Data& get_set_data_intersection(int index);
 
   //operateur de copie
   const Intersections_Arete_Facettes& operator=(const Intersections_Arete_Facettes& iaf);
@@ -109,15 +109,15 @@ private:
   //
   // Les donnees : une arete par couple facette/face traverse.
   // (politique d'allocation : on agrandit d'un facteur 2, on ne diminue jamais).
-  long data_allocated_size; // Le nombre d'aretes allouees
-  long data_real_size;      // Le nombre d'aretes reellement utilisees
+  int data_allocated_size; // Le nombre d'aretes allouees
+  int data_real_size;      // Le nombre d'aretes reellement utilisees
   Intersections_Arete_Facettes_Data * data;
 };
 
 // Description:
 //  Renvoie les donnees de l'intersection stockee a l'indice "index"
 //  dans le tableau "data" ( 0 <= index < data_real_size_ )
-inline const Intersections_Arete_Facettes_Data& Intersections_Arete_Facettes::data_intersection(long index) const
+inline const Intersections_Arete_Facettes_Data& Intersections_Arete_Facettes::data_intersection(int index) const
 {
   //Cerr << "data_real_size " << data_real_size << finl;
   assert(index >= 0 && index < data_real_size);
@@ -127,7 +127,7 @@ inline const Intersections_Arete_Facettes_Data& Intersections_Arete_Facettes::da
 //  Renvoie les donnees de l'intersection stockee a l'indice "index"
 //  dans le tableau "data" ( 0 <= index < data_real_size_ )
 // ATTENTION A SON UTILISATION !!!
-inline Intersections_Arete_Facettes_Data& Intersections_Arete_Facettes::get_set_data_intersection(long index)
+inline Intersections_Arete_Facettes_Data& Intersections_Arete_Facettes::get_set_data_intersection(int index)
 {
   assert(index >= 0 && index < data_real_size);
   return data[index];

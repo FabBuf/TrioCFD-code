@@ -73,12 +73,12 @@ void Domaine_VDF_plus::discretiser()
   // L'element face_voisin(i,0) doit avoir une coordonnee "ori" plus petite que la face
   // et l'element face_voisin(i,1) doit avoir une coordonnee plus grande.
   {
-    const long nbr_faces_tot = face_voisins_.dimension_tot(0);
-    for (long i_face = 0; i_face < nbr_faces_tot; i_face++)
+    const int nbr_faces_tot = face_voisins_.dimension_tot(0);
+    for (int i_face = 0; i_face < nbr_faces_tot; i_face++)
       {
-        const long elem0 = face_voisins_(i_face, 0);
-        const long elem1 = face_voisins_(i_face, 1);
-        const long ori = orientation_[i_face];
+        const int elem0 = face_voisins_(i_face, 0);
+        const int elem1 = face_voisins_(i_face, 1);
+        const int ori = orientation_[i_face];
         const double x_face = xv(i_face, ori);
         double delta = 0.;
         // L'element 0 doit avoir une coordonnee "ori" plus petite que la face
@@ -117,12 +117,12 @@ void Domaine_VDF_plus::modifier_pour_Cl(const Conds_lim& conds_lim)
   // Cerr << "Domaine_VDF::Modifier_pour_Cl" << finl;
   Domaine_VF::modifier_pour_Cl(conds_lim);
 
-  long fac3;
-  long nb_cond_lim=conds_lim.size();
+  int fac3;
+  int nb_cond_lim=conds_lim.size();
   IntTab aretes_coin_traitees(nb_aretes_coin());
   aretes_coin_traitees = -1;
 
-  for (long num_cond_lim=0; num_cond_lim<nb_cond_lim; num_cond_lim++)
+  for (int num_cond_lim=0; num_cond_lim<nb_cond_lim; num_cond_lim++)
     {
       // for cl ...
       //Journal() << "On traite la cl num : " << num_cond_lim << finl;
@@ -135,9 +135,9 @@ void Domaine_VDF_plus::modifier_pour_Cl(const Conds_lim& conds_lim)
 
           const Domaine_Cl_VDF& domaine_Cl_VDF = ref_cast(Domaine_Cl_VDF,cl.domaine_Cl_dis());
 
-          long ndeb_arete = premiere_arete_bord();
-          long fac1,fac2,sign,num_face,elem1,n_type;
-          for (long n_arete=ndeb_arete; n_arete<ndeb_arete+nb_aretes_bord(); n_arete++)
+          int ndeb_arete = premiere_arete_bord();
+          int fac1,fac2,sign,num_face,elem1,n_type;
+          for (int n_arete=ndeb_arete; n_arete<ndeb_arete+nb_aretes_bord(); n_arete++)
             {
               // for n_arete
               n_type=domaine_Cl_VDF.type_arete_bord(n_arete-ndeb_arete);
@@ -151,8 +151,8 @@ void Domaine_VDF_plus::modifier_pour_Cl(const Conds_lim& conds_lim)
                   sign = Qdm_(n_arete,3);
 
                   const Front_VF& la_frontiere_dis = ref_cast(Front_VF,cl.frontiere_dis());
-                  long ndeb = la_frontiere_dis.num_premiere_face();
-                  long nfin = ndeb + la_frontiere_dis.nb_faces();
+                  int ndeb = la_frontiere_dis.num_premiere_face();
+                  int nfin = ndeb + la_frontiere_dis.nb_faces();
                   if ( ( ( ndeb <= fac1) && (fac1 < nfin) ) ||
                        ( ( ndeb <= fac2) && (fac2 < nfin) )
                      )
@@ -174,11 +174,11 @@ void Domaine_VDF_plus::modifier_pour_Cl(const Conds_lim& conds_lim)
                 }
             }
           // prise  en compte des aretes coin
-          long ndeb_arete_coin = premiere_arete_coin();
+          int ndeb_arete_coin = premiere_arete_coin();
           Cerr << "Modifications de Qdm pour les aretes coins  num_cond_lim=" << num_cond_lim <<  finl;
-          long fac4;
+          int fac4;
 
-          for (long n_arete=ndeb_arete_coin; n_arete<ndeb_arete_coin+nb_aretes_coin(); n_arete++)
+          for (int n_arete=ndeb_arete_coin; n_arete<ndeb_arete_coin+nb_aretes_coin(); n_arete++)
             {
               if (aretes_coin_traitees[n_arete] != 1)
                 {
@@ -190,7 +190,7 @@ void Domaine_VDF_plus::modifier_pour_Cl(const Conds_lim& conds_lim)
                   // On recupere le numero des faces qui ne sont pas egales a -1
                   IntVect f(2);
                   f = -2;
-                  long i=0;
+                  int i=0;
                   if (fac1 != -1)
                     {
                       f(i) = fac1;
@@ -215,16 +215,16 @@ void Domaine_VDF_plus::modifier_pour_Cl(const Conds_lim& conds_lim)
                   // On regarde si la face est une face de periodicite
 
                   const Front_VF& la_frontiere_dis = ref_cast(Front_VF,cl.frontiere_dis());
-                  long ndeb = la_frontiere_dis.num_premiere_face();
-                  long nfin = ndeb + la_frontiere_dis.nb_faces();
-                  long  elem, fac,dim0,dim1,indic_f0=-100,indic_f1=-100;
+                  int ndeb = la_frontiere_dis.num_premiere_face();
+                  int nfin = ndeb + la_frontiere_dis.nb_faces();
+                  int  elem, fac,dim0,dim1,indic_f0=-100,indic_f1=-100;
 
                   n_type=domaine_Cl_VDF.type_arete_coin(n_arete-ndeb_arete_coin);
                   dim1 = orientation_[f(1)];
                   dim0 = orientation_[f(0)];
 
-                  for (long j=0; j<2; j++)
-                    for (long k=0; k<2; k++)
+                  for (int j=0; j<2; j++)
+                    for (int k=0; k<2; k++)
                       if ((face_voisins(f(0),j) == face_voisins(f(1),k))  && (face_voisins(f(0),j)!=-1) )
                         {
                           indic_f0 = j;
@@ -326,12 +326,12 @@ void Domaine_VDF_plus::modifier_pour_Cl(const Conds_lim& conds_lim)
 
           const Domaine_Cl_VDF& domaine_Cl_VDF = ref_cast(Domaine_Cl_VDF,cl.domaine_Cl_dis());
 
-          long fac1,fac2,n_type;
-          long ndeb_arete_coin = premiere_arete_coin();
+          int fac1,fac2,n_type;
+          int ndeb_arete_coin = premiere_arete_coin();
           Cerr << "Modifications de Qdm pour les aretes coins touchant une paroi num_cond_lim=" << num_cond_lim <<  finl;
-          long fac4;
+          int fac4;
 
-          for (long n_arete=ndeb_arete_coin; n_arete<ndeb_arete_coin+nb_aretes_coin(); n_arete++)
+          for (int n_arete=ndeb_arete_coin; n_arete<ndeb_arete_coin+nb_aretes_coin(); n_arete++)
             {
               if (aretes_coin_traitees[n_arete] != 1)
                 {
@@ -343,7 +343,7 @@ void Domaine_VDF_plus::modifier_pour_Cl(const Conds_lim& conds_lim)
                   // On recupere le numero des faces qui ne sont pas egales a -1
                   IntVect f(2);
                   f = -2;
-                  long i=0;
+                  int i=0;
                   if (fac1 != -1)
                     {
                       f(i) = fac1;
@@ -368,14 +368,14 @@ void Domaine_VDF_plus::modifier_pour_Cl(const Conds_lim& conds_lim)
                   // On regarde si la face est une face de type paroi
 
                   const Front_VF& la_frontiere_dis = ref_cast(Front_VF,cl.frontiere_dis());
-                  long ndeb = la_frontiere_dis.num_premiere_face();
-                  long nfin = ndeb + la_frontiere_dis.nb_faces();
-                  long indic_f0=-100,indic_f1=-100;
+                  int ndeb = la_frontiere_dis.num_premiere_face();
+                  int nfin = ndeb + la_frontiere_dis.nb_faces();
+                  int indic_f0=-100,indic_f1=-100;
 
                   n_type=domaine_Cl_VDF.type_arete_coin(n_arete-ndeb_arete_coin);
 
-                  for (long j=0; j<2; j++)
-                    for (long k=0; k<2; k++)
+                  for (int j=0; j<2; j++)
+                    for (int k=0; k<2; k++)
                       if ((face_voisins(f(0),j) == face_voisins(f(1),k)) && (face_voisins(f(0),j)!=-1) )
                         {
                           indic_f0 = j;
@@ -428,32 +428,32 @@ void Domaine_VDF_plus::modifier_pour_Cl(const Conds_lim& conds_lim)
 // debut EB
   Domaine_VF& zvf = ref_cast(Domaine_VF,*this); // EB
   Joints& joints=zvf.domaine().faces_joint();
-  const long nb_voisins = joints.size();
+  const int nb_voisins = joints.size();
   //const DoubleTab& coord=domaine().domaine().coord_sommets();
   DoubleTab cg_aretes(1,dimension);
   ArrOfInt aretes(1);
   const IntTab& Aretes_Som=domaine().aretes_som();
 
-  for (long voisin=0; voisin<nb_voisins; voisin++)
+  for (int voisin=0; voisin<nb_voisins; voisin++)
     {
       Joint& joint     = joints[voisin];
-      //const long pe = joint.PEvoisin();
+      //const int pe = joint.PEvoisin();
       ArrOfInt& items_communs = joint.set_joint_item(Joint::ARETE).set_items_communs(); // arete multiple
       items_communs.set_smart_resize(1);
       items_communs.resize(0);
-      long compteur_aretes_joint=0;
+      int compteur_aretes_joint=0;
 
       const ArrOfInt& indices_sommets =
         joint.joint_item(Joint::SOMMET).items_communs();
 
-      for (long ind_S1=0; ind_S1< indices_sommets.size_array(); ind_S1++)
+      for (int ind_S1=0; ind_S1< indices_sommets.size_array(); ind_S1++)
         {
-          long S1 = indices_sommets(ind_S1);
-          for (long ind_S2=ind_S1; ind_S2< indices_sommets.size_array(); ind_S2++)
+          int S1 = indices_sommets(ind_S1);
+          for (int ind_S2=ind_S1; ind_S2< indices_sommets.size_array(); ind_S2++)
             {
-              long S2 = indices_sommets(ind_S2);
+              int S2 = indices_sommets(ind_S2);
               compteur_aretes_joint=items_communs.size_array();
-              for (long k=0; k<Aretes_Som.dimension(0); k++)
+              for (int k=0; k<Aretes_Som.dimension(0); k++)
                 if (Aretes_Som(k,0)==S1 && Aretes_Som(k,1)==S2)
                   {
                     items_communs.append_array(k);
@@ -477,9 +477,9 @@ void Domaine_VDF_plus::modifier_pour_Cl(const Conds_lim& conds_lim)
   // fin EB
 }
 
-static inline long face_vois_plus(const Domaine_VDF& dvdf, const Domaine& domaine, long face, long i)
+static inline int face_vois_plus(const Domaine_VDF& dvdf, const Domaine& domaine, int face, int i)
 {
-  long elem=dvdf.face_voisins(face,i);
+  int elem=dvdf.face_voisins(face,i);
   if(elem==-1)
     {
       face=domaine.face_bords_interne_conjuguee(face);
@@ -503,15 +503,15 @@ void Domaine_VDF_plus::genere_et_cree_aretes()
   Aretes_som.set_smart_resize(1);
   Aretes_som.resize(0, 2);
 
-  const long nb_aretes_elem=12;
+  const int nb_aretes_elem=12;
   Elem_Aretes.resize(0, nb_aretes_elem);
   mon_domaine.creer_tableau_elements(Elem_Aretes, Array_base::NOCOPY_NOINIT);
   Elem_Aretes=-1;
-  //  long nb_poly = mon_domaine.nb_elem();
-  long nb_poly_tot = mon_domaine.nb_elem_tot();
+  //  int nb_poly = mon_domaine.nb_elem();
+  int nb_poly_tot = mon_domaine.nb_elem_tot();
   // Estimation avec majoration du nombre d'aretes : nb_aretes_plus
   nb_aretes_=-1; // cf Aretes::affecter
-  long nb_aretes_plus=-1;
+  int nb_aretes_plus=-1;
   if (dimension == 2)
     nb_aretes_plus = mon_domaine.nb_som_tot();
   else if (dimension == 3)
@@ -520,10 +520,10 @@ void Domaine_VDF_plus::genere_et_cree_aretes()
   Aretes les_aretes(nb_aretes_plus);
 
   // On balaie les elements :
-  long el1, el2, el3, el4;
-  long face12, face13, face34, face24;
-  long s1,s2;
-  long nb_dir;
+  int el1, el2, el3, el4;
+  int face12, face13, face34, face24;
+  int s1,s2;
+  int nb_dir;
   if(dimension==2) nb_dir=1;
   else nb_dir=3;
   IntVect gauche(nb_dir);
@@ -555,7 +555,7 @@ void Domaine_VDF_plus::genere_et_cree_aretes()
       bas(2)=2;
     }
   IntVect ind_som1(nb_dir);
-  long ind_som2=-1;
+  int ind_som2=-1;
 
   IntVect ind_som1_bas_droite(nb_dir);
   IntVect ind_som2_bas_droite(nb_dir);
@@ -592,10 +592,10 @@ void Domaine_VDF_plus::genere_et_cree_aretes()
     ind_som2_bas_gauche(2)=1;
   }
 
-  long coin=-1;
-  long bord=0;
-  long mixte=1;
-  long interne=2;
+  int coin=-1;
+  int bord=0;
+  int mixte=1;
+  int interne=2;
   // Detection des plaques (2 faces frontieres se superposent):
   IntVect est_une_plaque(nb_faces());
   creer_tableau_faces(est_une_plaque);
@@ -604,18 +604,18 @@ void Domaine_VDF_plus::genere_et_cree_aretes()
   ArrOfDouble P1(3), P2(3);
   P1=0;
   P2=0;
-  long ok=0;
+  int ok=0;
   double eps = 10.0*Objet_U::precision_geom;
-  for (long face=0; face<premiere_face_int(); face++)
+  for (int face=0; face<premiere_face_int(); face++)
     {
-      long ori = orientation(face);
-      for (long i = 0; i < dimension; i++)
+      int ori = orientation(face);
+      for (int i = 0; i < dimension; i++)
         {
           P1[i] = xv(face, i) + (ori == i ? eps : 0);
           P2[i] = xv(face, i) - (ori == i ? eps : 0);
         }
-      long elem1 = domaine().chercher_elements(P1[0], P1[1], P1[2]);
-      long elem2 = domaine().chercher_elements(P2[0], P2[1], P2[2]);
+      int elem1 = domaine().chercher_elements(P1[0], P1[1], P1[2]);
+      int elem2 = domaine().chercher_elements(P2[0], P2[1], P2[2]);
       if (elem1 >= 0 && elem2 >= 0 && elem1 != elem2)
         {
           // Find 2 points P1 and P2 in cells so:
@@ -627,7 +627,7 @@ void Domaine_VDF_plus::genere_et_cree_aretes()
   est_une_plaque.echange_espace_virtuel();
 
   // Dans cette premiere boucle, on remplit Aretes_som et les aretes 0-2 de Elem_Aretes
-  for(long dir=0; dir<nb_dir; dir++)
+  for(int dir=0; dir<nb_dir; dir++)
     for (el1=0; el1<nb_poly_tot; el1++)
       {
         // On doit generer l'arete en haut a droite de el1
@@ -666,7 +666,7 @@ void Domaine_VDF_plus::genere_et_cree_aretes()
         if ( (el3==-1) && (el4>=0) )
           face34=elem_faces(el4,gauche(dir));
 
-        const long nb_f = nb_faces();
+        const int nb_f = nb_faces();
         if (el2 > -1 && el3 > -1 && el4 > -1) // arete interne
           ok=les_aretes.affecter_aretes(nb_aretes_, dir, interne, nb_f, face13, face24, face12, face34, est_une_plaque);
         else if ( (el3 > -1 && el4 > -1) ||
@@ -794,41 +794,41 @@ void Domaine_VDF_plus::genere_et_cree_aretes()
 
   // On complete Elem_Aretes
 
-  for (long elem1=0; elem1<nb_poly_tot; elem1++)
+  for (int elem1=0; elem1<nb_poly_tot; elem1++)
     {
-      long face_bas=elem_faces(elem1,2);
-      long elem_bas=face_vois_plus(*this, mon_domaine, face_bas, 0);
+      int face_bas=elem_faces(elem1,2);
+      int elem_bas=face_vois_plus(*this, mon_domaine, face_bas, 0);
       if (elem_bas>=0)
         {
           if (Elem_Aretes(elem1,8)<0) Elem_Aretes(elem1,8)=Elem_Aretes(elem_bas,2);
           if (Elem_Aretes(elem1,7)<0) Elem_Aretes(elem1,7)=Elem_Aretes(elem_bas,1);
         }
 
-      long face_gauche= elem_faces(elem1,0);
-      long elem_gauche=face_vois_plus(*this,mon_domaine, face_gauche, 0);
+      int face_gauche= elem_faces(elem1,0);
+      int elem_gauche=face_vois_plus(*this,mon_domaine, face_gauche, 0);
       if (elem_gauche>=0)
         {
           if (Elem_Aretes(elem1,9)<0) Elem_Aretes(elem1,9)=Elem_Aretes(elem_gauche,0);
           if (Elem_Aretes(elem1,10)<0) Elem_Aretes(elem1,10)=Elem_Aretes(elem_gauche,1);
 
-          long face_avant_elem_gauche= elem_faces(elem_gauche,1);
-          long elem_gauche_avant=face_vois_plus(*this, mon_domaine, face_avant_elem_gauche, 0);
+          int face_avant_elem_gauche= elem_faces(elem_gauche,1);
+          int elem_gauche_avant=face_vois_plus(*this, mon_domaine, face_avant_elem_gauche, 0);
           if (elem_gauche_avant>=0 && Elem_Aretes(elem1,3)<0) Elem_Aretes(elem1,3)=Elem_Aretes(elem_gauche_avant,0);
 
-          long face_bas_elem_gauche= elem_faces(elem_gauche,2);
-          long elem_gauche_bas=face_vois_plus(*this, mon_domaine, face_bas_elem_gauche, 0);
+          int face_bas_elem_gauche= elem_faces(elem_gauche,2);
+          int elem_gauche_bas=face_vois_plus(*this, mon_domaine, face_bas_elem_gauche, 0);
           if (elem_gauche_bas>=0 && Elem_Aretes(elem1,4)<0) Elem_Aretes(elem1,4)=Elem_Aretes(elem_gauche_bas,1);
         }
 
-      long face_avant= elem_faces(elem1,1);
-      long elem_avant=face_vois_plus(*this,mon_domaine, face_avant, 0);
+      int face_avant= elem_faces(elem1,1);
+      int elem_avant=face_vois_plus(*this,mon_domaine, face_avant, 0);
       if (elem_avant>=0)
         {
           if (Elem_Aretes(elem1,6)<0) Elem_Aretes(elem1,6)=Elem_Aretes(elem_avant,0);
           if (Elem_Aretes(elem1,11)<0) Elem_Aretes(elem1,11)=Elem_Aretes(elem_avant,2);
 
-          long face_bas_elem_avant=elem_faces(elem_avant,2);
-          long elem_avant_bas=face_vois_plus(*this,mon_domaine,face_bas_elem_avant,0);
+          int face_bas_elem_avant=elem_faces(elem_avant,2);
+          int elem_avant_bas=face_vois_plus(*this,mon_domaine,face_bas_elem_avant,0);
           if (elem_avant_bas>=0 && Elem_Aretes(elem1,5)<0) Elem_Aretes(elem1,5)=Elem_Aretes(elem_avant_bas,2);
         }
 
@@ -845,7 +845,7 @@ void Domaine_VDF_plus::genere_et_cree_aretes()
   les_aretes.dimensionner(nb_aretes_tot_);
   Aretes_som.resize(nb_aretes_tot_,2);
   // Ajuste la taille du tableau Aretes_som
-  const long n_aretes_tot = Aretes_som.dimension(0);
+  const int n_aretes_tot = Aretes_som.dimension(0);
   Aretes_som.append_line(-1, -1);
   Aretes_som.set_smart_resize(0);
   Aretes_som.resize(n_aretes_tot, 2);
@@ -881,16 +881,16 @@ void Domaine_VDF_plus::genere_et_cree_aretes()
 // debut EB
 void Domaine_VDF_plus::remplir_volumes_aretes()
 {
-  const long nb_aretes=domaine().nb_aretes();
+  const int nb_aretes=domaine().nb_aretes();
   double y_bas=0,y_haut=0,x_gauche=0,x_droite=0,z_arriere=0,z_avant=0;
-  long ori_arete,face1,face2,face3,face4;
-  long s1,s2;
+  int ori_arete,face1,face2,face3,face4;
+  int s1,s2;
   const IntTab& Aretes_Som=domaine().aretes_som();
   const DoubleTab& coord_som=domaine().coord_sommets();
   const IntVect& types_aretes=type_arete();
   volumes_aretes_.resize(nb_aretes);
-  long type_arete;
-  for (long arete=0; arete<nb_aretes; arete++)
+  int type_arete;
+  for (int arete=0; arete<nb_aretes; arete++)
     {
       type_arete=types_aretes(arete);
       ori_arete=dimension-orientation_aretes()(arete)-1;
@@ -939,10 +939,10 @@ void Domaine_VDF_plus::remplir_volumes_aretes()
 
       else // coin, mixte (rip pour les aretes mixtes)
         {
-          long elem1=(face4>=0) ? face_voisins(face4,0) : -1;
-          long elem2=(face4>=0) ? face_voisins(face4,1) : -1;
-          long elem3=(face3>=0) ? face_voisins(face3,0) : -1;
-          long elem4=(face3>=0) ? face_voisins(face3,1) : -1;
+          int elem1=(face4>=0) ? face_voisins(face4,0) : -1;
+          int elem2=(face4>=0) ? face_voisins(face4,1) : -1;
+          int elem3=(face3>=0) ? face_voisins(face3,0) : -1;
+          int elem4=(face3>=0) ? face_voisins(face3,1) : -1;
 
           if (elem1>=0) volumes_aretes_(arete)=volumes(elem1)/4;
           else if (elem2>=0) volumes_aretes_(arete)=volumes(elem2)/4;
@@ -964,16 +964,16 @@ void Domaine_VDF_plus::calcul_xa()
   const Domaine& dom = domaine();
   // Calcul des centres de gravite des aretes xa_ stockes dans la Domaine_VF
   const IntTab& aretes_som = domaine().aretes_som();
-  const long nb_aretes_tot = aretes_som.dimension_tot(0);
+  const int nb_aretes_tot = aretes_som.dimension_tot(0);
   const DoubleTab& coord = dom.les_sommets();
-  const long dim = coord.dimension(1);
+  const int dim = coord.dimension(1);
   xa_.resize(nb_aretes_tot, dim);
   //creer_tableau_aretes(xa_, ArrOfDouble::NOCOPY_NOINIT);
-  for (long i = 0; i < nb_aretes_tot; i++)
+  for (int i = 0; i < nb_aretes_tot; i++)
     {
-      const long s0 = aretes_som(i, 0);
-      const long s1 = aretes_som(i, 1);
-      for (long j = 0; j < dim; j++)
+      const int s0 = aretes_som(i, 0);
+      const int s1 = aretes_som(i, 1);
+      for (int j = 0; j < dim; j++)
         xa_(i, j) = (coord(s0, j) + coord(s1, j)) * 0.5;
     }
   //xa_.echange_espace_virtuel();
@@ -985,15 +985,15 @@ void Domaine_VDF_plus::cree_aretes_virtuelles(IntTab& Aretes_som, IntTab& Elem_A
 {
   Domaine& mon_domaine=domaine();
   const IntTab& elem_som = mon_domaine.les_elems();
-  //const long nb_aretes_elem=12;
+  //const int nb_aretes_elem=12;
 
-  long nb_poly = mon_domaine.nb_elem();
-  long nb_poly_tot = mon_domaine.nb_elem_tot();
+  int nb_poly = mon_domaine.nb_elem();
+  int nb_poly_tot = mon_domaine.nb_elem_tot();
   // On balaie les elements :
-  long el1, el2, el3, el4;
-  long face12, face13, face34, face24;
-  long s1,s2;
-  long nb_dir;
+  int el1, el2, el3, el4;
+  int face12, face13, face34, face24;
+  int s1,s2;
+  int nb_dir;
   if(dimension==2) nb_dir=1;
   else nb_dir=3;
   IntVect gauche(nb_dir);
@@ -1025,7 +1025,7 @@ void Domaine_VDF_plus::cree_aretes_virtuelles(IntTab& Aretes_som, IntTab& Elem_A
       bas(2)=2;
     }
   IntVect ind_som1(nb_dir);
-  long ind_som2=-1;
+  int ind_som2=-1;
 
   IntVect ind_som1_bas_droite(nb_dir);
   IntVect ind_som2_bas_droite(nb_dir);
@@ -1062,13 +1062,13 @@ void Domaine_VDF_plus::cree_aretes_virtuelles(IntTab& Aretes_som, IntTab& Elem_A
     ind_som2_bas_gauche(2)=1;
   }
 
-  long coin=-1;
-  long bord=0;
-  long mixte=1;
-  long interne=2;
-  long ok=0;
+  int coin=-1;
+  int bord=0;
+  int mixte=1;
+  int interne=2;
+  int ok=0;
   // Dans cette premiere boucle, on remplit Aretes_som et les aretes 0-2 de Elem_Aretes
-  for(long dir=0; dir<nb_dir; dir++)
+  for(int dir=0; dir<nb_dir; dir++)
     for (el1=nb_poly; el1<nb_poly_tot; el1++)
       {
 
@@ -1109,7 +1109,7 @@ void Domaine_VDF_plus::cree_aretes_virtuelles(IntTab& Aretes_som, IntTab& Elem_A
           face34=elem_faces(el4,gauche(dir));
 
 
-        const long nb_f = nb_faces();
+        const int nb_f = nb_faces();
         if (Elem_Aretes(el1,dir)<0)
           {
             if (el2 > -1 && el3 > -1 && el4 > -1) // arete interne
@@ -1242,41 +1242,41 @@ void Domaine_VDF_plus::cree_aretes_virtuelles(IntTab& Aretes_som, IntTab& Elem_A
       }
 
   // On complete Elem_Aretes
-  for (long elem1=nb_elem(); elem1<nb_poly_tot; elem1++)
+  for (int elem1=nb_elem(); elem1<nb_poly_tot; elem1++)
     {
-      long face_bas=elem_faces(elem1,2);
-      long elem_bas=face_vois_plus(*this, mon_domaine, face_bas, 0);
+      int face_bas=elem_faces(elem1,2);
+      int elem_bas=face_vois_plus(*this, mon_domaine, face_bas, 0);
       if (elem_bas>=0)
         {
           if (Elem_Aretes(elem1,8)<0) Elem_Aretes(elem1,8)=Elem_Aretes(elem_bas,2);
           if (Elem_Aretes(elem1,7)<0) Elem_Aretes(elem1,7)=Elem_Aretes(elem_bas,1);
         }
 
-      long face_gauche= elem_faces(elem1,0);
-      long elem_gauche=face_vois_plus(*this,mon_domaine, face_gauche, 0);
+      int face_gauche= elem_faces(elem1,0);
+      int elem_gauche=face_vois_plus(*this,mon_domaine, face_gauche, 0);
       if (elem_gauche>=0)
         {
           if (Elem_Aretes(elem1,9)<0) Elem_Aretes(elem1,9)=Elem_Aretes(elem_gauche,0);
           if (Elem_Aretes(elem1,10)<0) Elem_Aretes(elem1,10)=Elem_Aretes(elem_gauche,1);
 
-          long face_avant_elem_gauche= elem_faces(elem_gauche,1);
-          long elem_gauche_avant=face_vois_plus(*this,mon_domaine, face_avant_elem_gauche, 0);
+          int face_avant_elem_gauche= elem_faces(elem_gauche,1);
+          int elem_gauche_avant=face_vois_plus(*this,mon_domaine, face_avant_elem_gauche, 0);
           if (elem_gauche_avant>=0 && Elem_Aretes(elem1,3)<0) Elem_Aretes(elem1,3)=Elem_Aretes(elem_gauche_avant,0);
 
-          long face_bas_elem_gauche= elem_faces(elem_gauche,2);
-          long elem_gauche_bas=face_vois_plus(*this,mon_domaine, face_bas_elem_gauche, 0);
+          int face_bas_elem_gauche= elem_faces(elem_gauche,2);
+          int elem_gauche_bas=face_vois_plus(*this,mon_domaine, face_bas_elem_gauche, 0);
           if (elem_gauche_bas>=0 && Elem_Aretes(elem1,4)<0) Elem_Aretes(elem1,4)=Elem_Aretes(elem_gauche_bas,1);
         }
 
-      long face_avant= elem_faces(elem1,1);
-      long elem_avant=face_vois_plus(*this,mon_domaine, face_avant, 0);
+      int face_avant= elem_faces(elem1,1);
+      int elem_avant=face_vois_plus(*this,mon_domaine, face_avant, 0);
       if (elem_avant>=0)
         {
           if (Elem_Aretes(elem1,6)<0) Elem_Aretes(elem1,6)=Elem_Aretes(elem_avant,0);
           if (Elem_Aretes(elem1,11)<0) Elem_Aretes(elem1,11)=Elem_Aretes(elem_avant,2);
 
-          long face_bas_elem_avant=elem_faces(elem_avant,2);
-          long elem_avant_bas=face_vois_plus(*this,mon_domaine,face_bas_elem_avant,0);
+          int face_bas_elem_avant=elem_faces(elem_avant,2);
+          int elem_avant_bas=face_vois_plus(*this,mon_domaine,face_bas_elem_avant,0);
           if (elem_avant_bas>=0 && Elem_Aretes(elem1,5)<0) Elem_Aretes(elem1,5)=Elem_Aretes(elem_avant_bas,2);
         }
 
