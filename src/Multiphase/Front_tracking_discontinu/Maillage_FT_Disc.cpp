@@ -7592,7 +7592,8 @@ void Maillage_FT_Disc::nettoyer_noeuds_virtuels_et_frontieres()
             if (dimension3)
               sommets_(n, 2) = sommets_(i, 2);
             sommet_elem_[n] = sommet_elem_[i];
-            for (int dim=0; dim<dimension; dim++) sommet_face_(n,dim) = sommet_face_(i,dim); // EB
+            if(sommet_face_.dimension(0)>0 && sommet_face_.dimension(1)>0 )
+              for (int dim=0; dim<dimension; dim++) sommet_face_(n,dim) = sommet_face_(i,dim); // EB
             sommet_face_bord_[n] = sommet_face_bord_[i];
             sommet_PE_owner_[n] = sommet_PE_owner_[i];
             drapeaux_sommets_[n] = drapeaux_sommets_[i];

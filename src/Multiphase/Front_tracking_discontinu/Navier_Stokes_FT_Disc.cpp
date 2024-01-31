@@ -882,6 +882,61 @@ int Navier_Stokes_FT_Disc::lire_motcle_non_standard(const Motcle& mot, Entree& i
           Process::exit();
         }
     }
+  else if (mot =="OutletCorrection_pour_dI_dt")
+    {
+      Motcles motcles2(4);
+      motcles2[0] = "no_correction";
+      motcles2[1] = "CORRECTION_GHOST_INDIC";
+      motcles2[2] = "zero_net_flux_on_mixed_cells";
+      motcles2[3] = "zero_out_flux_on_mixed_cells";
+      Motcle motlu;
+      is >> motlu;
+      Cerr << mot << " " << motlu << finl;
+      Cout << "Setting the type of correction at outlet BC for calculer_dI_dt to " << motlu << "." << finl;
+      long rang = motcles2.search(motlu);
+      switch(rang)
+        {
+        case Navier_Stokes_FT_Disc_interne::NO_CORRECTION:
+          {
+            variables_internes_->OutletCorrection_pour_dI_dt_ = Navier_Stokes_FT_Disc_interne::NO_CORRECTION;
+            if (Process::je_suis_maitre())
+              Cerr << " No correction of div(chi u) at exit (historical way)" << finl;
+            return 1;
+          }
+        case Navier_Stokes_FT_Disc_interne::CORRECTION_GHOST_INDIC:
+          {
+            variables_internes_->OutletCorrection_pour_dI_dt_ = Navier_Stokes_FT_Disc_interne::CORRECTION_GHOST_INDIC;
+            if (Process::je_suis_maitre())
+              Cerr << " Correction of chi in ghost cells (virtually)" << finl;
+            return 1;
+          }
+        case Navier_Stokes_FT_Disc_interne::ZERO_NET_FLUX_ON_MIXED_CELLS:
+          {
+            variables_internes_->OutletCorrection_pour_dI_dt_ = Navier_Stokes_FT_Disc_interne::ZERO_NET_FLUX_ON_MIXED_CELLS;
+            if (Process::je_suis_maitre())
+              Cerr << " correction of div(chi u) at exit : zero divergence on cells touching outlet." << finl;
+            return 1;
+          }
+        case Navier_Stokes_FT_Disc_interne::ZERO_OUT_FLUX_ON_MIXED_CELLS:
+          {
+            variables_internes_->OutletCorrection_pour_dI_dt_ = Navier_Stokes_FT_Disc_interne::ZERO_OUT_FLUX_ON_MIXED_CELLS;
+            if (Process::je_suis_maitre())
+              {
+                Cerr << " correction of div(chi u) at exit : zero vapour mass flux on cells touching outlet." << finl;
+                Cerr << " This is a bad option because it does not let vapour get out explicitly (prevents interface contact)" << finl;
+                Cerr << " Should not be used or with great care." << finl;
+                // Process::exit();
+              }
+            return 1;
+          }
+        default:
+          Cerr << "Transport_Interfaces_FT_Disc::lire\n"
+               << "The options for methode_transport are :\n"
+               << motcles2;
+          Process::exit();
+        }
+    }
+
   else
     return Navier_Stokes_Turbulent::lire_motcle_non_standard(mot,is);
   return 1;
