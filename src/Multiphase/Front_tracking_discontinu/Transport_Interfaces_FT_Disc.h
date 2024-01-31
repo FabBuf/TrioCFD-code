@@ -342,6 +342,8 @@ public:
 
   int is_solid_particle(); // EB
   int is_solid_particle() const; // EB
+
+  int get_nb_compo_tot() const; // EB
 protected:
 
   void ajouter_contribution_saut_vitesse(DoubleTab& deplacement) const;
@@ -415,7 +417,6 @@ protected:
   int postraiter_indicatrice_arete_; // EB
   int get_radius_; // EB
 
-  int get_nb_compo_tot ();
 
 
 private:

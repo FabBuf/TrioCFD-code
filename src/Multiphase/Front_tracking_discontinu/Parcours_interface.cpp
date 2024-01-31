@@ -210,8 +210,6 @@ void Parcours_interface::parcourir(Maillage_FT_Disc& maillage) const
   domaine_sommets_ptr = & domaine_vf.domaine().les_sommets();
 
   const Domaine_dis& domaine_dis = maillage.refdomaine_dis_.valeur();
-  const Domaine_VDF& domaine_vdf = ref_cast(Domaine_VDF,domaine_dis.valeur());
-  const IntVect& type_arete=domaine_vdf.type_arete();
   static int iteration_parcourir_faces=0;
   static int iteration_parcourir_aretes=0;
   int calcul_precis_indic_face=0,calcul_precis_indic_arete=0;
@@ -584,6 +582,8 @@ void Parcours_interface::parcourir(Maillage_FT_Disc& maillage) const
 
   if (calcul_precis_indic_arete)
     {
+      const Domaine_VDF& domaine_vdf = ref_cast(Domaine_VDF,domaine_dis.valeur());
+      const IntVect& type_arete=domaine_vdf.type_arete();
       maillage.update_sommet_arete();
       //maillage.update_sommet_arete();
       if (iteration_parcourir_aretes>1|| temps>0) // lors des premieres iterations, bug parce qu'on a pas encore rempli sommet_face_ (fait uniquement apres

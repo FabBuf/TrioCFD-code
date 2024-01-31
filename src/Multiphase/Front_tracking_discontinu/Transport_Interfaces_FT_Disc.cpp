@@ -8290,7 +8290,7 @@ void Transport_Interfaces_FT_Disc::transporter_sans_changement_topologie(DoubleT
   maillage.changer_temps(temps);
   indicatrice_.valeurs()=get_update_indicatrice().valeurs();
   variables_internes_->indicatrice_cache.changer_temps(temps);
-  indicatrice_.valeurs()=get_compute_indicatrice_faces().valeurs();
+  indicatrice_faces_.valeurs()=get_compute_indicatrice_faces().valeurs();
   variables_internes_->indicatrice_face_cache.changer_temps(temps);
   indicatrice_.changer_temps(temps);
   get_update_distance_interface();
@@ -11945,7 +11945,7 @@ void Transport_Interfaces_FT_Disc::set_nb_compo_tot(const int nb_compo)
 {
   variables_internes_->nb_compo_tot_=nb_compo;
 }
-int Transport_Interfaces_FT_Disc::get_nb_compo_tot ()
+int Transport_Interfaces_FT_Disc::get_nb_compo_tot() const
 {
   return variables_internes_->nb_compo_tot_;
 }

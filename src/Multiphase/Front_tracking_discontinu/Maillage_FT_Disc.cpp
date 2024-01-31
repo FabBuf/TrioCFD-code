@@ -903,7 +903,8 @@ void Maillage_FT_Disc::calcul_indicatrice(DoubleVect& indicatrice,
 
   static const Stat_Counter_Id stat_counter = statistiques().new_counter(3, "Calculer_Indicatrice", "FrontTracking");
   statistiques().begin_count(stat_counter);
-
+  const Transport_Interfaces_FT_Disc& eq_interfaces = refequation_transport_.valeur();
+  const int nb_compo_tot=eq_interfaces.get_nb_compo_tot();
   const Domaine_dis& domaine_dis = refdomaine_dis_.valeur();
   const Domaine& ladomaine = domaine_dis.domaine();
   const Domaine_VF& domaine_vf = ref_cast(Domaine_VF, domaine_dis.valeur());
@@ -996,39 +997,39 @@ void Maillage_FT_Disc::calcul_indicatrice(DoubleVect& indicatrice,
   // Calcul de l'indicatrice au voisinage de l'interface a l'aide
   // de la fonction distance.
   // Il reste dans elements_calcules[i] == 0 les voisins de l'interface
-  /*
-  {
-    const DoubleTab& distance = equation_transport().get_update_distance_interface().valeurs();
-    int i;
-    int error_count = 0;
+  if (!is_solid_particle_ || (is_solid_particle_ && nb_compo_tot==1)) // EB : lors de la collision de particules solides, on autorise l'interpenetration (modele de spheres molles). Le calcul de la distance a l'interface donne donc n'importe quoi dans les mailles ou les marqueurs lagrangiens se chevauchent. En simulation anisotherme, on a cependant besoin du calcul de la distance, on doit donc fixer "n_iterations_distances" different de 0 dans le jdd. Ce qui explique cette condition if qui agit comme un petit morceau de chatertone en attendant de corriger le bug...
+    {
+      const DoubleTab& distance = equation_transport().get_update_distance_interface().valeurs();
+      int i;
+      int error_count = 0;
 
-    for (i = 0; i < nb_elem; i++)
-      {
+      for (i = 0; i < nb_elem; i++)
+        {
 
-        if (elements_calcules[i] == 0)
-          {
-            double x = distance(i);
-            // La distance a-t-elle ete calculee pour cet element ?
-            if (x > -1e10)
-              {
-                double v = (x > 0.) ? 1. : 0.;
-                indicatrice[i] = v;
-              }
-            else
-              {
-                // Probleme : un element a une indicatrice suspecte et
-                // on ne peut pas l'evaluer avec la fonction distance
-                // (augmenter le nombre d'iterations du calcul de distance ?)
-                error_count++;
-              }
-          }
-      }
-    if (error_count)
-      {
-        Cerr << "[" << me() << "] calcul_indicatrice : error_count = " << error_count << finl;
-      }
-  }
-  */
+          if (elements_calcules[i] == 0)
+            {
+              double x = distance(i);
+              // La distance a-t-elle ete calculee pour cet element ?
+              if (x > -1e10)
+                {
+                  double v = (x > 0.) ? 1. : 0.;
+                  indicatrice[i] = v;
+                }
+              else
+                {
+                  // Probleme : un element a une indicatrice suspecte et
+                  // on ne peut pas l'evaluer avec la fonction distance
+                  // (augmenter le nombre d'iterations du calcul de distance ?)
+                  error_count++;
+                }
+            }
+        }
+      if (error_count)
+        {
+          Cerr << "[" << me() << "] calcul_indicatrice : error_count = " << error_count << finl;
+        }
+    }
+
   indicatrice.echange_espace_virtuel();
 
   // Certains elements ont une indicatrice erronee (error_count).
