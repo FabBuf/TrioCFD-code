@@ -62,7 +62,8 @@ Lire particule_solide
 	mu  Champ_Uniforme 1 10
  	rho Champ_Uniforme 1 7800
     	e_dry 0.97
-    	rayon 1.5e-3
+    	rayon_frottements 1.5e-3
+	rayon_collision 1.5e-3
 	monodisperse 1
 }
 

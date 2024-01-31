@@ -21,7 +21,8 @@ public:
   void set_diametre(const double rayon) const;
   void set_volume_compo(const double volume) const;
   void set_masse_compo(const double masse) const;
-  const double& rayon() const;
+  const double& rayon_frottements() const;
+  const double& rayon_collision() const;
   const double& diametre() const;
   const double& volume_compo() const;
   const double& masse_compo() const;
@@ -29,7 +30,8 @@ public:
 protected :
   double e_dry_;
   int monodisperse_;
-  mutable double rayon_;
+  mutable double rayon_frottements_;
+  mutable double rayon_collision_;
   mutable double diametre_;
   mutable double volume_compo_;
   mutable double masse_compo_;

@@ -56,7 +56,8 @@ Lire particule_solide
        	lambda champ_uniforme 	1 1
     	cp champ_uniforme 	1 1300
 	monodisperse 1
-	rayon 2.6e-5
+	rayon_frottements 2.6e-5
+	rayon_collision 2.6e-5
 }
 
 Fluide_Incompressible fluide

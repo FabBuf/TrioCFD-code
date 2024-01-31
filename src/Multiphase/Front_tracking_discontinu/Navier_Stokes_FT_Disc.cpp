@@ -2188,7 +2188,7 @@ void Navier_Stokes_FT_Disc::calculer_champ_forces_collisions(const DoubleTab& in
   const Fluide_Diphasique& mon_fluide = fluide_diphasique();
   const Particule_Solide& particule_solide=ref_cast(Particule_Solide,fluide_diphasique().fluide_phase(0));
   double ed = particule_solide.e_dry();
-  const double& rayon_compo=particule_solide.rayon(); // a modifier pour des particules bidisperses ou de tailles differentes
+  const double& rayon_compo=particule_solide.rayon_collision(); // a modifier pour des particules bidisperses ou de tailles differentes
   const int nb_facettes = maillage.nb_facettes();
   IntVect compo_connexes_facettes(nb_facettes); // Init a zero
 

@@ -52,7 +52,8 @@ Lire particule_solide
  	rho Champ_Uniforme 1 1e4
     	e_dry 0.97
 	monodisperse 1
-	rayon 2.6e-5
+	rayon_frottements 2.6e-5
+	rayon_collision 2.6e-5
 }
 
 Fluide_Incompressible fluide

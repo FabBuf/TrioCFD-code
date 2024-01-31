@@ -1937,7 +1937,7 @@ int Transport_Interfaces_FT_Disc::preparer_calcul(void)
 
       if (particule_solide.monodisperse()==1)
         {
-          const double rayon_compo=particule_solide.rayon();
+          const double rayon_compo=particule_solide.rayon_collision();
           // EB : pour ne pas avoir a tout remodeler (pour le moment), on rempli le tableau rayons_compo meme en monodisperse
           const int nb_compo_tot=get_nb_compo_tot();
           DoubleVect& rayons_compo=get_rayons_compo();
