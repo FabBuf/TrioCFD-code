@@ -1,5 +1,5 @@
 /****************************************************************************
-* Copyright (c) 2023, CEA
+* Copyright (c) 2024, CEA
 * All rights reserved.
 *
 * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
@@ -291,13 +291,13 @@ public:
   ///
   /// Various
   ///
-  void clear();
+  virtual void clear();
   void fill_from_list(std::list<Domaine*>& lst);
   void merge_wo_vertices_with(Domaine& z);
   inline bool axi1d() const {  return axi1d_;  }
   inline void fixer_epsilon(double eps)  { epsilon_=eps; }
-  inline int deformable() const  {   return deformable_;  }
-  inline int& deformable() {   return deformable_;  }
+  inline bool deformable() const  {   return deformable_;  }
+  inline bool& deformable() {   return deformable_;  }
   inline void set_fichier_lu(Nom& nom)  {    fichier_lu_=nom;   }
   inline const Nom& get_fichier_lu() const  {   return fichier_lu_;  }
   void imprimer() const;
@@ -333,12 +333,6 @@ public:
   virtual void creer_tableau_elements(Array_base&, Array_base::Resize_Options opt = Array_base::COPY_INIT) const;
   virtual const MD_Vector& md_vector_elements() const;
   static int identifie_item_unique(IntList& item_possible, DoubleTab& coord_possible, const DoubleVect& coord_ref);
-
-  //Extraire surface on a mobile boundary (deformable domaine, like ALE)
-  inline void setLes_elems_extrait_surf_ref(const IntTab&) ;
-  inline IntTab getLes_elems_extrait_surf_ref() const;
-  inline void setExtrait_surf_dom_deformable(bool) ;
-  inline bool getExtrait_surf_dom_deformable() const;
 
 protected:
   // Domaine name
@@ -390,7 +384,7 @@ protected:
 
   int axi1d_;
   double epsilon_;
-  int deformable_;
+  bool deformable_;
   Nom fichier_lu_;
 
 #ifdef MEDCOUPLING_
@@ -402,10 +396,6 @@ protected:
 #endif
 
   void duplique_bords_internes();
-
-  //attributes necessary to perform surface extraction on a moving boundary (deformable domaine, like ALE)
-  IntTab les_elems_extrait_surf_reference_; // list of elements belonging to the extracted surface on a moving boundary defines at the initialization.
-  bool extrait_surf_dom_deformable_; // indicates whether the domain was defined by extraction on a moving boundary
 
 private:
   void prepare_rmp_with(Domaine& );
@@ -906,30 +896,5 @@ inline IntTab& Domaine::set_aretes_som() {  return aretes_som_; }
  */
 inline const IntTab& Domaine::elem_aretes() const {   return elem_aretes_; }
 inline IntTab& Domaine::set_elem_aretes() {   return elem_aretes_; }
-
-
-inline void Domaine::setLes_elems_extrait_surf_ref(const IntTab& ref)
-{
-  les_elems_extrait_surf_reference_=ref;
-
-}
-inline IntTab Domaine::getLes_elems_extrait_surf_ref() const
-{
-  return les_elems_extrait_surf_reference_;
-}
-
-
-inline void Domaine::setExtrait_surf_dom_deformable(bool def)
-{
-
-  extrait_surf_dom_deformable_ = def;
-
-}
-inline bool Domaine::getExtrait_surf_dom_deformable() const
-{
-
-  return extrait_surf_dom_deformable_;
-
-}
 
 #endif
