@@ -7,7 +7,7 @@ Parametres {
 }
 
 Chapitre {
-	Titre "Maillage généré par cree_multi_bulles.sh"
+	Titre "Maillage gÃ©nÃ©rÃ© par cree_multi_bulles.sh"
 	visu {
 		titre "Etat initial genere par cree_multi_bulles.sh"
 		mesh init.lata FTMESH
@@ -80,7 +80,7 @@ Chapitre {
 
 
 #Pendmacro(CHAPITRE)
-#Pusemacro(CHAPITRE)("calcul séquentiel",test_sigma_seq.lata, "séquentiel", 1)
-#Pusemacro(CHAPITRE)("calcul séquentiel",test_sigma_seq.lata, "séquentiel", -1)
+#Pusemacro(CHAPITRE)("calcul sÃ©quentiel",test_sigma_seq.lata, "sÃ©quentiel", 1)
+#Pusemacro(CHAPITRE)("calcul sÃ©quentiel",test_sigma_seq.lata, "sÃ©quentiel", -1)
 #Pusemacro(CHAPITRE)("calcul parallele",test_sigma_par8.lata, "parallele", 1)
 #Pusemacro(CHAPITRE)("calcul parallele",test_sigma_par8.lata, "parallele", -1)
