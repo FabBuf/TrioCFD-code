@@ -1,7 +1,7 @@
 Parameters {
 	Title "Validation de l'operateur de conduction"
 	Author "Dorian Dupuy"
-	VersionTrio_U 1.7.4
+	VersionTrio_U 1.9.2
  	TestCase test_conduction test_conduction.data
 	Description "Info pour completer un prm: firefox \$TRUST_ROOT/Validation/Outils/Genere_courbe/doc/manuel.xhtml "
 }
